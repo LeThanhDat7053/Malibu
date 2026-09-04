@@ -10,7 +10,8 @@
     $roomVideos = collect($room->videos ?? []);
     $roomGalleryVr360s = collect($roomGalleryItems)->filter(fn($item) => Arr::get($item, 'type') === 'vr360');
 @endphp
-<div class="about-area5 about-p p-relative room-details">
+{{-- data-mlb-room feeds the "recently viewed" strip on the homepage --}}
+<div class="about-area5 about-p p-relative room-details" data-mlb-room="{{ $room->getKey() }}">
     <div class="container pt-60 pb-40">
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-4 order-2">

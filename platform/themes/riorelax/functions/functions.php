@@ -21,6 +21,7 @@ use Botble\Theme\Supports\ThemeSupport;
 
 register_page_template([
     'default' => __('Default'),
+    'home' => __('Homepage (Malibu)'),
     'side-menu' => __('Side menu'),
     'full-menu' => __('Full menu'),
     'blog-sidebar' => __('Blog sidebar'),

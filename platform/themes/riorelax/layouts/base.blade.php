@@ -8,6 +8,9 @@
 
     <link href="https://fonts.googleapis.com/css?family={{ urlencode(theme_option('primary_font', 'Epilogue')) }}:400,500,600,700" rel="stylesheet" type="text/css">
 
+    {{-- Display serif used by the Malibu homepage headings --}}
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet" type="text/css">
+
     <style>
         :root {
             --primary-color: {{ theme_option('primary_color', '#fec201') }};

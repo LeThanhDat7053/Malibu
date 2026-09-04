@@ -63,6 +63,8 @@ return [
             $theme->asset()->usePath()->add('booking-mask-css', 'css/booking-mask.css');
             $theme->asset()->usePath()->add('popup-banner-css', 'css/popup-banner.css');
 
+            $theme->asset()->usePath()->add('mlb-home-css', 'css/home.css', ['style-css']);
+
             $theme->asset()->container('header')->usePath()->add('jquery', 'plugins/jquery.min.js');
             $theme->asset()->container('footer')->usePath()->add('imagesloaded', 'plugins/imagesloaded.min.js');
             $theme->asset()->container('footer')->usePath()->add('counterup', 'plugins/jquery.counterup.min.js');
@@ -82,6 +84,7 @@ return [
             $theme->asset()->container('footer')->usePath()->add('script', 'js/script.js', ['datepicker-js', 'bootstrap-datepicker-locale']);
             $theme->asset()->container('footer')->usePath()->add('external-booking', 'js/external-booking.js', ['main']);
             $theme->asset()->container('footer')->usePath()->add('booking-mask-js', 'js/booking-mask.js', ['datepicker-js']);
+            $theme->asset()->container('footer')->usePath()->add('mlb-home-js', 'js/home.js', ['datepicker-js']);
 
             if (function_exists('shortcode')) {
                 $theme->composer(['page', 'post', 'teams.team', 'hotel.room', 'hotel.service'], function (View $view): void {

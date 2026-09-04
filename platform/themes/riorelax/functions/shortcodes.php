@@ -14,6 +14,7 @@ use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormFieldOptions;
+use Botble\Blog\Models\Category as BlogCategory;
 use Botble\Contact\Forms\ShortcodeContactAdminConfigForm;
 use Botble\Faq\Models\Faq;
 use Botble\Faq\Models\FaqCategory;
@@ -272,7 +273,20 @@ app()->booted(function (): void {
                         ->multiple()
                         ->searchable()
                         ->toArray(),
-                );
+                )
+                ->add(
+                    'style',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Layout'))
+                        ->choices([
+                            'default' => __('Default (carousel cards)'),
+                            'editorial' => __('Editorial (Malibu homepage)'),
+                        ])
+                        ->toArray()
+                )
+                ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
+                ->add('button_url', TextField::class, TextFieldOption::make()->label(__('Button URL'))->toArray());
         });
 
         Shortcode::register(
@@ -1305,7 +1319,338 @@ app()->booted(function (): void {
 
         Shortcode::setAdminConfig('galleries', function (array $attributes) {
             return ShortcodeForm::createFromArray($attributes)
+                ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+                ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+                ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
                 ->add('limit', NumberField::class, NumberFieldOption::make()->label(__('Limit'))->toArray());
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Malibu homepage sections
+    |--------------------------------------------------------------------------
+    */
+
+    // Full-bleed 360° tour, lazily embedded on click
+    Shortcode::register(
+        'panorama-tour',
+        __('Panorama 360° tour'),
+        __('Malibu homepage - immersive 360° tour block'),
+        function (ShortcodeCompiler $shortcode): ?string {
+            $tabs = Shortcode::fields()->getTabsData(['label', 'url', 'thumbnail'], $shortcode);
+
+            return Theme::partial('shortcodes.panorama-tour.index', compact('shortcode', 'tabs'));
+        }
+    );
+
+    Shortcode::setAdminConfig('panorama-tour', function (array $attributes) {
+        return ShortcodeForm::createFromArray($attributes)
+            ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+            ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add(
+                'poster_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()->label(__('Poster image'))->toArray()
+            )
+            ->add(
+                'tour_url',
+                TextField::class,
+                TextFieldOption::make()
+                    ->label(__('Tour URL'))
+                    ->placeholder('https://malibuhotel.vt360.vn/')
+                    ->toArray()
+            )
+            ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
+            ->add(
+                'tabs',
+                ShortcodeTabsField::class,
+                ShortcodeTabsFieldOption::make()
+                    ->label(__('Scenes (optional)'))
+                    ->attrs($attributes)
+                    ->max(8)
+                    ->fields([
+                        'label' => ['type' => 'text', 'title' => __('Scene name')],
+                        'url' => ['type' => 'url', 'title' => __('Scene tour URL')],
+                        'thumbnail' => ['type' => 'image', 'title' => __('Thumbnail')],
+                    ])
+                    ->toArray()
+            );
+    });
+
+    // Reusable 2-4 column editorial grid
+    Shortcode::register(
+        'highlight-columns',
+        __('Highlight columns'),
+        __('Malibu homepage - image + blurb + link grid'),
+        function (ShortcodeCompiler $shortcode): ?string {
+            $tabs = Shortcode::fields()->getTabsData(
+                ['image', 'eyebrow', 'title', 'description', 'link_label', 'link_url'],
+                $shortcode
+            );
+
+            return Theme::partial('shortcodes.highlight-columns.index', compact('shortcode', 'tabs'));
+        }
+    );
+
+    Shortcode::setAdminConfig('highlight-columns', function (array $attributes) {
+        return ShortcodeForm::createFromArray($attributes)
+            ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+            ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add(
+                'columns',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Columns'))
+                    ->choices([2 => 2, 3 => 3, 4 => 4])
+                    ->toArray()
+            )
+            ->add(
+                'tabs',
+                ShortcodeTabsField::class,
+                ShortcodeTabsFieldOption::make()
+                    ->label(__('Columns content'))
+                    ->attrs($attributes)
+                    ->max(12)
+                    ->fields([
+                        'image' => ['type' => 'image', 'title' => __('Image')],
+                        'eyebrow' => ['type' => 'text', 'title' => __('Eyebrow')],
+                        'title' => ['type' => 'text', 'title' => __('Title')],
+                        'description' => ['type' => 'textarea', 'title' => __('Description')],
+                        'link_label' => ['type' => 'text', 'title' => __('Link label')],
+                        'link_url' => ['type' => 'url', 'title' => __('Link URL')],
+                    ])
+                    ->toArray()
+            );
+    });
+
+    // Numbered brand-signature rows
+    Shortcode::register(
+        'signature-experiences',
+        __('Signature experiences'),
+        __('Malibu homepage - what makes the brand singular'),
+        function (ShortcodeCompiler $shortcode): ?string {
+            $tabs = Shortcode::fields()->getTabsData(['icon', 'image', 'title', 'description'], $shortcode);
+
+            return Theme::partial('shortcodes.signature-experiences.index', compact('shortcode', 'tabs'));
+        }
+    );
+
+    Shortcode::setAdminConfig('signature-experiences', function (array $attributes) {
+        return ShortcodeForm::createFromArray($attributes)
+            ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+            ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add(
+                'background_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()->label(__('Background image'))->toArray()
+            )
+            ->add(
+                'tabs',
+                ShortcodeTabsField::class,
+                ShortcodeTabsFieldOption::make()
+                    ->label(__('Experiences'))
+                    ->attrs($attributes)
+                    ->max(8)
+                    ->fields([
+                        'icon' => ['type' => 'icon', 'title' => __('Icon')],
+                        'image' => ['type' => 'image', 'title' => __('Image')],
+                        'title' => ['type' => 'text', 'title' => __('Title')],
+                        'description' => ['type' => 'textarea', 'title' => __('Description')],
+                    ])
+                    ->toArray()
+            );
+    });
+
+    // Contact block + lazily-loaded map, optional nearby places
+    Shortcode::register(
+        'location-map',
+        __('Location & map'),
+        __('Malibu homepage - address, directions and nearby places'),
+        function (ShortcodeCompiler $shortcode): ?string {
+            $places = collect();
+
+            if (is_plugin_active('hotel') && $shortcode->place_ids) {
+                $placeIds = Shortcode::fields()->getIds('place_ids', $shortcode);
+
+                if ($placeIds) {
+                    $places = Place::query()
+                        ->with('slugable')
+                        ->wherePublished()
+                        ->whereIn('id', $placeIds)
+                        ->get();
+                }
+            }
+
+            return Theme::partial('shortcodes.location-map.index', compact('shortcode', 'places'));
+        }
+    );
+
+    Shortcode::setAdminConfig('location-map', function (array $attributes) {
+        $form = ShortcodeForm::createFromArray($attributes)
+            ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+            ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+            ->add('address', TextField::class, TextFieldOption::make()->label(__('Address'))->toArray())
+            ->add('phone', TextField::class, TextFieldOption::make()->label(__('Phone'))->toArray())
+            ->add('email', TextField::class, TextFieldOption::make()->label(__('Email'))->toArray())
+            ->add(
+                'map_embed_url',
+                TextareaField::class,
+                TextareaFieldOption::make()
+                    ->label(__('Google Maps embed URL'))
+                    ->rows(2)
+                    ->toArray()
+            )
+            ->add('directions_url', TextField::class, TextFieldOption::make()->label(__('Directions URL'))->toArray())
+            ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
+            ->add('places_title', TextField::class, TextFieldOption::make()->label(__('Nearby places heading'))->toArray());
+
+        if (is_plugin_active('hotel')) {
+            $places = Place::query()->wherePublished()->pluck('name', 'id')->all();
+
+            $form->add(
+                'place_ids',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Nearby places'))
+                    ->choices($places)
+                    ->selected(ShortcodeField::parseIds(Arr::get($attributes, 'place_ids')))
+                    ->multiple()
+                    ->searchable()
+                    ->toArray()
+            );
+        }
+
+        return $form;
+    });
+
+    if (is_plugin_active('blog')) {
+        // Offers & stay packages sourced from a blog category
+        Shortcode::register(
+            'offers',
+            __('Offers & packages'),
+            __('Malibu homepage - offers pulled from a blog category'),
+            function (ShortcodeCompiler $shortcode): ?string {
+                $limit = (int) $shortcode->limit ?: 3;
+
+                $query = \Botble\Blog\Models\Post::query()
+                    ->wherePublished()
+                    ->with(['slugable', 'categories', 'categories.slugable'])
+                    ->orderByDesc('created_at')
+                    ->limit($limit);
+
+                if ($categoryId = (int) $shortcode->category_id) {
+                    $query->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId));
+                }
+
+                $posts = $query->get();
+
+                if ($posts->isEmpty()) {
+                    return null;
+                }
+
+                return Theme::partial('shortcodes.offers.index', compact('shortcode', 'posts'));
+            }
+        );
+
+        Shortcode::setAdminConfig('offers', function (array $attributes) {
+            $categories = BlogCategory::query()
+                ->wherePublished()
+                ->pluck('name', 'id')
+                ->all();
+
+            return ShortcodeForm::createFromArray($attributes)
+                ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+                ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+                ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+                ->add(
+                    'category_id',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Category'))
+                        ->choices($categories)
+                        ->searchable()
+                        ->toArray()
+                )
+                ->add('limit', NumberField::class, NumberFieldOption::make()->label(__('Limit'))->toArray())
+                ->add('item_label', TextField::class, TextFieldOption::make()->label(__('Card link label'))->toArray())
+                ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
+                ->add('button_url', TextField::class, TextFieldOption::make()->label(__('Button URL'))->toArray());
+        });
+    }
+
+    if (is_plugin_active('hotel')) {
+        // Inline booking strip that overlaps the hero and sticks on scroll
+        Shortcode::register(
+            'booking-strip',
+            __('Booking strip'),
+            __('Malibu homepage - inline availability search'),
+            function (ShortcodeCompiler $shortcode): ?string {
+                if (App::getLocale() !== 'en') {
+                    Theme::asset()
+                        ->container('footer')
+                        ->usePath(false)
+                        ->add(
+                            'bootstrap-datepicker-locale',
+                            sprintf(
+                                '//cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/locales/bootstrap-datepicker.%s.min.js',
+                                App::getLocale()
+                            ),
+                        );
+                }
+
+                return Theme::partial('shortcodes.booking-strip.index', compact('shortcode'));
+            }
+        );
+
+        Shortcode::setAdminConfig('booking-strip', function (array $attributes) {
+            return ShortcodeForm::createFromArray($attributes)
+                ->add('title', TextField::class, TextFieldOption::make()->label(__('Eyebrow text'))->toArray())
+                ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
+                ->add(
+                    'promo_enabled',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Show promo code field'))
+                        ->choices(['1' => __('Yes'), '0' => __('No')])
+                        ->toArray()
+                )
+                ->add(
+                    'trust_items',
+                    TextareaField::class,
+                    TextareaFieldOption::make()
+                        ->label(__('Trust items (separate with ";")'))
+                        ->rows(2)
+                        ->toArray()
+                );
+        });
+
+        // "Rooms you viewed" - rendered client-side from localStorage
+        Shortcode::register(
+            'recently-viewed',
+            __('Recently viewed rooms'),
+            __('Malibu homepage - personalised strip of rooms the visitor opened'),
+            function (ShortcodeCompiler $shortcode): ?string {
+                $rooms = Room::query()
+                    ->wherePublished()
+                    ->with('slugable')
+                    ->get();
+
+                if ($rooms->isEmpty()) {
+                    return null;
+                }
+
+                return Theme::partial('shortcodes.recently-viewed.index', compact('shortcode', 'rooms'));
+            }
+        );
+
+        Shortcode::setAdminConfig('recently-viewed', function (array $attributes) {
+            return ShortcodeForm::createFromArray($attributes)
+                ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+                ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray());
         });
     }
 });
