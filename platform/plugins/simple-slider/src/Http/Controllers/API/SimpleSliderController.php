@@ -4,6 +4,8 @@ namespace Botble\SimpleSlider\Http\Controllers\API;
 
 use Botble\Api\Http\Controllers\BaseApiController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Language\Facades\Language;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Media\Facades\RvMedia;
 use Botble\SimpleSlider\Models\SimpleSlider;
 use Illuminate\Http\Request;
@@ -24,6 +26,13 @@ class SimpleSliderController extends BaseApiController
      */
     public function index(Request $request, BaseHttpResponse $response)
     {
+        if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+            LanguageAdvancedManager::initModelRelations();
+        }
+
+        $currentLocale = Language::getCurrentLocaleCode();
+        $defaultLocale = Language::getDefaultLocaleCode();
+
         if ($request->has('keys')) {
             $validator = Validator::make($request->all(), [
                 'keys' => ['required', 'array'],
@@ -42,9 +51,22 @@ class SimpleSliderController extends BaseApiController
         // Build the base query
         $query = SimpleSlider::query()
             ->wherePublished()
-            ->with(['sliderItems' => function ($query): void {
-                $query->orderBy('order');
-            }]);
+            ->with([
+                'translations' => fn ($query) => $query->when(
+                    $currentLocale && $currentLocale !== $defaultLocale,
+                    fn ($query) => $query->where('lang_code', $currentLocale)
+                ),
+                'sliderItems' => function ($query) use ($currentLocale, $defaultLocale): void {
+                    $query
+                        ->orderBy('order')
+                        ->with([
+                            'translations' => fn ($query) => $query->when(
+                                $currentLocale && $currentLocale !== $defaultLocale,
+                                fn ($query) => $query->where('lang_code', $currentLocale)
+                            ),
+                        ]);
+                },
+            ]);
 
         // Filter by keys if provided (either from GET or POST)
         $keys = $request->input('keys');

@@ -22,6 +22,14 @@ class ProductRequest extends Request
             'category_id' => ['nullable', 'exists:ht_product_categories,id'],
             'order' => ['nullable', 'numeric'],
             'status' => Rule::in(BaseStatusEnum::values()),
+            'sale_start_date' => ['nullable', 'date'],
+            'sale_end_date' => ['nullable', 'date', 'after_or_equal:sale_start_date'],
+            'enable_booking' => ['nullable', 'boolean'],
+            'service_start_time' => ['nullable', 'date_format:H:i,H:i:s'],
+            'service_end_time' => ['nullable', 'date_format:H:i,H:i:s', 'after:service_start_time'],
+            'service_days' => ['nullable', 'array'],
+            'service_days.*' => ['integer', 'min:0', 'max:6'],
+            'time_slot_duration' => ['nullable', 'integer', Rule::in([30, 60, 90, 120])],
         ];
     }
 }

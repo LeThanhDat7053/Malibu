@@ -30,6 +30,9 @@ Route::group(['namespace' => 'Botble\Product\Http\Controllers', 'middleware' => 
 
             Route::post('products/order', 'PublicProductController@postOrder')
                 ->name('public.product.order');
+
+            Route::get('products/booked-slots/{product_id}', 'PublicProductController@getBookedSlots')
+                ->name('public.product.booked-slots');
         });
     }
 });

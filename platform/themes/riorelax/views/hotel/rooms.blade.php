@@ -1,4 +1,7 @@
-@php(Theme::set('pageTitle', __('Rooms')))
+@php
+    Theme::set('pageTitle', __('Rooms'));
+    Theme::set('breadcrumbPageKey', 'room');
+@endphp
 
 <section class="container">
     <div class="row">

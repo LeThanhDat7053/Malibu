@@ -33,6 +33,16 @@ class ProductOrderTable extends TableAbstract
             ->eloquent($this->query())
             ->editColumn('total_amount', function (ProductOrder $item) {
                 return number_format($item->total_amount, 0, ',', '.') . ' VND';
+            })
+            ->editColumn('service_date', function (ProductOrder $item) {
+                if (! $item->service_date) {
+                    return '-';
+                }
+
+                $date = $item->service_date->format('d/m/Y');
+                $time = $item->service_time ? \Carbon\Carbon::parse($item->service_time)->format('H:i') : '';
+
+                return $time ? $date . ' ' . $time : $date;
             });
 
         return $this->toJson($data);
@@ -49,6 +59,8 @@ class ProductOrderTable extends TableAbstract
                 'customer_name',
                 'customer_email',
                 'customer_phone',
+                'service_date',
+                'service_time',
                 'total_amount',
                 'status',
                 'created_at',
@@ -71,6 +83,9 @@ class ProductOrderTable extends TableAbstract
                 ->title(trans('plugins/product::product.customer_phone')),
             Column::make('total_amount')
                 ->title(trans('plugins/product::product.total_amount')),
+            Column::make('service_date')
+                ->title(trans('plugins/product::product.service_date'))
+                ->width(150),
             Column::make('status')
                 ->title(trans('core/base::tables.status')),
             CreatedAtColumn::make(),

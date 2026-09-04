@@ -1,5 +1,17 @@
 @php($bgColor = $shortcode->background_color ?: '#f7f5f1')
 
+@once
+    <style>
+        @media (min-width: 992px) {
+            .feature-area2 .feature-img.feature-img-right {
+                margin-inline-start: 0;
+                margin-inline-end: 0;
+                text-align: left;
+            }
+        }
+    </style>
+@endonce
+
 <section class="feature-area2 p-relative fix" style="background: {{ $bgColor }}">
     @if ($bgImage = $shortcode->background_image)
         <div class="animations-02">
@@ -11,7 +23,7 @@
         <div class="row justify-content-center align-items-center">
             <div class="col-lg-6 col-md-12 col-sm-12 pr-30">
                 @if($image = $shortcode->image)
-                    <div class="feature-img">
+                    <div class="feature-img feature-img-right">
                         <img src="{{ RvMedia::getImageUrl($image) }}" alt="{{ __('Image') }}" class="img">
                     </div>
                 @endif

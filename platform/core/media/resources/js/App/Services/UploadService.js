@@ -49,8 +49,8 @@ export class UploadService {
             previewsContainer: false,
             sending: function (file, xhr, formData) {
                 formData.append('_token', $('meta[name="csrf-token"]').attr('content'))
-                formData.append('folder_id', Helpers.getRequestParams().folder_id)
-                formData.append('view_in', Helpers.getRequestParams().view_in)
+                formData.append('folder_id', file.uploadFolderId)
+                formData.append('view_in', file.uploadViewIn)
                 formData.append('path', file.fullPath)
             },
             chunksUploaded: (file, done) => {
@@ -76,6 +76,9 @@ export class UploadService {
         _self.dropZone.on('addedfile', (file) => {
             file.index = _self.totalQueued
             _self.totalQueued++
+            // Capture the target folder at queue time so navigating away mid-upload doesn't change it
+            file.uploadFolderId = Helpers.getRequestParams().folder_id
+            file.uploadViewIn = Helpers.getRequestParams().view_in
         })
 
         _self.dropZone.on('sending', (file) => {

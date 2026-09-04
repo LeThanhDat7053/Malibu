@@ -1,5 +1,6 @@
 @php
     Theme::set('pageTitle',  $gallery->name);
+    Theme::set('breadcrumbPageKey', 'gallery');
 @endphp
 
 @if (function_exists('get_galleries'))

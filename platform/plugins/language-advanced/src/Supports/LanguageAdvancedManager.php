@@ -81,6 +81,10 @@ class LanguageAdvancedManager
             $language = self::getTranslationLocale();
         }
 
+        if (is_string($language)) {
+            $language = Str::before($language, '?');
+        }
+
         $condition = [
             'lang_code' => $language,
             $object->getTable() . '_id' => $object->getKey(),

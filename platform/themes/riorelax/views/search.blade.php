@@ -1,5 +1,6 @@
 @php
     Theme::set('pageTitle', __('Blog Search'));
+    Theme::set('breadcrumbPageKey', 'blog');
     $enabledSidebar = theme_option('blog_sidebar_enabled', 1)
 @endphp
 

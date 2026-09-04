@@ -85,7 +85,8 @@ class PublicController extends Controller
 
         [$startDate, $endDate, $adults] = HotelHelper::getRoomBookingParams();
 
-        $room = Room::query()
+            $room = Room::query()
+            ->wherePublished()
             ->with([
                 'amenities',
                 'currency',
@@ -93,8 +94,7 @@ class PublicController extends Controller
                 'activeRoomDates' => function ($query) use ($startDate, $endDate) {
                     return $query
                         ->whereDate('start_date', '>=', $startDate)
-                        ->whereDate('end_date', '<=', $endDate)
-                        ->take(42);
+                        ->whereDate('end_date', '<=', $endDate);
                 },
             ])
             ->findOrFail($slug->reference_id);
@@ -125,9 +125,11 @@ class PublicController extends Controller
             'adults' => $adults,
         ];
 
+        $relatedRoomsLimit = (int) theme_option('number_of_related_rooms', 2) ?: 2;
+
         $relatedRooms = $this->getRoomService->getRelatedRooms(
             $room->getKey(),
-            (int) theme_option('number_of_related_rooms', 2),
+            $relatedRoomsLimit,
             [
                 'with' => [
                     'amenities',
@@ -144,8 +146,7 @@ class PublicController extends Controller
                     'activeRoomDates' => function ($query) use ($startDate, $endDate) {
                         return $query
                             ->whereDate('start_date', '>=', $startDate)
-                            ->whereDate('end_date', '<=', $endDate)
-                            ->take(42);
+                            ->whereDate('end_date', '<=', $endDate);
                     },
                 ],
             ]
@@ -349,8 +350,7 @@ class PublicController extends Controller
                 'activeRoomDates' => function ($query) use ($startDate, $endDate) {
                     return $query
                         ->whereDate('start_date', '>=', $startDate)
-                        ->whereDate('end_date', '<=', $endDate)
-                        ->take(42);
+                        ->whereDate('end_date', '<=', $endDate);
                 },
             ])
             ->findOrFail(Arr::get($sessionData, 'room_id'));

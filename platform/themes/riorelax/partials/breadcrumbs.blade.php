@@ -1,5 +1,19 @@
 @php
-    $breadcrumbBackgroundImage = Theme::get('breadcrumbBackgroundImage') ?: theme_option('breadcrumb_background_image');
+    $breadcrumbPageKey = Theme::get('breadcrumbPageKey');
+    $breadcrumbOptionMap = [
+        'room' => 'breadcrumb_background_image_room',
+        'product' => 'breadcrumb_background_image_product',
+        'gallery' => 'breadcrumb_background_image_gallery',
+        'blog' => 'breadcrumb_background_image_blog',
+    ];
+
+    $breadcrumbBackgroundImage = Theme::get('breadcrumbBackgroundImage');
+
+    if (! $breadcrumbBackgroundImage && $breadcrumbPageKey && isset($breadcrumbOptionMap[$breadcrumbPageKey])) {
+        $breadcrumbBackgroundImage = theme_option($breadcrumbOptionMap[$breadcrumbPageKey]);
+    }
+
+    $breadcrumbBackgroundImage = $breadcrumbBackgroundImage ?: theme_option('breadcrumb_background_image');
     $bgImage = $breadcrumbBackgroundImage ? RvMedia::getImageUrl($breadcrumbBackgroundImage) : Theme::asset()->url('images/breadcrumb-bg.jpg');
 @endphp
 

@@ -27,21 +27,6 @@
                 <div class="header-social">
                     <?php echo Theme::partial('language-switcher'); ?>
 
-                    <?php echo Theme::partial('currency-switcher'); ?>
-
-                    <?php if(is_plugin_active('hotel')): ?>
-                        <?php if(auth()->guard('customer')->check()): ?>
-                            <a href="<?php echo e(route('customer.overview')); ?>">
-                                <img src="<?php echo e(auth('customer')->user()->avatar_url); ?>" class="rounded-circle ms-3 text-white customer-avatar-header" title="<?php echo e(auth('customer')->user()->name); ?>" width="16" alt="<?php echo e(auth('customer')->user()->name); ?>">
-                                <span class="customer-name text-white ms-1 customer-name-header"><?php echo e(auth('customer')->user()->name); ?></span>
-                            </a>
-                        <?php else: ?>
-                            <a href="<?php echo e(route('customer.login')); ?>" class="ms-3">
-                                <i class="fa fa-sign-in-alt"></i>
-                                <span class="text-white customer-name-header ms-1"><?php echo e(__('Login')); ?></span>
-                            </a>
-                        <?php endif; ?>
-                    <?php endif; ?>
                     <?php if($socialLinks = json_decode(theme_option('social_links'))): ?>
                         <span class="social-links">
                             <?php $__currentLoopData = $socialLinks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $social): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>

@@ -15,9 +15,22 @@ class ProductOrder extends BaseModel
         'customer_email',
         'customer_phone',
         'customer_note',
+        'service_date',
+        'service_time',
         'total_amount',
         'status',
     ];
+
+    protected $casts = [
+        'service_date' => 'date',
+    ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (ProductOrder $order) {
+            $order->items()->delete();
+        });
+    }
 
     public function items(): HasMany
     {

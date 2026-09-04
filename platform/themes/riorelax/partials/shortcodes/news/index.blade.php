@@ -21,7 +21,7 @@
                         <p>{!! BaseHelper::clean($description) !!}</p>
                     @endif
                 </div>
-
+                
             </div>
         </div>
         @if ($posts->isNotEmpty())

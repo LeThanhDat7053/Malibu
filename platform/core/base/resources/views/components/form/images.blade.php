@@ -1,5 +1,6 @@
 @props([
     'name',
+    'inputName' => null,
     'allowThumb' => true,
     'images' => [],
     'addImagesLabel' => trans('core/base::forms.add_images'),
@@ -14,7 +15,7 @@
                 'text-center cursor-pointer default-placeholder-gallery-image',
                 'hidden' => !empty($images),
             ])
-            data-name="{{ $name }}"
+            data-name="{{ $inputName ?: $name }}"
         >
             <div class="mb-3">
                 <x-core::icon
@@ -29,12 +30,12 @@
             </p>
         </div>
         <input
-            name="{{ $name }}"
+            name="{{ $inputName ?: $name }}"
             type="hidden"
         >
         <div
             class="row w-100 list-gallery-media-images @if (empty($images)) hidden @endif"
-            data-name="{{ $name }}"
+            data-name="{{ $inputName ?: $name }}"
             data-allow-thumb="{{ $allowThumb }}"
         >
             @if (!empty($images))
@@ -44,7 +45,7 @@
                             <div class="custom-image-box image-box">
                                 <input
                                     class="image-data"
-                                    name="{{ $name }}"
+                                    name="{{ $inputName ?: $name }}"
                                     type="hidden"
                                     value="{{ $image }}"
                                 >

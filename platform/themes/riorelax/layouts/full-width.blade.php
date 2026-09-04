@@ -9,6 +9,8 @@
         {!! Theme::partial('header') !!}
     </header>
 
+    {!! Theme::partial('booking-mask') !!}
+
     @if (Theme::get('breadcrumb', true))
         {!! Theme::partial('breadcrumbs') !!}
     @endif

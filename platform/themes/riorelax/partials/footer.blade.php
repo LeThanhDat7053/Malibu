@@ -14,7 +14,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 col-md-6">
-                    {{ theme_option('copyright') }}
+                    {!! Theme::getSiteCopyright() !!}
                 </div>
                 <div class="col-lg-6 col-md-6 text-end text-xl-right">
                     @if ($socialLinks = json_decode(theme_option('social_links')))

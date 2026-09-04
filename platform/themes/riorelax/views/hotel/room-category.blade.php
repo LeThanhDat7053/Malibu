@@ -1,5 +1,6 @@
 @php
     Theme::set('pageTitle', $category->name);
+    Theme::set('breadcrumbPageKey', 'room');
     [$startDate, $endDate, $adults, $nights, $children, $room] = HotelHelper::getRoomBookingParams();
 @endphp
 
@@ -49,5 +50,4 @@
         @endif
     @endif
 </section>
-
 

@@ -241,6 +241,8 @@ class HotelServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-tools',
                     'route' => 'amenity.index',
                 ])
+                // Hidden: Food, Food type, Feature, Place, Tax, Coupons
+                /*
                 ->registerItem([
                     'id' => 'cms-plugins-food',
                     'priority' => 3,
@@ -265,6 +267,7 @@ class HotelServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-star',
                     'route' => 'feature.index',
                 ])
+                */
                 ->registerItem([
                     'id' => 'cms-plugins-service',
                     'priority' => 6,
@@ -273,6 +276,7 @@ class HotelServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-bell-ringing',
                     'route' => 'service.index',
                 ])
+                /*
                 ->registerItem([
                     'id' => 'cms-plugins-place',
                     'priority' => 7,
@@ -281,6 +285,9 @@ class HotelServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-map-pin',
                     'route' => 'place.index',
                 ])
+                */
+                // Hidden: Customer (shows as 'Name' on server)
+                /*
                 ->registerItem([
                     'id' => 'cms-plugins-customer',
                     'priority' => 9,
@@ -289,6 +296,9 @@ class HotelServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-users',
                     'route' => 'customer.index',
                 ])
+                */
+                // Hidden: Tax, Coupons
+                /*
                 ->registerItem([
                     'id' => 'cms-plugins-tax',
                     'priority' => 10,
@@ -305,6 +315,9 @@ class HotelServiceProvider extends ServiceProvider
                     'icon' => 'ti ti-discount-2',
                     'route' => 'coupons.index',
                 ])
+                */
+                // Hidden: Booking section
+                /*
                 ->registerItem([
                     'id' => 'cms-plugins-booking',
                     'priority' => 1,
@@ -351,7 +364,8 @@ class HotelServiceProvider extends ServiceProvider
                     'name' => 'plugins/hotel::invoice.name',
                     'icon' => 'ti ti-receipt',
                     'route' => 'invoices.index',
-                ]);
+                ])
+                */;
         });
 
         $this->app['events']->listen(RouteMatched::class, function (): void {
@@ -398,6 +412,7 @@ class HotelServiceProvider extends ServiceProvider
                 'name',
                 'description',
                 'content',
+                'custom_url',
             ]);
 
             LanguageAdvancedManager::registerModule(Place::class, [

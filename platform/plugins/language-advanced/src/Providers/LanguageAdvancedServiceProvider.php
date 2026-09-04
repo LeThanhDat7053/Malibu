@@ -67,7 +67,10 @@ class LanguageAdvancedServiceProvider extends ServiceProvider
                 'name',
                 'description',
                 'content',
+                'content_mode',
                 'custom_html',
+                'content_mode_ui',
+                'html_preview_block',
             ]);
 
             LanguageAdvancedManager::registerModule(Slug::class, [

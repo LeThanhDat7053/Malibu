@@ -754,7 +754,7 @@ class LanguageManager
 
     public function setCurrentAdminLocale(?string $code): void
     {
-        $this->currentAdminLocaleCode = $code;
+        $this->currentAdminLocaleCode = $code ? Str::before($code, '?') : $code;
     }
 
     public function setCurrentLocale(?string $locale): void
@@ -1162,7 +1162,9 @@ class LanguageManager
 
     public function getRefLang(): ?string
     {
-        return BaseHelper::stringify(request()->input($this->refLangKey()));
+        $refLang = BaseHelper::stringify(request()->input($this->refLangKey()));
+
+        return $refLang ? Str::before($refLang, '?') : $refLang;
     }
 
     public function getRefFrom(): int|string|null

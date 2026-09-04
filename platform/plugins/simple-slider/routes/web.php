@@ -20,6 +20,12 @@ Route::group(['namespace' => 'Botble\SimpleSlider\Http\Controllers'], function (
                 'index',
             ])->parameters(['' => 'simple-slider-item']);
 
+            Route::post('{simple-slider-item}/apply-all', [
+                'as' => 'apply-all',
+                'uses' => 'SimpleSliderItemController@applyAll',
+                'permission' => 'simple-slider-item.edit',
+            ])->wherePrimaryKey('simple-slider-item');
+
             Route::match(['GET', 'POST'], 'list/{id}', [
                 'as' => 'index',
                 'uses' => 'SimpleSliderItemController@index',

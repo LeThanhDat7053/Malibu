@@ -52,7 +52,7 @@
                 </div>
 
                 <div class="text-column col-lg-8 col-md-12 col-sm-12">
-                    <div class="s-about-content pl-30 wow fadeInRight" data-animation="fadeInRight" data-delay=".2s">
+                    <div class="s-about-content pl-30 wow fadeInRight ck-content" data-animation="fadeInRight" data-delay=".2s">
                         {!! BaseHelper::clean($team->content) !!}
                     </div>
                 </div>

@@ -34,6 +34,11 @@ class ProductController extends BaseController
 
     public function store(ProductRequest $request)
     {
+        // Ensure service_days defaults to empty array if not sent (no checkboxes checked)
+        if (! $request->has('service_days')) {
+            $request->merge(['service_days' => []]);
+        }
+
         $form = ProductForm::create()->setRequest($request);
         $form->save();
 
@@ -53,6 +58,11 @@ class ProductController extends BaseController
 
     public function update(Product $product, ProductRequest $request)
     {
+        // Ensure service_days defaults to empty array if not sent (no checkboxes checked)
+        if (! $request->has('service_days')) {
+            $request->merge(['service_days' => []]);
+        }
+
         ProductForm::createFromModel($product)->setRequest($request)->save();
 
         return $this

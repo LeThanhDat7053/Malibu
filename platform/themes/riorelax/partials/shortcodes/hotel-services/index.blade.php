@@ -1,4 +1,14 @@
-<section class="hotel-service-area pt-40 pb-40 p-relative">
+@once
+    <style>
+        .service-images-rounded .services-icon2 img,
+        .service-images-rounded .services-08-thumb img {
+            display: block;
+            border-radius: 20px;
+        }
+    </style>
+@endonce
+
+<section class="hotel-service-area service-images-rounded pt-40 pb-40 p-relative">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-12">

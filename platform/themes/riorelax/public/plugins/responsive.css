@@ -141,10 +141,15 @@
         height: 645px;
     }
     .second-menu .main-menu ul li {
-        margin-left: 30px;
+        margin-left: 20px;
+        margin-inline-start: 20px;
     }
     .main-menu {
-        margin-right: -40px;
+        margin-right: 0;
+    }
+    .header-three .main-menu ul li a {
+        font-size: 15px;
+        letter-spacing: 0.5px;
     }
     .call-area h2 {
         color: #fff;
@@ -314,7 +319,12 @@
         padding: 18px 18px;
     }
     .second-menu .main-menu ul li {
-        margin-left: 20px;
+        margin-left: 12px;
+        margin-inline-start: 12px;
+    }
+    .header-three .main-menu ul li a {
+        font-size: 14px;
+        letter-spacing: 0;
     }
     .slider-bg .banner-img {
         height: 550px;

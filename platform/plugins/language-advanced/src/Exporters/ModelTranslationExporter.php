@@ -2,7 +2,6 @@
 
 namespace Botble\LanguageAdvanced\Exporters;
 
-use Botble\Base\Supports\Language as LanguageSupport;
 use Botble\DataSynchronize\Exporter\ExportColumn;
 use Botble\DataSynchronize\Exporter\ExportCounter;
 use Botble\DataSynchronize\Exporter\Exporter;
@@ -37,8 +36,10 @@ class ModelTranslationExporter extends Exporter
 
         $translatableColumns = LanguageAdvancedManager::getTranslatableColumns($this->modelClass);
 
-        foreach (LanguageSupport::getAvailableLocales() as $locale => $language) {
-            if ($locale === Language::getDefaultLocale()) {
+        foreach (Language::getSupportedLocales() as $language) {
+            $langCode = $language['lang_code'];
+
+            if (! $langCode || ! empty($language['lang_is_default'])) {
                 continue;
             }
 
@@ -47,8 +48,8 @@ class ModelTranslationExporter extends Exporter
                     continue;
                 }
 
-                $columns[] = ExportColumn::make($column . '_' . $locale)
-                    ->label(Str::title(str_replace('_', ' ', $column)) . ' (' . $language['code'] . ')');
+                $columns[] = ExportColumn::make($column . '_' . $langCode)
+                    ->label(Str::title(str_replace('_', ' ', $column)) . ' (' . $langCode . ')');
             }
         }
 
@@ -86,15 +87,17 @@ class ModelTranslationExporter extends Exporter
 
             $translations = $item->translations;
 
-            foreach (LanguageSupport::getAvailableLocales() as $locale => $language) {
-                if ($locale === Language::getDefaultLocale()) {
+            foreach (Language::getSupportedLocales() as $language) {
+                $langCode = $language['lang_code'];
+
+                if (! $langCode || ! empty($language['lang_is_default'])) {
                     continue;
                 }
 
-                $translation = $translations->where('lang_code', $locale)->first();
+                $translation = $translations->where('lang_code', $langCode)->first();
 
                 foreach ($translatableColumns as $column) {
-                    $data[$column . '_' . $locale] = (string) $translation?->{$column};
+                    $data[$column . '_' . $langCode] = (string) $translation?->{$column};
                 }
             }
 

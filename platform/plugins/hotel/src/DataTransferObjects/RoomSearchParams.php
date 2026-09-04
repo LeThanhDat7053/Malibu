@@ -110,8 +110,7 @@ class RoomSearchParams
             'activeRoomDates' => function ($query) {
                 return $query
                     ->whereDate('start_date', '>=', $this->startDate)
-                    ->whereDate('end_date', '<=', $this->endDate)
-                    ->take(42);
+                    ->whereDate('end_date', '<=', $this->endDate);
             },
         ];
     }

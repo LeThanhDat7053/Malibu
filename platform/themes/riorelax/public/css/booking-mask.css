@@ -1,87 +1,87 @@
 /* ============================================================
-   Booking Mask — Sticky right-side "Book Now" widget
+   Booking Bar — Always fixed, snapped below header
    ============================================================ */
 
-#booking-mask-wrapper {
+.booking-bar {
     position: fixed;
-    top: 50%;
     right: 0;
-    transform: translateY(-50%);
     z-index: 9999;
+    text-align: right;
     font-family: var(--primary-font, 'Roboto', sans-serif);
 }
 
-/* ---- Toggle button (visible when panel closed) ---- */
-.booking-button {
+/* ---- Inner wrapper ---- */
+.booking-bar-inner {
+    /* contains just the button */
+}
+
+/* ---- Toggle Button ---- */
+.booking-bar-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 7px;
     background: #0e4d97;
     color: #fff;
     border: none;
     cursor: pointer;
-    padding: 14px 10px;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    letter-spacing: 2px;
-    font-size: 14px;
+    padding: 10px 18px 10px 20px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
-    border-radius: 8px 0 0 8px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    line-height: 1.4;
+    border-radius: 0;
+    box-shadow: -3px 3px 12px rgba(0, 0, 0, 0.25);
     transition: background 0.3s;
-    box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.booking-button:hover {
+.booking-bar-btn:hover {
     background: #0a3a75;
     color: #fff;
 }
 
-/* ---- Panel container ---- */
-#booking-mask {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+.booking-bar-btn i {
+    font-size: 14px;
 }
 
-/* Closed state */
-#booking-mask.closed .booking-body {
-    width: 0;
-    padding: 0;
-    overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-}
-
-#booking-mask.closed .booking-button {
-    display: flex;
-}
-
-/* Open state */
-#booking-mask.open .booking-body {
-    width: 320px;
-    padding: 20px;
-    opacity: 1;
-    pointer-events: auto;
-    visibility: visible;
-    overflow-y: auto;
-    max-height: calc(100vh - 120px);
-}
-
-#booking-mask.open .booking-button {
+/* ---- Dropdown Panel ---- */
+.booking-bar-panel {
     display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    width: 320px;
+    z-index: 9999;
+    animation: bookingPanelDrop 0.25s ease;
 }
 
-/* ---- Booking body ---- */
-.booking-body {
+.booking-bar-panel.open {
+    display: block;
+}
+
+@keyframes bookingPanelDrop {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.booking-bar-panel-inner {
     position: relative;
     background: #0e4d97;
     color: #fff;
-    overflow: hidden;
-    transition: width 0.35s ease, padding 0.35s ease, opacity 0.25s ease;
-    border-radius: 0 0 0 12px;
-    box-shadow: -4px 4px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 8px 8px;
+    box-shadow: -4px 6px 24px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    overflow-y: auto;
+    /* Hide scrollbar but keep scrolling */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.booking-bar-panel-inner::-webkit-scrollbar {
+    display: none;
 }
 
 /* ---- Title ---- */
@@ -216,6 +216,33 @@
     color: #fff !important;
 }
 
+#bm-calendar .datepicker .datepicker-months td span,
+#bm-calendar .datepicker .datepicker-years td span {
+    color: #fff !important;
+    background: transparent !important;
+}
+
+#bm-calendar .datepicker .datepicker-months td span:hover,
+#bm-calendar .datepicker .datepicker-years td span:hover {
+    background: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+#bm-calendar .datepicker .datepicker-months td span.disabled,
+#bm-calendar .datepicker .datepicker-months td span.disabled:hover,
+#bm-calendar .datepicker .datepicker-years td span.disabled,
+#bm-calendar .datepicker .datepicker-years td span.disabled:hover {
+    color: rgba(255, 255, 255, 0.25) !important;
+    background: transparent !important;
+}
+
+#bm-calendar .datepicker .datepicker-months td span.old,
+#bm-calendar .datepicker .datepicker-months td span.new,
+#bm-calendar .datepicker .datepicker-years td span.old,
+#bm-calendar .datepicker .datepicker-years td span.new {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
 #bm-calendar .datepicker tbody td.active,
 #bm-calendar .datepicker tbody td.active:hover {
     background: #fff !important;
@@ -313,18 +340,17 @@
 
 /* ---- Responsive ---- */
 
-/* Medium desktop / large tablet (768px – 1199px) */
+/* Tablet (768px – 1199px) */
 @media (min-width: 768px) and (max-width: 1199px) {
-    #booking-mask.open .booking-body {
-        width: 280px;
-        padding: 14px;
-        max-height: calc(100vh - 100px);
+    .booking-bar-panel {
+        width: 290px;
     }
 
-    .bm-title {
-        font-size: 13px;
-        margin-bottom: 10px;
+    .booking-bar-panel-inner {
+        padding: 16px;
     }
+
+    .bm-title { font-size: 13px; margin-bottom: 10px; }
 
     #bm-calendar .datepicker table td,
     #bm-calendar .datepicker table th {
@@ -332,42 +358,34 @@
         font-size: 11px !important;
     }
 
-    .bm-dates-row {
-        gap: 5px;
-    }
+    .bm-dates-row { gap: 5px; }
+    .bm-date-field { padding: 6px 8px; }
+    .bm-date-field input { font-size: 12px; }
+    .bm-guests-row { gap: 5px; }
+    .bm-guest-field select { padding: 5px 8px; font-size: 13px; }
+    .booking-submit { padding: 10px; font-size: 13px; }
 
-    .bm-date-field {
-        padding: 6px 8px;
-    }
-
-    .bm-date-field input {
-        font-size: 12px;
-    }
-
-    .bm-guests-row {
-        gap: 5px;
-    }
-
-    .bm-guest-field select {
-        padding: 5px 8px;
-        font-size: 13px;
-    }
-
-    .booking-submit {
-        padding: 10px;
-        font-size: 13px;
-    }
-
-    .booking-button {
-        font-size: 12px;
-        padding: 12px 8px;
+    .booking-bar-btn {
+        font-size: 11px;
+        padding: 8px 14px 8px 16px;
     }
 }
 
-/* Hide on mobile */
+/* Mobile (max-width: 767px) */
 @media (max-width: 767px) {
-    #booking-mask-wrapper.no-mobile {
-        display: none;
+    .booking-bar-btn {
+        padding: 8px 12px 8px 14px;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+    }
+
+    .booking-bar-panel {
+        width: calc(100vw - 20px);
+        right: 0;
+    }
+
+    .booking-bar-panel-inner {
+        border-radius: 0 0 8px 8px;
     }
 }
 
@@ -375,6 +393,28 @@
 #button-contact-vr {
     right: auto !important;
     left: 20px !important;
+}
+
+/* ---- Position Link360 Chat Bot below contact icons (left side) ---- */
+#cs-live-chat,
+.cs-live-chat,
+[id^="chat-init"],
+.link360-widget {
+    right: auto !important;
+    left: 20px !important;
+}
+
+/* ---- Move scrollUp button a bit left to avoid Chat Bot overlap ---- */
+#scrollUp {
+    inset-inline-end: 100px !important;
+}
+
+/* ---- Keep cookie consent actions tappable on mobile ---- */
+@media (max-width: 767px) {
+    .site-notice.site-notice--visible ~ #scrollUp {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }
 
 /* ---- Hide datepicker dropdown popups triggered by hidden inputs ---- */

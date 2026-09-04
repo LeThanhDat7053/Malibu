@@ -1,0 +1,10 @@
+{
+    "name": "AI Translator",
+    "namespace": "Botble\\AiTranslator\\",
+    "provider": "Botble\\AiTranslator\\Providers\\AiTranslatorServiceProvider",
+    "author": "Botble Technologies",
+    "url": "https://botble.com",
+    "version": "1.0.0",
+    "description": "AI-powered translation for dashboard content using OpenAI GPT. Supports translating titles, descriptions, and content to multiple languages with custom training context.",
+    "minimum_core_version": "7.0.0"
+}

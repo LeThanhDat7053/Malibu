@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 /**
  * @property string|null $vr360_url
  * @property string|null $external_rate_id
+ * @property array $videos
  */
 class Room extends BaseModel
 {
@@ -24,6 +25,7 @@ class Room extends BaseModel
         'content',
         'is_featured',
         'images',
+        'videos',
         'vr360_url',
         'external_rate_id',
         'price',
@@ -61,6 +63,17 @@ class Room extends BaseModel
     public function getImageAttribute(): ?string
     {
         return Arr::first($this->images) ?? null;
+    }
+
+    public function getVideosAttribute($value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        $videos = json_decode((string) $value, true);
+
+        return is_array($videos) ? array_values(array_filter($videos)) : [];
     }
 
     public function amenities(): BelongsToMany

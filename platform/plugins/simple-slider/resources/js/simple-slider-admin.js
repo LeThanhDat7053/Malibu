@@ -71,6 +71,47 @@ class SimpleSliderAdminManagement {
 }
 
 $(() => {
+    const getCurrentRefLang = () =>
+        new URLSearchParams(window.location.search).get('ref_lang') ||
+        $('meta[name="ref_lang"]').attr('content') ||
+        ''
+
+    const appendRefLangToUrl = (href) => {
+        const refLang = getCurrentRefLang()
+
+        if (!href || !refLang) {
+            return href
+        }
+
+        const url = new URL(href, window.location.origin)
+
+        if (!url.searchParams.get('ref_lang')) {
+            url.searchParams.set('ref_lang', refLang)
+        }
+
+        return `${url.pathname}${url.search}${url.hash}`
+    }
+
+    const toggleApplyAllButton = (modal, data = {}) => {
+        const applyAllButton = modal.find('#simple-slider-item-apply-all')
+        const aiTranslateAllButton = modal.find('#simple-slider-item-ai-translate-all')
+
+        if (!data.canApplyAll) {
+            applyAllButton.hide().data('confirm-message', '')
+            aiTranslateAllButton.hide().data('confirm-message', '')
+
+            return
+        }
+
+        applyAllButton
+            .show()
+            .data('confirm-message', data.applyAllConfirmMessage || '')
+
+        aiTranslateAllButton
+            .show()
+            .data('confirm-message', data.aiTranslateAllConfirmMessage || '')
+    }
+
     document.addEventListener('core-table-init-completed', function (event) {
         new SimpleSliderAdminManagement().init(event.detail.table.prop('id'))
     })
@@ -78,7 +119,7 @@ $(() => {
     $(document)
         .on('show.bs.modal', '#simple-slider-item-modal', (e) => {
             const modal = $(e.currentTarget)
-            const href = $(e.relatedTarget).prop('href')
+            const href = appendRefLangToUrl($(e.relatedTarget).prop('href'))
 
             $httpClient
                 .make()
@@ -87,10 +128,89 @@ $(() => {
                 .then(({ data }) => {
                     modal.find('.modal-header .modal-title').text(data.data.title)
                     modal.find('.modal-body').html(data.data.content)
+                    toggleApplyAllButton(modal, data.data)
 
                     Botble.initMediaIntegrate()
 
                     Botble.initResources()
+                })
+        })
+        .on('hidden.bs.modal', '#simple-slider-item-modal', (e) => {
+            const modal = $(e.currentTarget)
+
+            modal.find('.modal-body').empty()
+            toggleApplyAllButton(modal)
+        })
+        .on('click', '#simple-slider-item-apply-all', (e) => {
+            e.preventDefault()
+
+            const button = $(e.currentTarget)
+            const modal = button.closest('.modal')
+            const form = modal.find('form')
+            const confirmMessage = button.data('confirm-message')
+
+            if (!form.length) {
+                return
+            }
+
+            if (confirmMessage && !window.confirm(confirmMessage)) {
+                return
+            }
+
+            const payload = {
+                ...Object.fromEntries(new URLSearchParams(form.serialize())),
+                simple_slider_id: form.find('input[name="simple_slider_id"]').val(),
+                language: form.find('input[name="language"]').val(),
+                title: form.find('input[name="title"]').val(),
+                description: form.find('textarea[name="description"]').val(),
+                apply_all: 1,
+            }
+
+            $httpClient
+                .make()
+                .withLoading(form)
+                .withButtonLoading(button)
+                .post(form.prop('action'), payload)
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+
+                    $('#botble-simple-slider-tables-simple-slider-item-table').DataTable().draw(false)
+                })
+        })
+        .on('click', '#simple-slider-item-ai-translate-all', (e) => {
+            e.preventDefault()
+
+            const button = $(e.currentTarget)
+            const modal = button.closest('.modal')
+            const form = modal.find('form')
+            const confirmMessage = button.data('confirm-message')
+
+            if (!form.length) {
+                return
+            }
+
+            if (confirmMessage && !window.confirm(confirmMessage)) {
+                return
+            }
+
+            const payload = {
+                ...Object.fromEntries(new URLSearchParams(form.serialize())),
+                simple_slider_id: form.find('input[name="simple_slider_id"]').val(),
+                language: form.find('input[name="language"]').val(),
+                title: form.find('input[name="title"]').val(),
+                description: form.find('textarea[name="description"]').val(),
+                ai_translate_all: 1,
+            }
+
+            $httpClient
+                .make()
+                .withLoading(form)
+                .withButtonLoading(button)
+                .post(form.prop('action'), payload)
+                .then(({ data }) => {
+                    Botble.showSuccess(data.message)
+
+                    $('#botble-simple-slider-tables-simple-slider-item-table').DataTable().draw(false)
                 })
         })
 

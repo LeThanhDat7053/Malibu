@@ -14,6 +14,46 @@ app()->booted(function (): void {
             ],
         ])
         ->setField([
+            'id' => 'breadcrumb_background_image_room',
+            'section_id' => 'opt-text-subsection-general',
+            'type' => 'mediaImage',
+            'label' => __('Breadcrumb background image for rooms'),
+            'attributes' => [
+                'name' => 'breadcrumb_background_image_room',
+            ],
+            'helper' => __('If empty, the default breadcrumb background image will be used.'),
+        ])
+        ->setField([
+            'id' => 'breadcrumb_background_image_product',
+            'section_id' => 'opt-text-subsection-general',
+            'type' => 'mediaImage',
+            'label' => __('Breadcrumb background image for products'),
+            'attributes' => [
+                'name' => 'breadcrumb_background_image_product',
+            ],
+            'helper' => __('If empty, the default breadcrumb background image will be used.'),
+        ])
+        ->setField([
+            'id' => 'breadcrumb_background_image_gallery',
+            'section_id' => 'opt-text-subsection-general',
+            'type' => 'mediaImage',
+            'label' => __('Breadcrumb background image for galleries'),
+            'attributes' => [
+                'name' => 'breadcrumb_background_image_gallery',
+            ],
+            'helper' => __('If empty, the default breadcrumb background image will be used.'),
+        ])
+        ->setField([
+            'id' => 'breadcrumb_background_image_blog',
+            'section_id' => 'opt-text-subsection-general',
+            'type' => 'mediaImage',
+            'label' => __('Breadcrumb background image for blog'),
+            'attributes' => [
+                'name' => 'breadcrumb_background_image_blog',
+            ],
+            'helper' => __('If empty, the default breadcrumb background image will be used.'),
+        ])
+        ->setField([
             'id' => 'copyright',
             'section_id' => 'opt-text-subsection-general',
             'type' => 'text',

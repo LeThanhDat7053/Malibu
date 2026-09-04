@@ -3,10 +3,11 @@
     Theme::asset()->container('footer')->usePath()->add('lightgallery-js', 'plugins/lightgallery/js/lightgallery.min.js');
 
     Theme::set('pageTitle', $room->name);
+    Theme::set('breadcrumbPageKey', 'room');
     $nights = (int) $startDate->diffInDays($endDate);
 
     $roomGalleryItems = function_exists('gallery_meta_data') ? gallery_meta_data($room) : [];
-    $roomGalleryVideos = collect($roomGalleryItems)->filter(fn($item) => Arr::get($item, 'type') === 'video');
+    $roomVideos = collect($room->videos ?? []);
     $roomGalleryVr360s = collect($roomGalleryItems)->filter(fn($item) => Arr::get($item, 'type') === 'vr360');
 @endphp
 <div class="about-area5 about-p p-relative room-details">
@@ -56,9 +57,9 @@
                         </div>
                     </div>
 
-                    @if ($roomGalleryVideos->isNotEmpty() || $roomGalleryVr360s->isNotEmpty())
+                    @if ($roomVideos->isNotEmpty() || $roomGalleryVr360s->isNotEmpty())
                         @php
-                            $videoAndVr360Items = $roomGalleryVideos->merge($roomGalleryVr360s)->values()->toArray();
+                            $videoAndVr360Items = $roomVideos->merge($roomGalleryVr360s)->values()->toArray();
                         @endphp
                         {!! Theme::partial('media-gallery', ['items' => $videoAndVr360Items, 'id' => 'room-gallery']) !!}
                     @endif
@@ -71,7 +72,7 @@
                             </div>
                         </div>
 
-                        {!! BaseHelper::clean($room->content) !!}
+                        <div class="ck-content">{!! BaseHelper::clean($room->content) !!}</div>
 
                         @if ($room->amenities->isNotEmpty())
                             <div class="room-block-content shadow-block mt-50 amenities-list">

@@ -47,10 +47,12 @@
 
 @yield('main')
 
-{!! Theme::partial('booking-mask') !!}
 {!! Theme::partial('popup-banner') !!}
 
 {!! Theme::footer() !!}
+
+{{-- Booking Services Chat Bot --}}
+{{-- <script id="chat-init" src="https://app.link360.vn/account/js/init.js?id=5740347"></script> --}}
 @if (session()->has('success_msg') || session()->has('error_msg') || (isset($errors) && $errors->count() > 0) || isset($error_msg))
     <script type="text/javascript">
         $(document).ready(function () {

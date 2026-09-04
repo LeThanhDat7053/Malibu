@@ -20,8 +20,8 @@ class RoomRepository extends RepositoriesAbstract implements RoomInterface
         $params = array_merge([
             'condition' => [],
             'order_by' => [
-                'created_at' => 'DESC',
                 'order' => 'ASC',
+                'id' => 'ASC',
             ],
             'take' => null,
             'paginate' => [
@@ -45,7 +45,7 @@ class RoomRepository extends RepositoriesAbstract implements RoomInterface
             $this->model = $this->model->where('room_category_id', $filters['room_category_id']);
         }
 
-        $this->model->wherePublished();
+        $this->model = $this->model->wherePublished();
 
         return $this->advancedGet($params);
     }
@@ -59,7 +59,8 @@ class RoomRepository extends RepositoriesAbstract implements RoomInterface
         $params = array_merge([
             'condition' => [],
             'order_by' => [
-                'created_at' => 'DESC',
+                'order' => 'ASC',
+                'id' => 'ASC',
             ],
             'take' => $limit,
             'paginate' => [

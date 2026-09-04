@@ -77,6 +77,12 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers'], function (): vo
                     'uses' => 'MediaSettingController@edit',
                 ]);
 
+                Route::get('resize-images', [
+                    'as' => 'media.resize-images',
+                    'uses' => 'MediaSettingController@resizeImages',
+                    'permission' => 'settings.media',
+                ]);
+
                 Route::put('/', [
                     'as' => 'media.update',
                     'uses' => 'MediaSettingController@update',
@@ -87,6 +93,20 @@ Route::group(['namespace' => 'Botble\Setting\Http\Controllers'], function (): vo
                 Route::post('generate-thumbnails', [
                     'as' => 'media.generate-thumbnails',
                     'uses' => 'MediaSettingController@generateThumbnails',
+                    'permission' => 'settings.media',
+                    'middleware' => 'preventDemo',
+                ]);
+
+                Route::post('resize-images/scan', [
+                    'as' => 'media.resize-images.scan',
+                    'uses' => 'MediaSettingController@scanImagesForResize',
+                    'permission' => 'settings.media',
+                    'middleware' => 'preventDemo',
+                ]);
+
+                Route::post('resize-images/process', [
+                    'as' => 'media.resize-images.process',
+                    'uses' => 'MediaSettingController@processImageResize',
                     'permission' => 'settings.media',
                     'middleware' => 'preventDemo',
                 ]);

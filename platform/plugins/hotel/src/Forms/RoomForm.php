@@ -4,6 +4,7 @@ namespace Botble\Hotel\Forms;
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\ContentFieldOption;
+use Botble\Gallery\Facades\Gallery;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
 use Botble\Base\Forms\FieldOptions\NameFieldOption;
 use Botble\Base\Forms\FieldOptions\OnOffFieldOption;
@@ -24,13 +25,23 @@ class RoomForm extends FormAbstract
 {
     public function setup(): void
     {
+        // Prevent Gallery plugin from adding a duplicate meta box in the 'advanced' section
+        Gallery::disableGalleryImagesMetaBox();
+
+        // Load hotel-specific assets via usingVueJS chain
         Assets::usingVueJS()
             ->addScripts(['input-mask', 'moment'])
             ->addScriptsDirectly([
                 'vendor/core/plugins/hotel/libraries/full-calendar-6.1.8/main.min.js',
                 'vendor/core/plugins/hotel/js/room-availability.js',
             ])
-            ->addStylesDirectly('vendor/core/plugins/hotel/css/hotel.css');
+            ->addStylesDirectly(['vendor/core/plugins/hotel/css/hotel.css']);
+
+        // Load gallery assets exactly the same way Gallery's HookServiceProvider does
+        // (must be separate from usingVueJS chain so scripts load in the right container)
+        Assets::addStylesDirectly(['vendor/core/plugins/gallery/css/admin-gallery.css'])
+            ->addScriptsDirectly(['vendor/core/plugins/gallery/js/gallery-admin.js'])
+            ->addScripts(['sortable']);
 
         $roomCategories = RoomCategory::query()->pluck('name', 'id')->all();
         $taxes = Tax::query()->pluck('title', 'id')->all();
@@ -147,9 +158,14 @@ class RoomForm extends FormAbstract
             ->add('rowClose3', 'html', [
                 'html' => '</div>',
             ])
-            ->add('images[]', 'mediaImages', [
-                'label' => trans('plugins/hotel::room.images'),
-                'values' => $this->getModel()->id ? $this->getModel()->images : [],
+            ->add('room_gallery_section', 'html', [
+                'html' => '<div class="form-group">'
+                    . '<label class="control-label">' . trans('plugins/hotel::room.images') . '</label>'
+                    . view('plugins/hotel::forms.room-gallery', ['model' => $this->getModel()])->render()
+                    . '</div>',
+                'wrapper' => [
+                    'class' => $this->formHelper->getConfig('defaults.wrapper_class'),
+                ],
             ])
             ->add('vr360_url', 'text', [
                 'label' => 'VR360 URL',

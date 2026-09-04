@@ -28,11 +28,15 @@ $(() => {
         },
     }
 
-    // Select Image  lazy-initialize rvMedia on click
+    // Select Image  pre-initialize rvMedia on first click so picker opens immediately
     $(document).on('click', '.btn_select_gallery', function (e) {
         e.preventDefault()
-        if (typeof $.fn.rvMedia === 'function') {
-            $(this).rvMedia(rvMediaOptions)
+        if (typeof $.fn.rvMedia !== 'function') return
+        var $btn = $(this)
+        if (!$btn.data('rv-init')) {
+            $btn.data('rv-init', true)
+            $btn.rvMedia(rvMediaOptions)
+            $btn.trigger('click')
         }
     })
 

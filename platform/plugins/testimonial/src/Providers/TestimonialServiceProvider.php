@@ -39,6 +39,8 @@ class TestimonialServiceProvider extends ServiceProvider
             ]);
         }
 
+        // Hidden: Testimonials menu
+        /*
         DashboardMenu::beforeRetrieving(function (): void {
             DashboardMenu::make()
                 ->registerItem([
@@ -50,5 +52,6 @@ class TestimonialServiceProvider extends ServiceProvider
                     'permissions' => ['testimonial.index'],
             ]);
         });
+        */
     }
 }

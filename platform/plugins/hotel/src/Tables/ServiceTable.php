@@ -4,12 +4,10 @@ namespace Botble\Hotel\Tables;
 
 use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Hotel\Models\Service;
-use Botble\Hotel\Tables\Formatters\PriceFormatter;
 use Botble\Table\Abstracts\TableAbstract;
 use Botble\Table\Actions\DeleteAction;
 use Botble\Table\Actions\EditAction;
 use Botble\Table\BulkActions\DeleteBulkAction;
-use Botble\Table\Columns\Column;
 use Botble\Table\Columns\CreatedAtColumn;
 use Botble\Table\Columns\IdColumn;
 use Botble\Table\Columns\ImageColumn;
@@ -35,8 +33,7 @@ class ServiceTable extends TableAbstract
     public function ajax(): JsonResponse
     {
         $data = $this->table
-            ->eloquent($this->query())
-            ->formatColumn('price', PriceFormatter::class);
+            ->eloquent($this->query());
 
         return $this->toJson($data);
     }
@@ -50,7 +47,6 @@ class ServiceTable extends TableAbstract
                 'id',
                 'name',
                 'image',
-                'price',
                 'created_at',
                 'status',
             ]);
@@ -64,8 +60,6 @@ class ServiceTable extends TableAbstract
             IdColumn::make(),
             ImageColumn::make(),
             NameColumn::make()->route('service.edit'),
-            Column::formatted('price')
-                ->title(trans('plugins/hotel::room.form.price')),
             CreatedAtColumn::make(),
             StatusColumn::make(),
         ];

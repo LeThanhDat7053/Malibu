@@ -12,12 +12,17 @@ use Botble\Product\Models\ProductOrderItem;
 use Botble\SeoHelper\Facades\SeoHelper;
 use Botble\Slug\Facades\SlugHelper;
 use Botble\Theme\Facades\Theme;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 
 class PublicProductController extends Controller
 {
+    public function getBookedSlots(int $product_id, Request $request): JsonResponse
+    {
+        return response()->json([]);
+    }
     public function getProducts(Request $request)
     {
         SeoHelper::setTitle(trans('plugins/product::product.name'));
@@ -72,8 +77,18 @@ class PublicProductController extends Controller
     {
         $product = Product::query()->findOrFail($request->input('product_id'));
 
+        // Check sale period availability
+        if (! $product->isWithinSalePeriod()) {
+            return $response
+                ->setError()
+                ->setMessage(trans('plugins/product::product.sale_ended'));
+        }
+
         $quantity = $request->integer('quantity', 1);
         $totalAmount = $product->price * $quantity;
+
+        $serviceDate = $product->enable_booking ? $request->input('service_date') : null;
+        $serviceTime = $product->enable_booking ? $request->input('service_time') : null;
 
         $order = ProductOrder::query()->create([
             'order_number' => 'PO-' . strtoupper(Str::random(8)),
@@ -81,6 +96,8 @@ class PublicProductController extends Controller
             'customer_email' => $request->input('customer_email'),
             'customer_phone' => $request->input('customer_phone'),
             'customer_note' => $request->input('customer_note'),
+            'service_date' => $serviceDate,
+            'service_time' => $serviceTime,
             'total_amount' => $totalAmount,
             'status' => 'pending',
         ]);
@@ -91,9 +108,14 @@ class PublicProductController extends Controller
             'product_name' => $product->name,
             'product_price' => $product->price,
             'quantity' => $quantity,
+            'service_date' => $serviceDate,
+            'service_time' => $serviceTime,
         ]);
 
         $product->increment('total_sold', $quantity);
+
+        $serviceDateFormatted = $serviceDate ? \Carbon\Carbon::parse($serviceDate)->format('d/m/Y') : '';
+        $serviceTimeFormatted = $serviceTime ?? '';
 
         // Send email notification via Botble email template system
         EmailHandler::setModule(PRODUCT_MODULE_SCREEN_NAME)
@@ -107,6 +129,8 @@ class PublicProductController extends Controller
                 'total_amount' => number_format($order->total_amount, 0, ',', '.') . ' VND',
                 'customer_note' => $order->customer_note ?: '',
                 'order_date' => $order->created_at->format('d/m/Y H:i'),
+                'service_date' => $serviceDateFormatted,
+                'service_time' => $serviceTimeFormatted,
             ])
             ->sendUsingTemplate('order-notice-to-admin');
 

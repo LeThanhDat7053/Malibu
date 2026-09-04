@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="col-lg-8 col-md-12 col-sm-12 order-2">
-                    {!! BaseHelper::clean($service->content) !!}
+                    <div class="ck-content">{!! BaseHelper::clean($service->content) !!}</div>
                 </div>
             </div>
         </div>

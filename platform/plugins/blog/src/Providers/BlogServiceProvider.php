@@ -183,6 +183,7 @@ class BlogServiceProvider extends ServiceProvider
                     'name',
                     'description',
                     'content',
+                    'image',
                 ]);
 
                 LanguageAdvancedManager::registerModule(Category::class, [

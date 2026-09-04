@@ -15,6 +15,8 @@ class ProductOrderItem extends BaseModel
         'product_name',
         'product_price',
         'quantity',
+        'service_date',
+        'service_time',
     ];
 
     protected $casts = [

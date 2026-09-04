@@ -6,6 +6,8 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Supports\Breadcrumb;
+use Botble\Language\Facades\Language;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\SimpleSlider\Forms\SimpleSliderForm;
 use Botble\SimpleSlider\Http\Requests\SimpleSliderRequest;
 use Botble\SimpleSlider\Models\SimpleSlider;
@@ -15,6 +17,19 @@ use Illuminate\Http\Request;
 
 class SimpleSliderController extends BaseController
 {
+    protected function syncLanguageContext(): ?string
+    {
+        $refLang = request()->input('ref_lang')
+            ?: Language::getCurrentAdminLocaleCode()
+            ?: Language::getDefaultLocaleCode();
+
+        Language::setCurrentAdminLocale($refLang);
+        LanguageAdvancedManager::clearLocaleCache();
+        LanguageAdvancedManager::initModelRelations();
+
+        return $refLang;
+    }
+
     protected function breadcrumb(): Breadcrumb
     {
         return parent::breadcrumb()
@@ -51,12 +66,20 @@ class SimpleSliderController extends BaseController
 
     public function edit(SimpleSlider $simpleSlider)
     {
+        $refLang = $this->syncLanguageContext();
+
+        $simpleSlider->loadMissing([
+            'translations' => fn ($query) => $query->when($refLang, fn ($query) => $query->where('lang_code', $refLang)),
+            'sliderItems.translations' => fn ($query) => $query->when($refLang, fn ($query) => $query->where('lang_code', $refLang)),
+        ]);
+
         Assets::addScripts('sortable')
             ->addScriptsDirectly('vendor/core/plugins/simple-slider/js/simple-slider-admin.js');
 
         $this->pageTitle(trans('core/base::forms.edit_item', ['name' => $simpleSlider->name]));
 
         return SimpleSliderForm::createFromModel($simpleSlider)
+            ->setRequest(request())
             ->renderForm();
     }
 

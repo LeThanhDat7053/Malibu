@@ -1,5 +1,6 @@
 @php
-    Theme::set('pageTitle', $tag->name)
+    Theme::set('pageTitle', $tag->name);
+    Theme::set('breadcrumbPageKey', 'blog');
 @endphp
 
 <section class="inner-blog pt-80">

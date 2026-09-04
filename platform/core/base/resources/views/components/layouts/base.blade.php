@@ -52,8 +52,6 @@
         @if (Auth::check())
             window.siteEditorLocale = "{{ apply_filters('cms_site_editor_locale', App::getLocale()) }}";
             window.ckEditorFontFamilies = "{{ config('core.base.general.editor.ckeditor.font_families') }}";
-            window.siteAuthorizedUrl = "{{ rescue(fn() => route('settings.license.verify.index')) }}";
-            window.licenseCheckUrl = "{{ rescue(fn() => route('license.check')) }}";
             window.isAuthenticated = {{ Auth::check() ? 'true' : 'false' }};
         @endif
     </script>

@@ -12,6 +12,7 @@ class Amenity extends BaseModel
 
     protected $fillable = [
         'name',
+        'description',
         'icon',
         'status',
     ];
@@ -19,6 +20,7 @@ class Amenity extends BaseModel
     protected $casts = [
         'status' => BaseStatusEnum::class,
         'name' => SafeContent::class,
+        'description' => SafeContent::class,
         'icon' => SafeContent::class,
     ];
 }

@@ -1,4 +1,5 @@
 @php
+    Theme::set('breadcrumbPageKey', 'blog');
     $isBlogListing = Theme::get('isBlogListingPage', false);
     $pinnedPost = null;
     $heroLeftPosts = collect();

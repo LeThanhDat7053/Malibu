@@ -1,10 +1,74 @@
 @php
     Theme::set('pageTitle', $post->name);
+    Theme::set('breadcrumbPageKey', 'blog');
     $recentPosts = get_recent_posts(5);
 @endphp
 
 @once
 <style>
+    .blog-details-wrap,
+    .blog-details-wrap .details__content,
+    .blog-details-wrap .ck-content {
+        min-width: 0;
+    }
+
+    .blog-details-wrap .ck-content {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .blog-details-wrap .ck-content > * {
+        max-width: 100%;
+    }
+
+    .blog-details-wrap .ck-content img,
+    .blog-details-wrap .ck-content video,
+    .blog-details-wrap .ck-content canvas,
+    .blog-details-wrap .ck-content svg,
+    .blog-details-wrap .ck-content iframe,
+    .blog-details-wrap .ck-content embed,
+    .blog-details-wrap .ck-content object {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    .blog-details-wrap .ck-content figure,
+    .blog-details-wrap .ck-content .image,
+    .blog-details-wrap .ck-content .table-responsive,
+    .blog-details-wrap .ck-content .wp-block-image,
+    .blog-details-wrap .ck-content .wp-block-embed {
+        max-width: 100%;
+    }
+
+    .blog-details-wrap .ck-content figure {
+        width: 100%;
+        margin: 24px 0;
+    }
+
+    .blog-details-wrap .ck-content figure img {
+        float: none;
+        margin: 0;
+    }
+
+    .blog-details-wrap .ck-content table {
+        display: block;
+        width: 100% !important;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .blog-details-wrap .ck-content pre,
+    .blog-details-wrap .ck-content code {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .blog-details-wrap .ck-content iframe {
+        width: 100%;
+    }
+
     /* H1 inside blog content - green left border style */
     .ck-content h1 {
         font-size: 22px;
@@ -140,42 +204,14 @@
                             </div>
                         @endif
                     </div>
-                    @if(($posts = get_related_posts($post->id, 2)) && $posts->isNotEmpty())
-                        <div class="posts_navigation pt-35 pb-100">
-                            <div class="row align-items-center">
-                                @if($prevPost = $posts[0])
-                                    <div class="col-xl-4 col-md-5">
-                                        <div class="prev-link">
-                                            <span>{{ __('Prev Post') }}</span>
-                                            <h4><a href="{{ $prevPost->url }}">{{ $prevPost->name }}</a></h4>
-                                        </div>
-                                    </div>
-                                @endif
-                                @if ($post->firstCategory)
-                                    <div class="col-xl-4 col-md-2 text-md-center">
-                                        <a href="{{ $post->firstCategory->url }}" class="blog-filter"><img src="{{ Theme::asset()->url('images/blog-category-icon.png') }}" alt="{{ $post->firstCategory->name }}" /></a>
-                                    </div>
-                                @endif
-                                @if($nextPost = (isset($posts[1]) ? $posts[1] : null))
-                                    <div class="col-xl-4 col-md-5">
-                                        <div class="next-link text-end text-md-right">
-                                            <span>{{ __('Next Post') }}</span>
-                                            <h4><a href="{{ $nextPost->url }}">{{ $nextPost->name }}</a></h4>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    @else
-                        <div class="mb-60"></div>
-                    @endif
+                    <div class="mb-60"></div>
 
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-4">
                 <aside class="sidebar-widget">
                     <div class="blog-detail-related">
-                        <div class="blog-detail-related-title">{{ __('CÓ THỂ BẠN QUAN TÂM') }}</div>
+                        <div class="blog-detail-related-title">{{ __('You may be interested') }}</div>
                         @foreach($recentPosts as $recentPost)
                             <div class="blog-detail-related-item">
                                 <div class="blog-detail-related-thumb">

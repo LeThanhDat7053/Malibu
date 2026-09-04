@@ -30,6 +30,23 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class PostTable extends TableAbstract
 {
+    protected ?bool $hasAnyPinned = null;
+
+    protected int|string|null $autoNewestPostId = null;
+
+    protected function loadPinnedStatus(): void
+    {
+        if ($this->hasAnyPinned !== null) {
+            return;
+        }
+
+        $this->hasAnyPinned = Post::query()->where('is_pinned', 1)->exists();
+
+        if (! $this->hasAnyPinned) {
+            $this->autoNewestPostId = Post::query()->orderByDesc('created_at')->value('id');
+        }
+    }
+
     public function setup(): void
     {
         $this->defaultSortColumnName = 'created_at';
@@ -45,6 +62,30 @@ class PostTable extends TableAbstract
                 IdColumn::make(),
                 ImageColumn::make(),
                 NameColumn::make()->route('posts.edit'),
+                FormattedColumn::make('is_pinned')
+                    ->title('Ghim')
+                    ->width(90)
+                    ->alignCenter()
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->renderUsing(function (FormattedColumn $column) {
+                        $this->loadPinnedStatus();
+                        $item = $column->getItem();
+
+                        if ($this->hasAnyPinned) {
+                            if ($item->is_pinned) {
+                                return '<span class="badge bg-warning text-dark" title="Bài đang được ghim">📌 Đang ghim</span>';
+                            }
+
+                            return '';
+                        }
+
+                        if ($item->id === $this->autoNewestPostId) {
+                            return '<span class="badge bg-secondary" title="Ghim tự động vì là bài mới nhất">📌 Mới nhất</span>';
+                        }
+
+                        return '';
+                    }),
                 FormattedColumn::make('categories_name')
                     ->title(trans('plugins/blog::posts.categories'))
                     ->width(150)
@@ -117,6 +158,7 @@ class PostTable extends TableAbstract
                         'id',
                         'name',
                         'image',
+                        'is_pinned',
                         'created_at',
                         'status',
                         'updated_at',

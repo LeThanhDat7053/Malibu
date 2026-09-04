@@ -1,0 +1,3 @@
+<?php
+
+// AI Translator helpers

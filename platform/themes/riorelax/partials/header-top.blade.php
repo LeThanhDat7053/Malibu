@@ -26,20 +26,6 @@
             <div class="col-lg-6 col-md-6 d-none d-lg-block text-end header-top-end">
                 <div class="header-social">
                     {!! Theme::partial('language-switcher') !!}
-                    {!! Theme::partial('currency-switcher') !!}
-                    @if (is_plugin_active('hotel'))
-                        @auth('customer')
-                            <a href="{{ route('customer.overview') }}">
-                                <img src="{{ auth('customer')->user()->avatar_url }}" class="rounded-circle ms-3 text-white customer-avatar-header" title="{{ auth('customer')->user()->name }}" width="16" alt="{{ auth('customer')->user()->name }}">
-                                <span class="customer-name text-white ms-1 customer-name-header">{{ auth('customer')->user()->name }}</span>
-                            </a>
-                        @else
-                            <a href="{{ route('customer.login') }}" class="ms-3">
-                                <i class="fa fa-sign-in-alt"></i>
-                                <span class="text-white customer-name-header ms-1">{{ __('Login') }}</span>
-                            </a>
-                        @endif
-                    @endif
                     @if ($socialLinks = json_decode(theme_option('social_links')))
                         <span class="social-links">
                             @foreach($socialLinks as $social)

@@ -69,6 +69,8 @@ class FaqServiceProvider extends ServiceProvider implements DeferrableProvider
             }
         }
 
+        // Hidden: FAQs menu
+        /*
         DashboardMenu::default()->beforeRetrieving(function (): void {
             DashboardMenu::make()
                 ->registerItem(
@@ -97,6 +99,7 @@ class FaqServiceProvider extends ServiceProvider implements DeferrableProvider
                         ->route('faq_category.index')
                 );
         });
+        */
 
         PanelSectionManager::default()->beforeRendering(function (): void {
             PanelSectionManager::registerItem(

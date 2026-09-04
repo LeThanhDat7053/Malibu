@@ -6,6 +6,7 @@ use Botble\Base\Facades\Assets;
 use Botble\Base\Http\Actions\DeleteResourceAction;
 use Botble\Base\Http\Controllers\BaseController;
 use Botble\Base\Http\Responses\BaseHttpResponse;
+use Botble\Gallery\Facades\Gallery;
 use Botble\Hotel\Enums\BookingStatusEnum;
 use Botble\Hotel\Forms\RoomForm;
 use Botble\Hotel\Http\Requests\RoomRequest;
@@ -15,6 +16,7 @@ use Botble\Hotel\Models\RoomDate;
 use Botble\Hotel\Tables\RoomTable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class RoomController extends BaseController
 {
@@ -48,14 +50,22 @@ class RoomController extends BaseController
         $form = RoomForm::create();
         $form->saving(function (RoomForm $form) use ($request): void {
             $data = $request->validated();
-            if ($images = $request->input('images', [])) {
-                $data['images'] = json_encode(array_filter($images));
-            }
 
-            $form
-                ->getModel()
-                ->fill($data)
-                ->save();
+            // Parse unified gallery JSON → sync to images (flat URLs) and videos (objects) columns
+            $galleryItems = json_decode($request->input('gallery', '[]'), true) ?: [];
+
+            $data['images'] = json_encode(array_values(array_filter(
+                array_map(fn ($i) => Arr::get($i, 'type', 'image') === 'image' ? Arr::get($i, 'img') : null, $galleryItems)
+            )));
+
+            $data['videos'] = json_encode(array_values(array_filter(
+                $galleryItems, fn ($i) => Arr::get($i, 'type') === 'video'
+            )));
+
+            $form->getModel()->fill($data)->save();
+
+            // Save to gallery_meta table so gallery_meta_data() can reload it on next edit
+            Gallery::saveGallery($request, $form->getModel());
 
             if ($room = $form->getModel()) {
                 $room->amenities()->sync($request->input('amenities', []));
@@ -81,13 +91,23 @@ class RoomController extends BaseController
         RoomForm::createFromModel($room)
             ->saving(function (RoomForm $form) use ($request): void {
                 $data = $request->validated();
-                if ($images = $request->input('images', [])) {
-                    $data['images'] = json_encode(array_filter($images));
-                }
+
+                // Parse unified gallery JSON → sync to images (flat URLs) and videos (objects) columns
+                $galleryItems = json_decode($request->input('gallery', '[]'), true) ?: [];
+
+                $data['images'] = json_encode(array_values(array_filter(
+                    array_map(fn ($i) => Arr::get($i, 'type', 'image') === 'image' ? Arr::get($i, 'img') : null, $galleryItems)
+                )));
+
+                $data['videos'] = json_encode(array_values(array_filter(
+                    $galleryItems, fn ($i) => Arr::get($i, 'type') === 'video'
+                )));
 
                 $model = $form->getModel();
-
                 $model->fill($data)->save();
+
+                // Save to gallery_meta table so gallery_meta_data() can reload it on next edit
+                Gallery::saveGallery($request, $model);
 
                 $model->amenities()->sync($request->input('amenities', []));
             });

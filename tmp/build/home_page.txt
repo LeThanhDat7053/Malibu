@@ -1,0 +1,11 @@
+[simple-slider data-vb-id="shortcode_1785828063_0" id="shortcode_1775527456_0" key="TRANG BÌA"][/simple-slider]
+
+[about-us data-vb-id="shortcode_1785828063_1" title="Nghĩ Dưỡng Hoàn Hảo Tại Vũng Tàu" subtitle="Ruby 68 Hotel" description="Ruby 68 Hotel nằm trên đường Võ Thị Sáu, Vũng Tàu, chỉ cách bãi biển Bãi Sau vài bước chân. Khách sạn đạt chuẩn 3 sao với các hạng phòng có ban công riêng, hướng biển hoặc hướng Núi Nhỏ. Đội ngũ nhân viên phục vụ tận tình, sẵn sàng hỗ trợ quý khách trong suốt kỳ nghỉ tại thành phố biển Vũng Tàu." highlights="Cách bãi biển Bãi Sau vài bước chân ; Khách sạn đạt chuẩn 3 sao ; Lễ tân phục vụ 24/7" style="style-1" top_left_image="photo-1631049035182-249067d7618eautoformatfitc.jpg"][/about-us]
+
+[service-list data-vb-id="shortcode_1785828063_2" id="shortcode_1774513789_3" limit="6"][/service-list]
+
+[featured-rooms data-vb-id="shortcode_1785828063_3" id="shortcode_1777370062_3" title="Các hạng phòng của khách sạn." subtitle="Các Hạng Phòng" description="60 phòng nghỉ đạt chuẩn 3 sao, mỗi phòng đều có ban công riêng với tầm nhìn hướng biển hoặc hướng núi, mang đến không gian nghỉ ngơi thoáng đãng và tiện nghi." room_ids="2,3,4,6,7"][/featured-rooms]
+
+[feature-area data-vb-id="shortcode_1785828063_4" title="Viên Ngọc Của Biển Bãi Sau." subtitle="Khách Sạn 3 Sao Bên Biển" description="Ruby 68 Hotel nằm ngay trên đường Võ Thị Sáu, cách bãi biển Bãi Sau vài bước chân. Khách sạn có 60 phòng nghỉ tiêu chuẩn 3 sao, phòng nào cũng có ban công riêng hướng biển hoặc hướng Núi Nhỏ. Tiện ích gồm hồ bơi ngoài trời, bãi đỗ xe miễn phí có mái che và quầy lễ tân phục vụ 24/7." image="https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?auto=format&fit=crop&w=1200&h=800&q=80" button_primary_label="ĐẶT PHÒNG NGAY" button_primary_url="/rooms"][/feature-area]
+
+[booking-form data-vb-id="shortcode_1785828063_5" title="Trải Nghiệm Kỳ Nghỉ Hoàn Hảo" subtitle="Đặt Phòng Ngay" image="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1140&h=1030&q=80"][/booking-form]

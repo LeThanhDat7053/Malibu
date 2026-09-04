@@ -87,7 +87,12 @@ class BaseHttpResponse extends Response implements Responsable
     {
         $this
             ->when(URL::previous(), function (self $httpReponse, string $previousUrl): void {
-                $previousRouteName = optional(Route::getRoutes()->match(Request::create($previousUrl)))->getName();
+                try {
+                    $previousRouteName = optional(Route::getRoutes()->match(Request::create($previousUrl)))->getName();
+                } catch (\Throwable) {
+                    return;
+                }
+
                 if ($previousRouteName && Str::endsWith($previousRouteName, '.edit')) {
                     $indexRouteName = Str::replaceLast('.edit', '.index', $previousRouteName);
                     if (Route::has($indexRouteName)) {

@@ -6,8 +6,11 @@ use Botble\Base\Enums\BaseStatusEnum;
 use Botble\Hotel\Enums\BookingStatusEnum;
 use Botble\Hotel\Models\Booking;
 use Botble\Hotel\Models\Customer;
+use Botble\Hotel\Models\Room;
 use Botble\Hotel\Services\BookingService;
 use Botble\Media\Facades\RvMedia;
+use Botble\Menu\Events\RenderingMenuOptions;
+use Botble\Menu\Facades\Menu;
 use Botble\Payment\Enums\PaymentMethodEnum;
 use Botble\Payment\Enums\PaymentStatusEnum;
 use Botble\Payment\Models\Payment;
@@ -26,6 +29,14 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_TOP_HEADER_LAYOUT, [$this, 'registerTopHeaderNotification'], 140);
         add_filter(BASE_FILTER_APPEND_MENU_NAME, [$this, 'countPendingBookings'], 140, 2);
         add_filter(BASE_FILTER_MENU_ITEMS_COUNT, [$this, 'getMenuItemCount'], 140);
+
+        if (defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
+            Menu::addMenuOptionModel(Room::class);
+
+            $this->app['events']->listen(RenderingMenuOptions::class, function (): void {
+                add_action(MENU_ACTION_SIDEBAR_OPTIONS, [$this, 'registerMenuOptions'], 11);
+            });
+        }
 
         if (defined('PAYMENT_FILTER_REDIRECT_URL')) {
             add_filter(PAYMENT_FILTER_REDIRECT_URL, function ($checkoutToken) {
@@ -228,5 +239,12 @@ class HookServiceProvider extends ServiceProvider
         }
 
         return $data;
+    }
+
+    public function registerMenuOptions(): void
+    {
+        if (Auth::guard()->user()->hasPermission('room.index')) {
+            Menu::registerMenuOptions(Room::class, trans('plugins/hotel::room.rooms'));
+        }
     }
 }

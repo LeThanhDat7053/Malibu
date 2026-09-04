@@ -1,5 +1,6 @@
 @php
-    Theme::set('pageTitle', $category->name)
+    Theme::set('pageTitle', $category->name);
+    Theme::set('breadcrumbPageKey', 'blog');
 @endphp
 
 <section class="inner-blog pt-80">
@@ -17,4 +18,3 @@
         </div>
     </div>
 </section>
-

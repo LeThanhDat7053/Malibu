@@ -41,18 +41,7 @@ class SystemController extends BaseSystemController
             $cacheKey = 'license_check_time';
 
             if (! $core->hasLicenseData()) {
-                if ($core->isSkippedLicenseReminder()) {
-                    return $this->httpResponse()->setData(['verified' => true]);
-                }
-
-                return $this->httpResponse()
-                    ->setError()
-                    ->setCode(401)
-                    ->setData([
-                        'verified' => false,
-                        'html' => view('core/base::system.license-invalid')->render(),
-                        'redirectUrl' => route('unlicensed', ['redirect_url' => request()->headers->get('referer')]),
-                    ]);
+                return $this->httpResponse()->setData(['verified' => true]);
             }
 
             if ($core->isLicenseFullyVerified()) {
@@ -76,14 +65,7 @@ class SystemController extends BaseSystemController
             }
 
             if (! $core->hasLicenseData()) {
-                return $this->httpResponse()
-                    ->setError()
-                    ->setCode(401)
-                    ->setData([
-                        'verified' => false,
-                        'html' => view('core/base::system.license-invalid')->render(),
-                        'redirectUrl' => route('unlicensed', ['redirect_url' => request()->headers->get('referer')]),
-                    ]);
+                return $this->httpResponse()->setData(['verified' => true]);
             }
 
             return $this->httpResponse()->setData(['verified' => true]);
@@ -96,18 +78,7 @@ class SystemController extends BaseSystemController
                 return $this->httpResponse()->setData(['verified' => true]);
             }
 
-            if ($core->isSkippedLicenseReminder()) {
-                return $this->httpResponse()->setData(['verified' => true]);
-            }
-
-            return $this->httpResponse()
-                ->setError()
-                ->setCode(401)
-                ->setData([
-                    'verified' => false,
-                    'html' => view('core/base::system.license-invalid')->render(),
-                    'redirectUrl' => route('unlicensed', ['redirect_url' => request()->headers->get('referer')]),
-                ]);
+            return $this->httpResponse()->setData(['verified' => true]);
         } catch (Exception $e) {
             report($e);
 
@@ -115,18 +86,7 @@ class SystemController extends BaseSystemController
                 return $this->httpResponse()->setData(['verified' => true]);
             }
 
-            if ($core->isSkippedLicenseReminder()) {
-                return $this->httpResponse()->setData(['verified' => true]);
-            }
-
-            return $this->httpResponse()
-                ->setError()
-                ->setCode(401)
-                ->setData([
-                    'verified' => false,
-                    'html' => view('core/base::system.license-invalid')->render(),
-                    'redirectUrl' => route('unlicensed', ['redirect_url' => request()->headers->get('referer')]),
-                ]);
+            return $this->httpResponse()->setData(['verified' => true]);
         }
     }
 

@@ -26,6 +26,7 @@ class RoomRequest extends Request
             'size' => ['nullable', 'numeric', 'min:0'],
             'images' => ['nullable', 'array'],
             'images.*' => ['nullable', 'string'],
+            'gallery' => ['nullable', 'string'],
             'vr360_url' => ['nullable', 'url', 'max:500'],
             'external_rate_id' => ['nullable', 'string', 'max:50'],
             'room_category_id' => ['required', 'string', 'exists:ht_room_categories,id'],

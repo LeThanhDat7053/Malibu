@@ -92,65 +92,16 @@ app()->booted(function (): void {
 
     if (is_plugin_active('simple-slider')) {
         SimpleSliderItemForm::extend(function (SimpleSliderItemForm $form): void {
-            $form
-                ->addAfter(
-                    'title',
-                    'subtitle',
-                    TextField::class,
-                    TextFieldOption::make()
-                        ->label(__('Subtitle'))
-                        ->metadata()
-                        ->placeholder(__('Enter the subtitle'))
-                        ->toArray()
-                )
-                ->addAfter(
-                    'subtitle',
-                    'description',
-                    TextareaField::class,
-                    DescriptionFieldOption::make()
-                        ->metadata()
-                        ->toArray()
-                )
-                ->addAfter(
-                    'subtitle',
-                    'button_primary_url',
-                    TextField::class,
-                    TextFieldOption::make()
-                        ->label(__('Button URL'))
-                        ->placeholder(__('Enter the button URL'))
-                        ->metadata()
-                        ->toArray()
-                )
-                ->addAfter(
-                    'subtitle',
-                    'button_primary_label',
-                    TextField::class,
-                    TextFieldOption::make()
-                        ->label(__('Button label'))
-                        ->placeholder(__('Enter the button label'))
-                        ->metadata()
-                        ->toArray()
-                )
-                ->addAfter(
-                    'subtitle',
-                    'button_play_label',
-                    TextField::class,
-                    TextFieldOption::make()
-                        ->label(__('Button play label'))
-                        ->placeholder(__('Enter the button play label'))
-                        ->metadata()
-                        ->toArray()
-                )
-                ->addAfter(
-                    'subtitle',
-                    'youtube_url',
-                    TextField::class,
-                    TextFieldOption::make()
-                        ->metadata()
-                        ->placeholder(__('Enter the YouTube URL'))
-                        ->label(__('YouTube URL'))
-                        ->toArray()
-                );
+            $form->remove([
+                'subtitle',
+                'link',
+                'youtube_url',
+                'button_play_label',
+                'button_label',
+                'button_url',
+                'button_primary_label',
+                'button_primary_url',
+            ]);
         }, 99);
     }
 

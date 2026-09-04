@@ -281,6 +281,18 @@
         }
     }
 
+    @media (min-width: 768px) and (max-width: 991px) {
+        .blog-hero-grid {
+            margin-bottom: 48px;
+        }
+
+        .blog-hero-right {
+            max-height: none;
+            height: auto;
+            overflow: visible;
+        }
+    }
+
     @media (max-width: 576px) {
         .blog-hero-left {
             flex-direction: column;
@@ -288,6 +300,12 @@
 
         .blog-hero-item {
             height: 180px;
+        }
+
+        .blog-hero-right {
+            max-height: none;
+            height: auto;
+            overflow: visible;
         }
 
         .blog-hero-featured-content h3 {

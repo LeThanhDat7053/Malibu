@@ -1,4 +1,14 @@
-<section class="pt-100 pb-90 p-relative">
+@once
+    <style>
+        .service-images-rounded .services-icon2 img,
+        .service-images-rounded .services-08-thumb img {
+            display: block;
+            border-radius: 20px;
+        }
+    </style>
+@endonce
+
+<section class="service-images-rounded pt-100 pb-90 p-relative">
     @if ($bgImage = $shortcode->background_image)
         <div class="animations-01">
             <img src="{{ RvMedia::getImageUrl($bgImage) }}" alt="{{ __('Background image') }}">

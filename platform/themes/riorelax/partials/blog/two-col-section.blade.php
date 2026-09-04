@@ -285,7 +285,7 @@
 
     {{-- Right Column 30%: 5 Most Viewed --}}
     <div class="blog-twocol-right">
-        <div class="blog-twocol-title">{{ __('Xem nhiều nhất') }}</div>
+        <div class="blog-twocol-title">{{ __('Most viewed') }}</div>
         <div class="blog-popular-list">
             @foreach($popularPosts as $index => $post)
                 <div class="blog-popular-item">

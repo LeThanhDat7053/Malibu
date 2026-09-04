@@ -89,10 +89,10 @@ class GetRoomService
 
                     break;
                 default:
-                    $query->latest();
+                    $query->orderBy('order')->orderBy('id');
             }
         } else {
-            $query->latest();
+            $query->orderBy('order')->orderBy('id');
         }
 
         // Eager load relationships
@@ -142,20 +142,54 @@ class GetRoomService
 
     public function getRelatedRooms(int $roomId, int $limit = 2, array $params = []): Collection
     {
-        $query = Room::query()
-            ->wherePublished()
-            ->where('id', '!=', $roomId);
-
-        // Get rooms from the same category
         $room = Room::query()->find($roomId);
-        if ($room && $room->room_category_id) {
-            $query->where('room_category_id', $room->room_category_id);
+
+        if (! $room) {
+            return new Collection();
         }
 
-        if (! empty($params['with'])) {
-            $query->with($params['with']);
+        $limit = max(1, $limit);
+
+        $applyParams = function (Builder $query) use ($params): Builder {
+            if (! empty($params['with'])) {
+                $query->with($params['with']);
+            }
+
+            return $query
+                ->orderBy('order')
+                ->orderBy('id');
+        };
+
+        $relatedRooms = new Collection();
+
+        if ($room->room_category_id) {
+            $relatedRooms = $applyParams(
+                Room::query()
+                    ->wherePublished()
+                    ->where('id', '!=', $roomId)
+                    ->where('room_category_id', $room->room_category_id)
+            )
+                ->limit($limit)
+                ->get();
         }
 
-        return $query->limit($limit)->get();
+        if ($relatedRooms->count() < $limit) {
+            $excludedRoomIds = $relatedRooms
+                ->pluck('id')
+                ->push($roomId)
+                ->all();
+
+            $fallbackRooms = $applyParams(
+                Room::query()
+                    ->wherePublished()
+                    ->whereNotIn('id', $excludedRoomIds)
+            )
+                ->limit($limit - $relatedRooms->count())
+                ->get();
+
+            $relatedRooms = $relatedRooms->concat($fallbackRooms);
+        }
+
+        return $relatedRooms;
     }
 }

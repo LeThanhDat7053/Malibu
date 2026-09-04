@@ -1,11 +1,13 @@
 @php
     Theme::set('pageTitle', trans('plugins/product::product.name'));
+    Theme::set('breadcrumbPageKey', 'product');
 @endphp
 
 <style>
     /* Product card image */
     .product-card-img {
-        height: 250px;
+        width: 100%;
+        height: 100%;
         object-fit: cover;
     }
 
@@ -32,8 +34,8 @@
         border-radius: 3px;
     }
     .category-products-scroll .product-scroll-item {
-        min-width: 240px;
-        max-width: 240px;
+        min-width: 270px;
+        max-width: 270px;
         flex-shrink: 0;
     }
 
@@ -69,13 +71,23 @@
         color: #333;
     }
     .sort-filters .filter-btn:hover {
-        border-color: #ff6600;
-        color: #ff6600;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
     }
     .sort-filters .filter-btn.active {
-        background: #ff6600;
+        background: var(--primary-color);
         color: #fff;
-        border-color: #ff6600;
+        border-color: var(--primary-color);
+    }
+
+    /* Product card price */
+    .product-price-text {
+        font-size: 1.1em;
+        display: block;
+        line-height: 1.4;
+    }
+    .product-price-text small {
+        font-size: 0.8em;
     }
 
     /* All products grid */
@@ -111,8 +123,8 @@
             min-width: unset;
             max-width: unset;
         }
-        .product-card-img {
-            height: 160px;
+        .product-card-image {
+            aspect-ratio: 4/3;
         }
         .product-card-body.p-3 {
             padding: 10px !important;
@@ -122,14 +134,10 @@
             min-height: 2.4em;
         }
         .product-card-body .product-price strong {
-            font-size: 1em !important;
+            font-size: 0.85em !important;
         }
-        .product-card-body .product-price del,
-        .product-card-body .product-price .price-original-placeholder {
-            font-size: 0.8em;
-            display: block;
-            margin-left: 0 !important;
-            min-height: 1.2em;
+        .product-card-body .product-price small {
+            font-size: 0.75em;
         }
         .sort-filters {
             gap: 6px;
@@ -147,8 +155,8 @@
 
     /* ===== SMALL MOBILE (max-width: 374px) ===== */
     @media (max-width: 374px) {
-        .product-card-img {
-            height: 130px;
+        .product-card-image {
+            aspect-ratio: 4/3;
         }
         .all-products-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -179,13 +187,13 @@
         {{-- All products with client-side sorting --}}
         @if ($allProducts->isNotEmpty())
             <div class="category-section">
-                <h3 class="category-title">{{ __('Sắp xếp theo') }}</h3>
+                <h3 class="category-title">{{ __('Sort By') }}</h3>
                 <div class="sort-filters">
-                    <button type="button" class="filter-btn active" data-sort="newest">{{ __('Mới nhất') }}</button>
-                    <button type="button" class="filter-btn" data-sort="best_selling">{{ __('Bán chạy') }}</button>
-                    <button type="button" class="filter-btn" data-sort="on_sale">{{ __('Đang giảm giá') }}</button>
-                    <button type="button" class="filter-btn" data-sort="price_asc">{{ __('Giá tăng dần') }}</button>
-                    <button type="button" class="filter-btn" data-sort="price_desc">{{ __('Giá giảm dần') }}</button>
+                    <button type="button" class="filter-btn active" data-sort="newest">{{ __('Newest') }}</button>
+                    <button type="button" class="filter-btn" data-sort="best_selling">{{ __('Best Selling') }}</button>
+                    <button type="button" class="filter-btn" data-sort="on_sale">{{ __('On Sale') }}</button>
+                    <button type="button" class="filter-btn" data-sort="price_asc">{{ __('Price: Low to High') }}</button>
+                    <button type="button" class="filter-btn" data-sort="price_desc">{{ __('Price: High to Low') }}</button>
                 </div>
                 <div class="all-products-grid" id="sortable-products">
                     @foreach ($allProducts as $product)

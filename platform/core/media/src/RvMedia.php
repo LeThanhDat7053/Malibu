@@ -1244,9 +1244,11 @@ class RvMedia
 
     public function createFolder(string $folderSlug, int|string|null $parentId = 0, bool $force = false): int|string
     {
+        $slug = Str::slug($folderSlug, '-', ! self::turnOffAutomaticUrlTranslationIntoLatin() ? 'en' : false);
+
         $folder = MediaFolder::query()
             ->where([
-                'slug' => $folderSlug,
+                'slug' => $slug,
                 'parent_id' => $parentId,
             ])
             ->first();
@@ -1255,9 +1257,10 @@ class RvMedia
             if ($force) {
                 MediaFolder::query()
                     ->where([
-                        'slug' => $folderSlug,
+                        'slug' => $slug,
                         'parent_id' => $parentId,
                     ])
+                    ->onlyTrashed()
                     ->each(fn (MediaFolder $folder) => $folder->forceDelete());
             }
 
@@ -1290,6 +1293,16 @@ class RvMedia
         return (bool) setting('media_chunk_enabled', (int) $this->getConfig('chunk.enabled') == 1);
     }
 
+    public function getOptimizableMimeTypes(): array
+    {
+        return [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/bmp',
+        ];
+    }
+
     public function getConfig(?string $key = null, bool|string|null|array $default = null)
     {
         $configs = config('core.media.media');
@@ -1304,6 +1317,106 @@ class RvMedia
     public function imageValidationRule(): string
     {
         return 'required|image|mimes:jpg,jpeg,png,webp,gif,bmp';
+    }
+
+    public function optimizeExistingImage(
+        MediaFile $file,
+        ?int $maxWidth = 2560,
+        ?int $maxHeight = 2560,
+        int $quality = 82
+    ): array {
+        if (! $file->url || ! in_array($file->mime_type, $this->getOptimizableMimeTypes())) {
+            return [
+                'status' => 'skipped',
+                'message' => 'unsupported_mime_type',
+            ];
+        }
+
+        $realPath = $this->getRealPath($file->url);
+
+        if (! $this->isUsingCloud() && (! $realPath || ! File::exists($realPath))) {
+            return [
+                'status' => 'skipped',
+                'message' => 'file_not_found',
+            ];
+        }
+
+        try {
+            if ($this->isUsingCloud()) {
+                try {
+                    $imageSource = Storage::get($file->url);
+                } catch (Throwable $exception) {
+                    BaseHelper::logError($exception);
+
+                    $imageSource = Http::withoutVerifying()->get($realPath)->body();
+                }
+            } else {
+                $imageSource = File::get($realPath);
+            }
+
+            if (! $imageSource) {
+                return [
+                    'status' => 'skipped',
+                    'message' => 'empty_image_content',
+                ];
+            }
+
+            $originalSize = $this->uploadManager->fileSize($file->url)
+                ?: ($this->isUsingCloud() ? strlen($imageSource) : File::size($realPath));
+
+            $image = $this->imageManager()->read($imageSource);
+            $originalWidth = $image->width();
+            $originalHeight = $image->height();
+
+            $shouldResize = ($maxWidth && $originalWidth > $maxWidth)
+                || ($maxHeight && $originalHeight > $maxHeight);
+
+            if ($shouldResize) {
+                $image->scaleDown($maxWidth ?: null, $maxHeight ?: null);
+            }
+
+            $encodedImage = (string) $image->encode(new AutoEncoder(quality: $quality));
+            $optimizedSize = strlen($encodedImage);
+
+            if (! $shouldResize && $optimizedSize >= $originalSize) {
+                return [
+                    'status' => 'skipped',
+                    'message' => 'already_optimized',
+                    'original_size' => $originalSize,
+                    'optimized_size' => $optimizedSize,
+                ];
+            }
+
+            $saved = $this->uploadManager->saveFile($file->url, $encodedImage, visibility: $file->visibility ?: 'public');
+
+            if (! $saved) {
+                throw new \RuntimeException(sprintf('Unable to write optimized image: %s', $file->url));
+            }
+
+            $data = $this->uploadManager->fileDetails($file->url);
+
+            $file->size = $data['size'] ?: $optimizedSize;
+            $file->mime_type = $data['mime_type'] ?: $file->mime_type;
+            $file->save();
+
+            $this->deleteThumbnails($file);
+            $this->generateThumbnails($file);
+
+            return [
+                'status' => 'optimized',
+                'message' => 'optimized',
+                'original_size' => $originalSize,
+                'optimized_size' => $file->size,
+                'original_width' => $originalWidth,
+                'original_height' => $originalHeight,
+                'new_width' => $image->width(),
+                'new_height' => $image->height(),
+            ];
+        } catch (Throwable $exception) {
+            BaseHelper::logError($exception);
+
+            throw $exception;
+        }
     }
 
     public function turnOffAutomaticUrlTranslationIntoLatin(): bool

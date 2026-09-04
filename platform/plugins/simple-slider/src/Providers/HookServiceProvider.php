@@ -5,6 +5,8 @@ namespace Botble\SimpleSlider\Providers;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Supports\ServiceProvider;
+use Botble\Language\Facades\Language;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Shortcode\Compilers\Shortcode;
 use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\SimpleSlider\Models\SimpleSlider;
@@ -12,9 +14,29 @@ use Botble\Theme\Facades\Theme;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 
 class HookServiceProvider extends ServiceProvider
 {
+    protected function applyTranslation(Model $model, array $columns, ?string $currentLocale, ?string $defaultLocale): void
+    {
+        if (! $currentLocale || $currentLocale === $defaultLocale || ! $model->relationLoaded('translations')) {
+            return;
+        }
+
+        $translation = $model->translations->firstWhere('lang_code', $currentLocale);
+
+        if (! $translation) {
+            return;
+        }
+
+        foreach ($columns as $column) {
+            if (isset($translation->{$column})) {
+                $model->setAttribute($column, $translation->{$column});
+            }
+        }
+    }
+
     public function boot(): void
     {
         if (function_exists('shortcode')) {
@@ -52,13 +74,40 @@ class HookServiceProvider extends ServiceProvider
 
     public function render(Shortcode $shortcode): View|Factory|Application|null
     {
+        if (defined('LANGUAGE_ADVANCED_MODULE_SCREEN_NAME')) {
+            LanguageAdvancedManager::initModelRelations();
+        }
+
+        $currentLocale = Language::getCurrentLocaleCode();
+        $defaultLocale = Language::getDefaultLocaleCode();
+
         $slider = SimpleSlider::query()
             ->wherePublished()
             ->where('key', $shortcode->key)
+            ->with([
+                'translations' => fn ($query) => $query->when(
+                    $currentLocale && $currentLocale !== $defaultLocale,
+                    fn ($query) => $query->where('lang_code', $currentLocale)
+                ),
+                'sliderItems' => fn ($query) => $query
+                    ->oldest('simple_slider_items.order')
+                    ->with([
+                        'translations' => fn ($query) => $query->when(
+                            $currentLocale && $currentLocale !== $defaultLocale,
+                            fn ($query) => $query->where('lang_code', $currentLocale)
+                        ),
+                    ]),
+            ])
             ->first();
 
         if (empty($slider) || $slider->sliderItems->isEmpty()) {
             return null;
+        }
+
+        $this->applyTranslation($slider, ['name', 'description'], $currentLocale, $defaultLocale);
+
+        foreach ($slider->sliderItems as $item) {
+            $this->applyTranslation($item, ['title', 'description', 'link'], $currentLocale, $defaultLocale);
         }
 
         if (setting('simple_slider_using_assets', true) && defined('THEME_OPTIONS_MODULE_SCREEN_NAME')) {

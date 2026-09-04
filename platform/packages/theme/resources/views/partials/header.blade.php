@@ -6,9 +6,23 @@
     type="application/xml"
 >
 
-@if ($favicon = theme_option('favicon'))
-    {{ Html::favicon(RvMedia::getImageUrl($favicon), ['type' => theme_option('favicon_type', 'image/x-icon')]) }}
-@endif
+@php
+    $themeFavicon = theme_option('favicon');
+    $faviconUrl = $themeFavicon ? RvMedia::getImageUrl($themeFavicon) : asset('favicon.ico');
+    $faviconExtension = strtolower(pathinfo(parse_url($faviconUrl, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION));
+    $faviconType = match ($faviconExtension) {
+        'png' => 'image/png',
+        'svg' => 'image/svg+xml',
+        'gif' => 'image/gif',
+        'jpg', 'jpeg' => 'image/jpeg',
+        'webp' => 'image/webp',
+        default => 'image/x-icon',
+    };
+@endphp
+
+<link rel="icon" href="{{ $faviconUrl }}" type="{{ $faviconType }}">
+<link rel="shortcut icon" href="{{ $faviconUrl }}" type="{{ $faviconType }}">
+<link rel="apple-touch-icon" href="{{ $faviconUrl }}">
 
 @if (Theme::has('headerMeta'))
     {!! Theme::get('headerMeta') !!}

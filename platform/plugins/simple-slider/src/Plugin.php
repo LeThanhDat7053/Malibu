@@ -10,6 +10,8 @@ class Plugin extends PluginOperationAbstract
 {
     public static function remove(): void
     {
+        Schema::dropIfExists('simple_sliders_translations');
+        Schema::dropIfExists('simple_slider_items_translations');
         Schema::dropIfExists('simple_sliders');
         Schema::dropIfExists('simple_slider_items');
 

@@ -19,6 +19,8 @@ return [
                 'total_amount' => 'Total amount',
                 'customer_note' => 'Customer note',
                 'order_date' => 'Order date',
+                'service_date' => 'Service date',
+                'service_time' => 'Service time',
             ],
         ],
     ],

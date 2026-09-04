@@ -10,6 +10,24 @@
             </x-core::button>
 
             <x-core::button
+                type="button"
+                color="info"
+                id="simple-slider-item-apply-all"
+                style="display: none;"
+            >
+                {{ trans('plugins/simple-slider::simple-slider.apply_to_all') }}
+            </x-core::button>
+
+            <x-core::button
+                type="button"
+                color="warning"
+                id="simple-slider-item-ai-translate-all"
+                style="display: none;"
+            >
+                {{ trans('plugins/simple-slider::simple-slider.ai_translate_all') }}
+            </x-core::button>
+
+            <x-core::button
                 type="submit"
                 color="primary"
             >

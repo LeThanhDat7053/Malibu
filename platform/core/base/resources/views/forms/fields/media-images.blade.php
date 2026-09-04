@@ -17,5 +17,6 @@
     @include('core/base::forms.partials.images', [
         'name' => $name,
         'values' => Arr::get($options, 'values'),
+        'attributes' => Arr::get($options, 'attr', []),
     ])
 </x-core::form.field>

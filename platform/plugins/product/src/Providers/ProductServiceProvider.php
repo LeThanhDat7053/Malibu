@@ -75,6 +75,8 @@ class ProductServiceProvider extends ServiceProvider
                 'name',
                 'description',
                 'content',
+                'image',
+                'images',
             ]);
 
             LanguageAdvancedManager::registerModule(ProductCategory::class, [

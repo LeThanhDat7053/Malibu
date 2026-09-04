@@ -15,7 +15,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 col-md-6">
-                    <?php echo e(theme_option('copyright')); ?>
+                    <?php echo Theme::getSiteCopyright(); ?>
 
                 </div>
                 <div class="col-lg-6 col-md-6 text-end text-xl-right">

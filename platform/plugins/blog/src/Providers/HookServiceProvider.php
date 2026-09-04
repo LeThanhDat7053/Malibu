@@ -14,6 +14,8 @@ use Botble\Blog\Models\Tag;
 use Botble\Blog\Services\BlogService;
 use Botble\Dashboard\Events\RenderingDashboardWidgets;
 use Botble\Dashboard\Supports\DashboardWidgetInstance;
+use Botble\Gallery\Models\GalleryMeta;
+use Botble\Language\Facades\Language;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Media\Facades\RvMedia;
 use Botble\Menu\Events\RenderingMenuOptions;
@@ -31,7 +33,9 @@ use Botble\Theme\Facades\Theme;
 use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class HookServiceProvider extends ServiceProvider
@@ -65,6 +69,10 @@ class HookServiceProvider extends ServiceProvider
         add_filter(BASE_FILTER_PUBLIC_SINGLE_DATA, [$this, 'handleSingleView'], 2);
 
         add_filter('facebook_comment_html', [$this, 'renderBlogPostFacebookComments'], 10, 2);
+
+        if (defined('LANGUAGE_ADVANCED_ACTION_SAVED')) {
+            add_action(LANGUAGE_ADVANCED_ACTION_SAVED, [$this, 'handleTranslatedPostGalleryFallback'], 10, 2);
+        }
 
         if (defined('PAGE_MODULE_SCREEN_NAME')) {
             add_filter(PAGE_FILTER_FRONT_PAGE_CONTENT, [$this, 'renderBlogPage'], 2, 2);
@@ -263,6 +271,39 @@ class HookServiceProvider extends ServiceProvider
             ->setBodyClass('')
             ->setColumn('col-md-6 col-sm-6')
             ->init($widgets, $widgetSettings);
+    }
+
+    public function handleTranslatedPostGalleryFallback(object|null $data, Request $request): void
+    {
+        if (! $data instanceof Post || ! $request->has('gallery')) {
+            return;
+        }
+
+        $language = $request->input('language') ?: $request->header('X-LANGUAGE');
+
+        if (! is_string($language) || $language === Language::getDefaultLocaleCode()) {
+            return;
+        }
+
+        $gallery = trim((string) $request->input('gallery'));
+
+        if (! in_array($gallery, ['', '[]', '[null]'])) {
+            return;
+        }
+
+        $metaId = GalleryMeta::query()
+            ->where('reference_id', $data->getKey())
+            ->where('reference_type', $data::class)
+            ->value('id');
+
+        if ($metaId) {
+            DB::table('gallery_meta_translations')
+                ->where('gallery_meta_id', $metaId)
+                ->where('lang_code', $language)
+                ->delete();
+        }
+
+        $request->request->remove('gallery');
     }
 
     public function handleSingleView(Slug|array $slug): Slug|array

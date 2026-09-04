@@ -23,6 +23,7 @@ use Botble\Hotel\Models\Place;
 use Botble\Hotel\Models\Room;
 use Botble\Hotel\Models\Service;
 use Botble\Hotel\Repositories\Interfaces\RoomInterface;
+use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
 use Botble\Hotel\Shortcodes\Forms\ShortcodeHotelPlaceForm;
 use Botble\Hotel\Shortcodes\Forms\ShortcodeHotelServiceForm;
 use Botble\Shortcode\Compilers\Shortcode as ShortcodeCompiler;
@@ -126,12 +127,22 @@ app()->booted(function (): void {
             __('Booking form'),
             __('Booking form'),
             function (ShortcodeCompiler $shortcode): ?string {
-                $limit = $shortcode->limit ?: 6;
-
-                $rooms = Room::query()
+                $roomsQuery = Room::query()
                     ->wherePublished()
-                    ->limit($limit)
-                    ->pluck('name', 'id');
+                    ->orderBy('order')
+                    ->orderBy('id');
+
+                if (is_plugin_active('language-advanced') && LanguageAdvancedManager::isSupported(Room::class)) {
+                    $roomsQuery->with([
+                        'translations' => function ($query): void {
+                            $query->where('lang_code', LanguageAdvancedManager::getTranslationLocale());
+                        },
+                    ]);
+                }
+
+                $rooms = $roomsQuery
+                    ->get()
+                    ->mapWithKeys(fn (Room $room): array => [$room->id => $room->name]);
 
                 return Theme::partial('shortcodes.booking-form.index', compact('shortcode', 'rooms'));
             }
@@ -149,8 +160,7 @@ app()->booted(function (): void {
                     MediaImageFieldOption::make()
                         ->label(__('Shape image'))
                         ->toArray()
-                )
-                ->add('limit', NumberField::class, NumberFieldOption::make()->label(__('Limit'))->toArray());
+                );
         });
 
         Assets::addStyles('coloris');
@@ -206,8 +216,7 @@ app()->booted(function (): void {
                         'activeRoomDates' => function ($query) use ($startDate, $endDate) {
                             return $query
                                 ->whereDate('start_date', '>=', $startDate->startOfDay())
-                                ->whereDate('end_date', '<=', $endDate->endOfDay())
-                                ->take(40);
+                                ->whereDate('end_date', '<=', $endDate->endOfDay());
                         },
                     ],
                 ];
@@ -339,6 +348,8 @@ app()->booted(function (): void {
 
                 $rooms = Room::query()
                     ->wherePublished()
+                    ->orderBy('order')
+                    ->orderBy('id')
                     ->limit($limit)
                     ->get();
 
@@ -406,8 +417,7 @@ app()->booted(function (): void {
                     'activeRoomDates' => function ($query) use ($startDate, $endDate) {
                         return $query
                             ->whereDate('start_date', '>=', $startDate->startOfDay())
-                            ->whereDate('end_date', '<=', $endDate->endOfDay())
-                            ->take(40);
+                            ->whereDate('end_date', '<=', $endDate->endOfDay());
                     },
                 ],
             ];
