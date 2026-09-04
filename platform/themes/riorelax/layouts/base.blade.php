@@ -9,7 +9,24 @@
     <link href="https://fonts.googleapis.com/css?family={{ urlencode(theme_option('primary_font', 'Epilogue')) }}:400,500,600,700" rel="stylesheet" type="text/css">
 
     <style>
+        @php
+            // Nút "Đặt phòng" nổi ở cạnh màn hình. Sắc độ đậm hơn của bảng đặt phòng
+            // được tính ra từ chính màu nền, khỏi bắt người dùng chọn thêm một màu nữa.
+            $bookingPanelBg = theme_option('booking_panel_bg_color', '#0e4d97');
+            $bookingPanelRgb = BaseHelper::hexToRgb($bookingPanelBg);
+            $bookingPanelBgDark = sprintf(
+                '#%02x%02x%02x',
+                (int) max(0, $bookingPanelRgb['red'] * .78),
+                (int) max(0, $bookingPanelRgb['green'] * .78),
+                (int) max(0, $bookingPanelRgb['blue'] * .78)
+            );
+        @endphp
         :root {
+            --booking-btn-bg: {{ theme_option('booking_button_bg_color', '#0e4d97') }};
+            --booking-btn-text: {{ theme_option('booking_button_text_color', '#ffffff') }};
+            --booking-btn-bg-hover: {{ theme_option('booking_button_hover_bg_color', '#0a3f80') }};
+            --booking-panel-bg: {{ $bookingPanelBg }};
+            --booking-panel-bg-dark: {{ $bookingPanelBgDark }};
             --primary-color: {{ theme_option('primary_color', '#fec201') }};
             --secondary-color: {{ theme_option('secondary_color', '#034460') }};
             --input-border-color: {{ theme_option('input_border_color', '#d7cfc8') }};

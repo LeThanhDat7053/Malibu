@@ -202,6 +202,120 @@ app()->booted(function (): void {
                 ],
             ],
         ])
+
+        // Nút "ĐẶT PHÒNG" nổi ở cạnh màn hình (partials/booking-mask.blade.php)
+        ->setSection([
+            'title' => __('Booking button'),
+            'desc' => __('The floating booking button on the side of the screen'),
+            'id' => 'opt-text-subsection-booking-button',
+            'subsection' => true,
+            'icon' => 'ti ti-calendar-plus',
+        ])
+        ->setField([
+            'id' => 'booking_button_enabled',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'customSelect',
+            'label' => __('Show booking button'),
+            'attributes' => [
+                'name' => 'booking_button_enabled',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+        ])
+        ->setField([
+            'id' => 'booking_button_label',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'text',
+            'label' => __('Booking button label'),
+            'attributes' => [
+                'name' => 'booking_button_label',
+                'value' => null,
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => __('Booking'),
+                ],
+            ],
+            'helper' => __('Leave empty to use the default translated label.'),
+        ])
+        ->setField([
+            'id' => 'booking_button_url',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'text',
+            'label' => __('Booking button URL'),
+            'attributes' => [
+                'name' => 'booking_button_url',
+                'value' => null,
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'https://',
+                ],
+            ],
+            'helper' => __('Leave empty to open the built-in date picker. Enter a URL to link to an external booking system instead.'),
+        ])
+        ->setField([
+            'id' => 'booking_button_new_tab',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'customSelect',
+            'label' => __('Open link in a new tab'),
+            'attributes' => [
+                'name' => 'booking_button_new_tab',
+                'list' => [
+                    'yes' => trans('core/base::base.yes'),
+                    'no' => trans('core/base::base.no'),
+                ],
+                'value' => 'yes',
+                'options' => [
+                    'class' => 'form-control',
+                ],
+            ],
+            'helper' => __('Only applies when a URL is set above.'),
+        ])
+        ->setField([
+            'id' => 'booking_button_bg_color',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'customColor',
+            'label' => __('Button background color'),
+            'attributes' => [
+                'name' => 'booking_button_bg_color',
+                'value' => '#0e4d97',
+            ],
+        ])
+        ->setField([
+            'id' => 'booking_button_text_color',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'customColor',
+            'label' => __('Button text color'),
+            'attributes' => [
+                'name' => 'booking_button_text_color',
+                'value' => '#ffffff',
+            ],
+        ])
+        ->setField([
+            'id' => 'booking_button_hover_bg_color',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'customColor',
+            'label' => __('Button background color on hover'),
+            'attributes' => [
+                'name' => 'booking_button_hover_bg_color',
+                'value' => '#0a3f80',
+            ],
+        ])
+        ->setField([
+            'id' => 'booking_panel_bg_color',
+            'section_id' => 'opt-text-subsection-booking-button',
+            'type' => 'customColor',
+            'label' => __('Booking panel background color'),
+            'attributes' => [
+                'name' => 'booking_panel_bg_color',
+                'value' => '#0e4d97',
+            ],
+        ])
         ->setSection([
             'title' => __('Contact'),
             'desc' => __('Contact information.'),
