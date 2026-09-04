@@ -1,4 +1,4 @@
-    @if (is_plugin_active('hotel'))
+    @if (is_plugin_active('hotel') && theme_option('booking_button_enabled', 'yes') !== 'no')
     @php
         $bookingCalendarTranslations = [
             'days' => [
@@ -64,12 +64,28 @@
         ];
     @endphp
 
+    @php
+        // Nhan, duong dan va mau lay tu Theme Options > Nut dat phong.
+        $bookingLabel = theme_option('booking_button_label') ?: __('Booking');
+        $bookingUrl = trim((string) theme_option('booking_button_url'));
+        $bookingNewTab = theme_option('booking_button_new_tab', 'yes') !== 'no';
+    @endphp
+
     <div class="booking-bar" id="booking-bar">
         <div class="booking-bar-inner">
-            <button type="button" class="booking-bar-btn" id="booking-toggle">
-                <i class="far fa-calendar-alt"></i>
-                <span>{{ __('Booking') }}</span>
-            </button>
+            @if ($bookingUrl)
+                {{-- Da dat URL: nut tro thang sang he thong dat phong ben ngoai --}}
+                <a href="{{ $bookingUrl }}" class="booking-bar-btn"
+                   @if ($bookingNewTab) target="_blank" rel="noopener noreferrer" @endif>
+                    <i class="far fa-calendar-alt"></i>
+                    <span>{{ $bookingLabel }}</span>
+                </a>
+            @else
+                <button type="button" class="booking-bar-btn" id="booking-toggle">
+                    <i class="far fa-calendar-alt"></i>
+                    <span>{{ $bookingLabel }}</span>
+                </button>
+            @endif
         </div>
         <div class="booking-bar-panel" id="booking-panel">
             <div class="booking-bar-panel-inner">

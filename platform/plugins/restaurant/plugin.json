@@ -1,0 +1,10 @@
+{
+    "id": "botble/restaurant",
+    "name": "Restaurant",
+    "namespace": "Botble\\Restaurant\\",
+    "provider": "Botble\\Restaurant\\Providers\\RestaurantServiceProvider",
+    "author": "The Malibu Hotel",
+    "url": "https://malibuhotel.com.vn",
+    "version": "1.0",
+    "description": "Quan ly nha hang & quan cafe cua khach san: thong tin, thu vien anh, video va VR360"
+}
