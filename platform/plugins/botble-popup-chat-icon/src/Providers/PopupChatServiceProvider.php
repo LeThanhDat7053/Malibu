@@ -22,7 +22,7 @@ class PopupChatServiceProvider extends ServiceProvider
             ->usePath(false)
             ->add(
                 'popup-chat-css',
-                asset('vendor/core/plugins/popup-chat/css/popup-chat.min.css')
+                asset('vendor/core/botble-popup-chat-icon/css/popup-chat.min.css')
             );
 
         add_filter(THEME_FRONT_FOOTER, function (string|null $data): string {

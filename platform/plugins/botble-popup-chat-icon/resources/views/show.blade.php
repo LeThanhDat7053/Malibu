@@ -7,7 +7,7 @@
                         <div class="phone-vr-circle-fill"></div>
                         <div class="phone-vr-img-circle">
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/Facebook.png"
+                                 src="/vendor/core/botble-popup-chat-icon/images/Facebook.png"
                                  alt="{{$facebook}}">
 
                         </div>
@@ -23,7 +23,7 @@
                         <div class="phone-vr-circle-fill"></div>
                         <div class="phone-vr-img-circle">
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/tiktok.png"
+                                 src="/vendor/core/botble-popup-chat-icon/images/tiktok.png"
                                  alt="{{$tiktok}}">
 
                         </div>
@@ -39,7 +39,7 @@
                         <div class="phone-vr-img-circle">
 
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/zalo.png"
+                                 src="/vendor/core/botble-popup-chat-icon/images/zalo.png"
                                  alt="{{$zalo}}">
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                         <div class="phone-vr-circle-fill"></div>
                         <div class="phone-vr-img-circle">
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/instagram.png"
+                                 src="/vendor/core/botble-popup-chat-icon/images/instagram.png"
                                  alt="{{$inta}}">
 
                         </div>
@@ -71,7 +71,7 @@
                         <div class="phone-vr-circle-fill"></div>
                         <div class="phone-vr-img-circle">
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/telegram.svg"
+                                 src="/vendor/core/botble-popup-chat-icon/images/telegram.svg"
                                  alt="Telegram">
                         </div>
                     </div>
@@ -85,7 +85,7 @@
                         <div class="phone-vr-circle-fill"></div>
                         <div class="phone-vr-img-circle">
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/whatsapp.svg"
+                                 src="/vendor/core/botble-popup-chat-icon/images/whatsapp.svg"
                                  alt="WhatsApp">
                         </div>
                     </div>
@@ -99,7 +99,7 @@
                         <div class="phone-vr-circle-fill"></div>
                         <div class="phone-vr-img-circle">
                             <img data-bb-lazy="true" width="200" height="200" loading="lazy"
-                                 src="/vendor/core/plugins/popup-chat/images/phone.png"
+                                 src="/vendor/core/botble-popup-chat-icon/images/phone.png"
                                  alt="{{$hotline}}">
                         </div>
                     </div>
