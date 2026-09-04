@@ -62,6 +62,7 @@ return [
             $theme->asset()->usePath()->add('datepicker-css', 'plugins/datepicker/bootstrap-datepicker.css');
             $theme->asset()->usePath()->add('booking-mask-css', 'css/booking-mask.css');
             $theme->asset()->usePath()->add('popup-banner-css', 'css/popup-banner.css');
+            $theme->asset()->usePath()->add('restaurant-css', 'css/restaurant.css');
 
             $theme->asset()->container('header')->usePath()->add('jquery', 'plugins/jquery.min.js');
             $theme->asset()->container('footer')->usePath()->add('imagesloaded', 'plugins/imagesloaded.min.js');

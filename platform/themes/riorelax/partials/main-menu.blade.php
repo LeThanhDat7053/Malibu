@@ -1,9 +1,18 @@
 <ul {!! BaseHelper::clean($options) !!}>
     @foreach ($menu_nodes as $row)
         @php
-            $isRoomsNode = theme_is_rooms_menu_node($row);
-            $roomTree = $isRoomsNode ? theme_rooms_menu_tree() : collect();
-            $hasSub = $row->has_child || $roomTree->isNotEmpty();
+            // Một node có thể được tự động đổ nội dung từ Phòng hoặc từ Nhà hàng.
+            // Hai cây có cùng cấu trúc { title, url, active, children } nên dùng
+            // chung một đoạn hiển thị bên dưới.
+            $autoTree = collect();
+
+            if (theme_is_rooms_menu_node($row)) {
+                $autoTree = theme_rooms_menu_tree();
+            } elseif (function_exists('theme_is_restaurants_menu_node') && theme_is_restaurants_menu_node($row)) {
+                $autoTree = theme_restaurants_menu_tree();
+            }
+
+            $hasSub = $row->has_child || $autoTree->isNotEmpty();
         @endphp
         <li @class(['has-sub' => $hasSub, $row->css_class])>
             <a @class(['active' => $row->active]) href="{{ $row->url }}" target="{{ $row->target }}">
@@ -15,9 +24,9 @@
 
                 {{ $row->title }}
             </a>
-            @if($isRoomsNode && $roomTree->isNotEmpty())
+            @if($autoTree->isNotEmpty())
                 <ul class="sub-menu">
-                    @foreach($roomTree as $group)
+                    @foreach($autoTree as $group)
                         <li @class(['has-sub' => $group->children->isNotEmpty()])>
                             <a @class(['active' => $group->active]) href="{{ $group->url }}">{{ $group->title }}</a>
                             @if($group->children->isNotEmpty())

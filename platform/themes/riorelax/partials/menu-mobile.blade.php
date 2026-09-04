@@ -1,9 +1,16 @@
 <ul {!! BaseHelper::clean($options) !!}>
     @foreach ($menu_nodes as $row)
         @php
-            $isRoomsNode = theme_is_rooms_menu_node($row);
-            $roomTree = $isRoomsNode ? theme_rooms_menu_tree() : collect();
-            $hasSub = $row->has_child || $roomTree->isNotEmpty();
+            // Node co the duoc tu dong do noi dung tu Phong hoac tu Nha hang.
+            $autoTree = collect();
+
+            if (theme_is_rooms_menu_node($row)) {
+                $autoTree = theme_rooms_menu_tree();
+            } elseif (function_exists('theme_is_restaurants_menu_node') && theme_is_restaurants_menu_node($row)) {
+                $autoTree = theme_restaurants_menu_tree();
+            }
+
+            $hasSub = $row->has_child || $autoTree->isNotEmpty();
         @endphp
         <li class="nav-item">
             <a href="{{ $row->url }}"
@@ -18,10 +25,10 @@
             >{{ $row->title }}</a>
         </li>
 
-        @if ($isRoomsNode && $roomTree->isNotEmpty())
+        @if ($autoTree->isNotEmpty())
             <div class="collapse" id="menu-collapse-{{ $row->id }}">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
-                    @foreach($roomTree as $groupIndex => $group)
+                    @foreach($autoTree as $groupIndex => $group)
                         @php($groupId = 'menu-collapse-' . $row->id . '-cat-' . $groupIndex)
                         <li class="nav-item">
                             <a href="{{ $group->url }}"
