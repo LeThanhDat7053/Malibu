@@ -5,7 +5,7 @@ import sys
 
 import lib
 
-PHASES = ["phase_a", "phase_b", "phase_c", "phase_d", "phase_e", "phase_f", "phase_g"]
+PHASES = ["phase_a", "phase_b", "phase_c", "phase_d", "phase_e", "phase_f", "phase_g", "phase_h", "phase_i"]
 
 
 def main(only=None):

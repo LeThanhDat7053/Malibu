@@ -42,6 +42,7 @@ def main():
     amenities = ids("ht_amenities")
     users = ids("users")
     faqcats = ids("faq_categories")
+    restaurants = ids("ht_restaurants")
 
     for r in read(sql, "ht_rooms")[1]:
         if r["room_category_id"] not in cats:
@@ -63,9 +64,18 @@ def main():
     for r in read(sql, "faqs")[1]:
         if r["category_id"] not in faqcats:
             err.append("faqs %s -> danh mục %s không tồn tại" % (r["id"], r["category_id"]))
+    gallery_owners = {
+        "Botble\\\\Gallery\\\\Models\\\\Gallery": galleries,
+        "Botble\\\\Restaurant\\\\Models\\\\Restaurant": restaurants,
+        "Botble\\\\Hotel\\\\Models\\\\Room": rooms,
+    }
     for r in read(sql, "gallery_meta")[1]:
-        if r["reference_id"] not in galleries:
-            err.append("gallery_meta -> thư viện %s không tồn tại" % r["reference_id"])
+        pool = gallery_owners.get(r["reference_type"])
+        if pool is None:
+            err.append("gallery_meta: kiểu %s lạ" % r["reference_type"])
+        elif r["reference_id"] not in pool:
+            err.append("gallery_meta -> %s #%s không tồn tại"
+                       % (r["reference_type"].split("\\\\")[-1], r["reference_id"]))
     for r in read(sql, "role_users")[1]:
         if r["user_id"] not in users:
             err.append("role_users -> user %s không tồn tại" % r["user_id"])
@@ -81,6 +91,7 @@ def main():
         "Botble\\\\Blog\\\\Models\\\\Post": posts,
         "Botble\\\\Blog\\\\Models\\\\Category": blogcats,
         "Botble\\\\Blog\\\\Models\\\\Tag": tags,
+        "Botble\\\\Restaurant\\\\Models\\\\Restaurant": restaurants,
     }
     slug_ids = set()
     for r in read(sql, "slugs")[1]:
@@ -120,6 +131,7 @@ def main():
         ("categories_translations", "categories_id", blogcats, "danh mục"),
         ("ht_amenities_translations", "ht_amenities_id", amenities, "tiện nghi"),
         ("ht_room_categories_translations", "ht_room_categories_id", cats, "hạng phòng"),
+        ("ht_restaurants_translations", "ht_restaurants_id", restaurants, "nhà hàng"),
     ]:
         for r in read(sql, table)[1]:
             if r[col] not in pool:

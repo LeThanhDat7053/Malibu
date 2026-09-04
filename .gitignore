@@ -62,3 +62,7 @@ storage/framework/maintenance.php
 
 /storage/framework/views/*
 !/storage/framework/views/.gitignore
+
+# Python bytecode cua script dung DB
+__pycache__/
+*.pyc

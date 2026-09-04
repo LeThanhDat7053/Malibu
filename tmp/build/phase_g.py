@@ -43,7 +43,7 @@ PAGE_BANNER = {
     6: FACILITIES,        # Tiện nghi & Dịch vụ
     7: LANDSCAPE,         # Thư viện ảnh
     8: LOBBY,             # Câu hỏi thường gặp
-    9: RESTAURANT,        # Ẩm thực
+    # trang 9 (Ẩm thực) đã bị bỏ, thay bằng plugin Nhà hàng ở /nha-hang
     10: EVENTS,           # Tin tức
     11: CONTACT,          # Liên hệ
     12: EXTERIOR2,        # Chính sách bảo mật

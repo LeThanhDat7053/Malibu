@@ -219,6 +219,24 @@ for _k in ("logo", "favicon", "background_footer", "breadcrumb_background_image"
     NEW["theme-riorelax-en_US-" + _k] = ""
     NEW.setdefault("theme-riorelax-" + _k, "")
 
+# ---- nút "Đặt phòng" nổi ở cạnh màn hình (Theme Options > Nút đặt phòng)
+BOOKING_BUTTON = {
+    "booking_button_enabled": "yes",
+    "booking_button_url": "",
+    "booking_button_new_tab": "yes",
+    "booking_button_bg_color": "rgb(228, 118, 44)",
+    "booking_button_text_color": "#ffffff",
+    "booking_button_hover_bg_color": "rgb(190, 92, 26)",
+    "booking_panel_bg_color": "rgb(22, 25, 44)",
+}
+
+for _k, _v in BOOKING_BUTTON.items():
+    NEW["theme-riorelax-" + _k] = _v
+    NEW["theme-riorelax-en_US-" + _k] = _v
+
+NEW["theme-riorelax-booking_button_label"] = "ĐẶT PHÒNG"
+NEW["theme-riorelax-en_US-booking_button_label"] = "BOOK NOW"
+
 _UNESC = {"n": "\n", "r": "\r", "t": "\t", "0": "\x00", "Z": "\x1a"}
 
 
