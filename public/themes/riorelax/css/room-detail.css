@@ -1,0 +1,743 @@
+/* Malibu - trang phòng (chi tiết + danh sách).
+   .mlb-page là scope dùng chung: token màu, nền giấy, dải tiêu đề, khung 2 cột,
+   hộp đặt phòng ở sidebar. Các rule .mlb-room-detail chỉ dành riêng trang chi tiết.
+   Bố cục theo mẫu Himara: dải tiêu đề đè lên ảnh, nội dung 2 cột với sidebar dính. */
+
+.mlb-page {
+    --mlb-paper: #fbfaf7;
+    --mlb-paper-alt: #f2eee8;
+    /* Mực lấy từ Theme Options > Secondary color, giống hệ token của trang chủ mới */
+    --mlb-ink: #16192c;
+    --mlb-ink: var(--secondary-color, #16192c);
+    --mlb-ink-soft: #4c5064;
+    --mlb-ink-soft: color-mix(in srgb, var(--mlb-ink) 76%, #ffffff);
+    --mlb-ink-mute: #7c8092;
+    --mlb-ink-mute: color-mix(in srgb, var(--mlb-ink) 52%, #ffffff);
+    --mlb-line: rgba(22, 25, 44, 0.14);
+    --mlb-line: color-mix(in srgb, var(--mlb-ink) 14%, transparent);
+    --mlb-line-soft: rgba(22, 25, 44, 0.08);
+    --mlb-line-soft: color-mix(in srgb, var(--mlb-ink) 8%, transparent);
+    --mlb-accent: var(--primary-color, #e4762c);
+    --mlb-display-font: 'Playfair Display', 'Times New Roman', serif;
+    --mlb-body-font: var(--primary-font, sans-serif);
+    --mlb-gap: clamp(20px, 2.4vw, 34px);
+
+    background: var(--mlb-paper);
+    color: var(--mlb-ink);
+    font-family: var(--mlb-body-font);
+}
+
+.mlb-page *,
+.mlb-page *::before,
+.mlb-page *::after {
+    box-sizing: border-box;
+}
+
+.mlb-page .mlb-shell {
+    width: min(100% - 40px, 1280px);
+    margin-inline: auto;
+}
+
+/* ------------------------------------------------------------- dải tiêu đề */
+
+.mlb-rd-hero {
+    position: relative;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.mlb-rd-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(9, 11, 22, 0.2) 0%, rgba(9, 11, 22, 0.58) 58%, rgba(9, 11, 22, 0.85) 100%);
+}
+
+/* .header-three .menu-area có margin-bottom:-110px nên hero phải chừa chỗ cho thanh menu đè lên */
+.mlb-rd-hero__inner {
+    position: relative;
+    z-index: 1;
+    padding-block: calc(110px + clamp(34px, 4.5vw, 76px)) clamp(24px, 2.8vw, 38px);
+}
+
+.mlb-rd-hero__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: clamp(16px, 3vw, 48px);
+}
+
+.mlb-rd-hero__id {
+    min-width: 0;
+}
+
+.mlb-page .mlb-rd-hero__eyebrow {
+    margin: 0 0 14px;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.mlb-rd-hero__title {
+    margin: 0;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(32px, 5vw, 62px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    text-transform: none;
+    color: #fff;
+}
+
+.mlb-rd-hero__price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    padding-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.mlb-rd-hero__price strong {
+    font-family: var(--mlb-display-font);
+    font-size: clamp(26px, 2.6vw, 36px);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #fff;
+}
+
+.mlb-rd-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: clamp(22px, 2.6vw, 34px) 0 0;
+    padding: 16px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    list-style: none;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.mlb-rd-crumbs li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mlb-rd-crumbs li + li::before {
+    content: '/';
+    padding: 0 10px;
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.mlb-rd-crumbs a {
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.mlb-rd-crumbs a:hover {
+    color: #fff;
+}
+
+.mlb-rd-crumbs li[aria-current] {
+    color: var(--mlb-accent);
+}
+
+/* --------------------------------------------------------------- khung nội dung */
+
+.mlb-rd-body {
+    padding-block: clamp(46px, 5.6vw, 92px);
+}
+
+/* không đặt align-items: start — cột sidebar phải cao bằng cột nội dung
+   thì hộp đặt phòng bên trong mới có quãng đường để dính theo cuộn */
+.mlb-rd-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: clamp(32px, 3.4vw, 60px);
+}
+
+.mlb-rd-content {
+    min-width: 0;
+}
+
+@media (max-width: 1100px) {
+    .mlb-rd-main {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------------- gallery */
+
+.mlb-room-detail .mlb-rd-gallery {
+    margin-bottom: clamp(24px, 3vw, 40px);
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-details-slider {
+    background: var(--mlb-paper-alt);
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-details-slider a {
+    display: block;
+}
+
+/* cùng tỷ lệ với .room-vr360-slide để đổi slide không nhảy chiều cao */
+.mlb-room-detail .mlb-rd-gallery .room-details-slider img {
+    width: 100%;
+    aspect-ratio: 850 / 460;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+/* VR360 nhúng thẳng vào slider, cùng tỷ lệ với ảnh nên đổi slide không giật */
+.mlb-rd-gallery .room-vr360-slide {
+    position: relative;
+    aspect-ratio: 850 / 460;
+    background: #000;
+    overflow: hidden;
+}
+
+.mlb-rd-gallery .room-vr360-slide iframe {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* dải thumbnail nằm dưới ảnh lớn, không đè lên ảnh */
+.mlb-rd-gallery .room-details-slider-nav {
+    margin: 10px -5px 0;
+}
+
+/* slick đặt width inline cho từng slide, ở đây chỉ chỉnh khoảng cách và độ mờ */
+.mlb-rd-gallery .room-details-slider-nav .slick-slide {
+    padding-inline: 5px;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.3s ease;
+}
+
+.mlb-rd-gallery .room-details-slider-nav .slick-slide:hover,
+.mlb-rd-gallery .room-details-slider-nav .slick-current {
+    opacity: 1;
+}
+
+.mlb-rd-gallery .room-details-slider-nav img {
+    display: block;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.mlb-rd-gallery .room-details-slider-nav .room-vr360-nav-thumb {
+    position: relative;
+}
+
+.mlb-rd-gallery .room-details-slider-nav .room-vr360-nav-thumb img {
+    width: 100%;
+    filter: brightness(0.6);
+}
+
+.mlb-rd-gallery .room-vr360-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+}
+
+.mlb-rd-gallery .room-vr360-badge i {
+    font-size: 20px;
+    line-height: 1;
+    color: #00d4ff;
+}
+
+
+/* --------------------------------------------------------------- thông số phòng */
+
+/* Kẻ ô bằng border của từng mục, hàng cuối thiếu ô cũng không lòi ra mảng nền trống */
+.mlb-room-detail .mlb-rd-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    margin: 0 0 clamp(30px, 3.4vw, 46px);
+    padding: 0;
+    list-style: none;
+    background: #fff;
+    border-top: 1px solid var(--mlb-line-soft);
+    border-inline-start: 1px solid var(--mlb-line-soft);
+}
+
+.mlb-room-detail .mlb-rd-facts li {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 0;
+    padding: 18px 20px;
+    list-style: none;
+    border-bottom: 1px solid var(--mlb-line-soft);
+    border-inline-end: 1px solid var(--mlb-line-soft);
+}
+
+.mlb-rd-facts__k {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-rd-facts__v {
+    font-family: var(--mlb-display-font);
+    font-size: 21px;
+    line-height: 1.2;
+    color: var(--mlb-ink);
+}
+
+/* ---------------------------------------------------------------------- copy */
+
+/* Chữ cái đầu thả xuống ở đoạn mở đầu mô tả phòng.
+   Nội dung CKEditor có thể lồng thêm 1-2 lớp div nên phải bắt tới 3 cấp. */
+.mlb-rd-prose--lead > p:first-child::first-letter,
+.mlb-rd-prose--lead > *:first-child > p:first-child::first-letter,
+.mlb-rd-prose--lead > *:first-child > *:first-child > p:first-child::first-letter {
+    float: left;
+    margin: 8px 12px 0 0;
+    font-family: var(--mlb-display-font);
+    font-size: 54px;
+    line-height: 0.78;
+    color: var(--mlb-accent);
+}
+
+[dir='rtl'] .mlb-rd-prose--lead > p:first-child::first-letter,
+[dir='rtl'] .mlb-rd-prose--lead > *:first-child > p:first-child::first-letter,
+[dir='rtl'] .mlb-rd-prose--lead > *:first-child > *:first-child > p:first-child::first-letter {
+    float: none;
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+.mlb-rd-prose {
+    max-width: 72ch;
+    font-size: 15.5px;
+    line-height: 1.85;
+    color: var(--mlb-ink-soft);
+}
+
+.mlb-rd-prose p {
+    margin: 0 0 18px;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+.mlb-rd-prose > :last-child {
+    margin-bottom: 0;
+}
+
+.mlb-rd-prose h1,
+.mlb-rd-prose h2,
+.mlb-rd-prose h3,
+.mlb-rd-prose h4 {
+    margin: 32px 0 14px;
+    font-family: var(--mlb-display-font);
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--mlb-ink);
+}
+
+.mlb-rd-prose h2 { font-size: 28px; }
+.mlb-rd-prose h3 { font-size: 23px; }
+.mlb-rd-prose h4 { font-size: 19px; }
+
+.mlb-rd-prose a {
+    color: var(--mlb-accent);
+}
+
+.mlb-rd-prose img {
+    max-width: 100%;
+    height: auto;
+}
+
+.mlb-rd-prose ul,
+.mlb-rd-prose ol {
+    margin: 0 0 18px;
+    padding-inline-start: 20px;
+}
+
+.mlb-rd-prose li {
+    margin-bottom: 8px;
+}
+
+/* ------------------------------------------------------------- tiêu đề khối */
+
+.mlb-rd-section {
+    margin-top: clamp(44px, 5vw, 78px);
+}
+
+.mlb-rd-head {
+    margin-bottom: clamp(24px, 2.6vw, 36px);
+}
+
+.mlb-rd-head__title {
+    margin: 0;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(26px, 2.9vw, 40px);
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: var(--mlb-ink);
+}
+
+.mlb-rd-head__sub {
+    margin: 10px 0 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-rd-head::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--mlb-accent);
+}
+
+/* ------------------------------------------------------------------ tiện nghi */
+
+.mlb-room-detail .mlb-rd-amenities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    gap: 0 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mlb-room-detail .mlb-rd-amenities li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--mlb-line-soft);
+    list-style: none;
+    font-family: var(--mlb-body-font);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--mlb-ink);
+}
+
+.mlb-room-detail .mlb-rd-amenities li > i,
+.mlb-room-detail .mlb-rd-amenities li > svg {
+    flex: none;
+    width: 18px;
+    font-size: 15px;
+    text-align: center;
+    color: var(--mlb-accent);
+}
+
+.mlb-room-detail .mlb-rd-amenities li > img {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.mlb-room-detail .mlb-rd-amenities li > span {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+/* ------------------------------------------------------- nội quy & hủy phòng */
+
+.mlb-rd-notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: clamp(18px, 2vw, 28px);
+}
+
+.mlb-rd-note {
+    padding: clamp(22px, 2.2vw, 32px);
+    background: #fff;
+    border: 1px solid var(--mlb-line-soft);
+}
+
+.mlb-rd-note h3 {
+    margin: 0 0 14px;
+    font-family: var(--mlb-display-font);
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.25;
+    text-transform: none;
+    color: var(--mlb-ink);
+}
+
+.mlb-rd-note .mlb-rd-prose {
+    max-width: none;
+    font-size: 14.5px;
+}
+
+/* --------------------------------------------------------------- phòng liên quan */
+
+.mlb-rd-related__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--mlb-gap);
+}
+
+
+/* ------------------------------------------------------------------- sidebar */
+
+.mlb-rd-aside {
+    min-width: 0;
+}
+
+/* top chừa chỗ cho thanh menu sticky cao 67px của theme */
+.mlb-rd-aside__inner {
+    position: sticky;
+    top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 2vw, 28px);
+}
+
+@media (max-width: 1100px) {
+    .mlb-rd-aside__inner {
+        position: static;
+    }
+}
+
+.mlb-rd-widget {
+    padding: clamp(22px, 2vw, 28px);
+    background: #fff;
+    border: 1px solid var(--mlb-line-soft);
+}
+
+.mlb-rd-widget__title {
+    margin: 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--mlb-line-soft);
+    font-family: var(--mlb-display-font);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.2;
+    text-transform: none;
+    color: var(--mlb-ink);
+}
+
+.mlb-rd-widget__price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-rd-widget__price strong {
+    font-family: var(--mlb-display-font);
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--mlb-accent);
+}
+
+/* form đặt phòng dùng lại markup của theme, chỉ thay lớp sơn */
+
+.mlb-rd-widget .form-booking {
+    margin-top: 18px !important;
+}
+
+.mlb-rd-widget .booking-area {
+    --bs-gutter-x: 0;
+    margin-inline: 0;
+}
+
+.mlb-rd-widget .booking-area > [class*='col-'] {
+    padding-inline: 0;
+}
+
+.mlb-rd-widget .contact-field label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 8px;
+    font-family: var(--mlb-body-font);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-rd-widget .contact-field label i {
+    padding-inline-end: 0;
+    font-size: 13px;
+    color: var(--mlb-accent);
+}
+
+.mlb-rd-widget .contact-field input[type='text'] {
+    width: 100%;
+    height: 48px;
+    padding-inline: 14px;
+    border: 1px solid var(--mlb-line);
+    border-radius: 2px;
+    background: #fff;
+    font-size: 14px;
+    color: var(--mlb-ink);
+}
+
+.mlb-rd-widget .contact-field input[type='text']:focus {
+    border-color: var(--mlb-accent);
+    outline: none;
+}
+
+.mlb-rd-widget .contact-field .input-quantity {
+    align-items: stretch;
+    border: 1px solid var(--mlb-line);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.mlb-rd-widget .contact-field .input-quantity .btn.main-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 46px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--mlb-ink);
+}
+
+.mlb-rd-widget .contact-field .input-quantity .btn.main-btn:hover {
+    background: var(--mlb-paper-alt);
+    color: var(--mlb-accent);
+}
+
+.mlb-rd-widget .contact-field .input-quantity input,
+.mlb-rd-widget .contact-field.input-group-two .input-quantity input {
+    height: 46px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--mlb-ink);
+}
+
+/* theme để .slider-btn là inline-block co theo nội dung, nút sẽ không kéo hết bề ngang */
+.mlb-rd-widget .slider-btn {
+    display: block;
+    width: 100%;
+    margin-top: 4px !important;
+}
+
+.mlb-rd-widget .btn.ss-btn {
+    display: block;
+    width: 100%;
+    padding: 17px 22px;
+    border: 1px solid var(--mlb-ink);
+    border-radius: 2px;
+    background: var(--mlb-ink);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mlb-paper);
+}
+
+.mlb-rd-widget .btn.ss-btn:hover {
+    border-color: var(--mlb-accent);
+    background: var(--mlb-accent);
+    color: #fff;
+}
+
+/* --------------------------------------------------------------- cần hỗ trợ */
+
+.mlb-room-detail .mlb-rd-help {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mlb-room-detail .mlb-rd-help li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 15px;
+}
+
+.mlb-rd-help i {
+    flex: none;
+    width: 18px;
+    text-align: center;
+    color: var(--mlb-accent);
+}
+
+.mlb-rd-help a {
+    color: var(--mlb-ink);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.mlb-rd-help a:hover {
+    color: var(--mlb-accent);
+}
+
+/* widget do admin gắn thêm vào sidebar phòng */
+
+.mlb-rd-aside .sidebar-widget {
+    margin-bottom: 0;
+    padding: clamp(22px, 2vw, 28px);
+    background: #fff;
+    border: 1px solid var(--mlb-line-soft);
+}
