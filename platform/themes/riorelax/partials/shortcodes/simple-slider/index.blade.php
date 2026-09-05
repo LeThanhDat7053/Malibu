@@ -402,6 +402,82 @@
                 max-height: 240px !important;
             }
         }
+
+        /* ===== Chỉ trang chủ Malibu: banner chiếm trọn màn hình ===== */
+        .mlb-home .slider-area .slider-active .single-slider.slider-bg,
+        .mlb-home .slider-area .slider-active .slick-list,
+        .mlb-home .slider-area .slider-active .slick-track,
+        .mlb-home .slider-area .slider-active .slick-slide,
+        .mlb-home .slider-area .slider-active .slick-slide > div {
+            height: 100vh !important;
+            height: 100svh !important;
+            min-height: 0 !important;
+            max-height: none !important;
+        }
+
+        .mlb-home .slider-area .slider-active .single-slider.slider-bg .slider-mobile-image {
+            min-height: 0 !important;
+            max-height: none !important;
+        }
+
+        @media (max-width: 1024px) {
+            .mlb-home .slider-area {
+                padding-top: 0 !important;
+            }
+        }
+
+        /* Số thứ tự slide ở cạnh phải */
+        .mlb-home .slider-area .mlb-hero-count {
+            position: absolute;
+            z-index: 5;
+            inset-inline-end: clamp(20px, 2.6vw, 52px);
+            /* ngồi ngay trên mép hộp booking đang đè vào hero */
+            bottom: calc(var(--mlb-hero-strip, 200px) + clamp(20px, 2.4vw, 36px));
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 14px;
+        }
+
+        .mlb-home .slider-area .mlb-hero-count button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0;
+            border: 0;
+            background: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.55);
+            transition: color 0.25s ease;
+        }
+
+        .mlb-home .slider-area .mlb-hero-count button::before {
+            content: '';
+            width: 22px;
+            height: 1px;
+            background: currentColor;
+            transition: width 0.25s ease, background 0.25s ease;
+        }
+
+        .mlb-home .slider-area .mlb-hero-count button:hover,
+        .mlb-home .slider-area .mlb-hero-count button.is-active {
+            color: #fff;
+        }
+
+        .mlb-home .slider-area .mlb-hero-count button.is-active::before {
+            width: 46px;
+            background: var(--mlb-accent, #e2711d);
+        }
+
+        @media (max-width: 767px) {
+            .mlb-home .slider-area .mlb-hero-count {
+                display: none;
+            }
+        }
     </style>
 @endonce
 
@@ -469,6 +545,9 @@
             </div>
         @endforeach
     </div>
+
+    {{-- số thứ tự slide, dựng bằng JS sau khi slick khởi tạo --}}
+    <div class="mlb-hero-count" data-mlb-hero-count></div>
 </section>
 
 @once
@@ -498,6 +577,58 @@
                 document.addEventListener('DOMContentLoaded', run);
             } else {
                 run();
+            }
+        })();
+    </script>
+
+    {{-- rail số thứ tự slide ở cạnh phải, đồng bộ với slick --}}
+    <script>
+        (function () {
+            function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+            function build() {
+                var $slider = window.jQuery('.mlb-home .slider-area .slider-active');
+                var nav = document.querySelector('.mlb-home [data-mlb-hero-count]');
+                if (!nav || !$slider.length) return;
+
+                var total = $slider.find('.single-slider').not('.slick-cloned').length;
+                if (total < 2) return;
+
+                nav.innerHTML = '';
+                for (var i = 0; i < total; i++) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = pad(i + 1);
+                    btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+                    btn.dataset.index = i;
+                    nav.appendChild(btn);
+                }
+
+                function setActive(index) {
+                    nav.querySelectorAll('button').forEach(function (b) {
+                        b.classList.toggle('is-active', Number(b.dataset.index) === index);
+                    });
+                }
+
+                nav.addEventListener('click', function (e) {
+                    var btn = e.target.closest('button');
+                    if (btn) $slider.slick('slickGoTo', Number(btn.dataset.index));
+                });
+
+                $slider.on('afterChange', function (e, slick, current) { setActive(current); });
+                setActive($slider.slick('slickCurrentSlide') || 0);
+            }
+
+            function wait(tries) {
+                var el = document.querySelector('.mlb-home .slider-area .slider-active');
+                if (window.jQuery && el && el.classList.contains('slick-initialized')) return build();
+                if (tries < 80) setTimeout(function () { wait(tries + 1); }, 100);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () { wait(0); });
+            } else {
+                wait(0);
             }
         })();
     </script>

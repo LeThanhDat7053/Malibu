@@ -11,10 +11,6 @@
 <section class="mlb-booking" id="mlb-booking">
     <div class="mlb-booking__shell">
         <div class="mlb-booking__inner">
-            <p class="mlb-booking__eyebrow" data-mlb-greeting data-default="{{ $shortcode->title ?: __('Book direct') }}">
-                {{ $shortcode->title ?: __('Book direct') }}
-            </p>
-
             <form class="mlb-booking__form form-booking" method="GET" action="{{ route('public.rooms') }}" data-mlb-booking-form>
                 <div class="mlb-booking__field mlb-booking__field--date">
                     <label for="mlb-start-date">{{ __('Arrival date') }}</label>

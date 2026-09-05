@@ -23,6 +23,10 @@
 }
 
 .mlb-home {
+    /* dải ảnh hero còn thấy dưới đáy hộp booking */
+    --mlb-hero-gap: clamp(40px, 6vh, 88px);
+    /* phần hero bị hộp booking che; --mlb-booking-h do home.js đo được */
+    --mlb-hero-strip: calc(var(--mlb-booking-h, 200px) + var(--mlb-hero-gap));
     background: var(--mlb-paper);
     color: var(--mlb-ink);
     font-family: var(--mlb-body-font);
@@ -289,21 +293,35 @@
 /* ------------------------------------------------------------------- header */
 
 .mlb-header .menu-area {
-    background: var(--mlb-paper, #fbfaf7);
-    border-bottom: 1px solid rgba(22, 25, 44, 0.1);
+    background: rgba(9, 9, 12, 0.34);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+/* rời khỏi hero thì đổi sang nền trắng, chữ đen */
 .mlb-header .menu-area.sticky-menu {
-    background: rgba(251, 250, 247, 0.96);
-    backdrop-filter: saturate(160%) blur(10px);
-    -webkit-backdrop-filter: saturate(160%) blur(10px);
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom-color: rgba(22, 25, 44, 0.1);
     box-shadow: 0 1px 0 rgba(22, 25, 44, 0.1);
 }
 
-/* header-three paints its links white for a dark bar — repaint them for the paper bar */
+.mlb-header .menu-area.sticky-menu .main-menu ul li > a,
+.mlb-header .menu-area.sticky-menu .navbar-toggler,
+.mlb-header .menu-area.sticky-menu .menu-tigger,
+.mlb-header .menu-area.sticky-menu .bar-humburger a {
+    color: var(--mlb-ink);
+}
+
+.mlb-header .menu-area.sticky-menu .main-menu ul li > a:hover,
+.mlb-header .menu-area.sticky-menu .main-menu ul li.active > a {
+    color: var(--mlb-accent);
+}
+
+/* thanh menu mờ đen nằm đè lên hero, chữ giữ màu sáng */
 .mlb-header.header-three .main-menu ul li > a,
 .mlb-header .second-menu .main-menu ul li > a {
-    color: var(--mlb-ink);
+    color: rgba(255, 255, 255, 0.92);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -319,7 +337,7 @@
 .mlb-header .navbar-toggler,
 .mlb-header .menu-area .menu-tigger,
 .mlb-header .bar-humburger a {
-    color: var(--mlb-ink);
+    color: #fff;
 }
 
 /* the floating booking bar steps aside while the in-page strip is on screen */
@@ -385,7 +403,7 @@ body.mlb-bar-hidden .booking-bar {
     top: auto;
     transform: none;
     /* clears the booking strip, which is pulled up over the hero */
-    padding: 0 0 clamp(120px, 13vw, 200px);
+    padding: 0 0 calc(var(--mlb-hero-strip) + clamp(28px, 3vw, 48px));
     background: transparent;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -484,7 +502,9 @@ body.mlb-bar-hidden .booking-bar {
 
 /* only the homepage strip lifts into the hero */
 .mlb-home .mlb-booking {
-    margin-top: clamp(-64px, -4vw, -32px);
+    margin-top: calc(-1 * var(--mlb-hero-strip));
+    /* trả lại đúng phần đã kéo lên, để section kế tiếp bắt đầu ở đáy hero */
+    margin-bottom: var(--mlb-hero-gap);
 }
 
 .mlb-booking__shell {
@@ -613,6 +633,22 @@ body.mlb-bar-hidden .booking-bar {
     height: 6px;
     border-radius: 50%;
     background: var(--mlb-accent);
+}
+
+/* base.blade.php khôi phục bullet + margin-bottom cho .ck-content, phải gỡ lại ở đây */
+.mlb-home .mlb-booking__trust,
+.mlb-home .mlb-booking__trust li {
+    list-style: none;
+}
+
+/* trang chủ Malibu: hộp gọn hơn vì nằm trong hero */
+.mlb-home .mlb-booking__inner {
+    padding-bottom: clamp(14px, 1.4vw, 18px);
+}
+
+.mlb-home .mlb-booking__trust {
+    margin: 14px 0 0;
+    padding-top: 12px;
 }
 
 
@@ -1619,20 +1655,27 @@ body.mlb-bar-hidden .booking-bar {
         --mlb-section-y: clamp(48px, 11vw, 72px);
     }
 
-    /* the partial caps the mobile hero at 240px; give the brand image real room */
+    .mlb-home {
+        --mlb-hero-strip: 60px;
+    }
+
+    .mlb-home .mlb-booking {
+        margin-bottom: 0;
+    }
+
     .mlb-home .slider-area .slider-active .single-slider.slider-bg,
     .mlb-home .slider-area .slider-active .slick-list,
     .mlb-home .slider-area .slider-active .slick-track,
     .mlb-home .slider-area .slider-active .slick-slide,
     .mlb-home .slider-area .slider-active .slick-slide > div {
-        height: 62vh !important;
-        min-height: 420px !important;
-        max-height: 560px !important;
+        height: 100svh !important;
+        min-height: 0 !important;
+        max-height: none !important;
     }
 
     .mlb-home .slider-area .slider-active .single-slider.slider-bg .slider-mobile-image {
-        min-height: 420px;
-        max-height: 560px;
+        min-height: 0;
+        max-height: none;
     }
 
     .mlb-home .slider-area .slider-active .single-slider.slider-bg .slider-text-banner {

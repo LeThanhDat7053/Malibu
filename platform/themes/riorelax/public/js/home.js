@@ -605,6 +605,30 @@
         }, 1200)
     }
 
+    // Hộp booking đè lên hero: đo chiều cao thật để CSS chừa đúng khoảng ảnh dưới đáy hộp
+    function measureBookingStrip() {
+        var inner = document.querySelector('.mlb-home .mlb-booking__inner')
+
+        if (!inner) {
+            return
+        }
+
+        var apply = function () {
+            document.documentElement.style.setProperty(
+                '--mlb-booking-h',
+                Math.round(inner.getBoundingClientRect().height) + 'px'
+            )
+        }
+
+        apply()
+
+        if (window.ResizeObserver) {
+            new ResizeObserver(apply).observe(inner)
+        } else {
+            window.addEventListener('resize', apply)
+        }
+    }
+
     $(function () {
         loadI18n()
         trackRoomView()
@@ -614,5 +638,6 @@
         initPanorama()
         initMap()
         initReveal()
+        measureBookingStrip()
     })
 })(jQuery)
