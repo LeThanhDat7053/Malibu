@@ -1,227 +1,722 @@
 /* ==========================================================================
    Nhà hàng — The Malibu Hotel
 
-   Trang chi tiết dùng lại đúng khung của trang Phòng (.room-details,
-   .service-detail, .thumb, .room-details-slider) nên phần lớn giao diện đã
-   có sẵn trong theme.css. File này chỉ bổ sung những chỗ riêng:
-   - Bảng thông tin và liên hệ ở cột bên
-   - Dòng nhãn vị trí + câu dẫn ở đầu nội dung
-   - Thẻ nhà hàng dùng cho trang danh sách và mục "Các không gian khác"
+   Layout dựng theo mẫu: hero khổ lớn (sau này thay bằng khung VR360) → tiêu đề
+   → nội dung → lưới ảnh → "Our Menu" chỉ gồm ảnh thực đơn → thanh đặt bàn.
+
+   Màu lấy từ biến của theme (--primary-color / --secondary-color) nên đổi
+   theme option là toàn bộ trang đổi theo, không phải sửa file này.
    ========================================================================== */
 
-.restaurant-details,
+.rst-detail,
 .rst-listing {
-    --rst-ink: #16192c;
-    --rst-accent: #e4762c;
+    --rst-ink: var(--secondary-color, #034460);
+    --rst-accent: var(--primary-color, #fec201);
     --rst-cream: #faf7f2;
     --rst-muted: #6b7280;
     --rst-line: #e8e2d8;
+    --rst-heading-font: var(--heading-font, sans-serif);
 }
 
-/* -------------------------------------------------- Cột bên: thông tin */
-.restaurant-facts,
-.restaurant-contact {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+/* ==========================================================================
+   1. Hero
+   ========================================================================== */
+
+/* Cách header một khoảng nhỏ để khối VR360 sau này không dính sát menu. */
+.rst-hero {
+    position: relative;
+    width: 100%;
+    height: 55vw;
+    max-height: 600px;
+    margin-top: 40px;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
-.restaurant-facts li {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--rst-line);
+/* Dải trắng mờ dần ở đáy để nối liền với phần tiêu đề bên dưới. */
+.rst-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 40%;
+    background: linear-gradient(to top, #fff 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-.restaurant-facts li:last-child {
-    border-bottom: 0;
-    padding-bottom: 0;
+.rst-hero--embed {
+    background: #000;
 }
 
-.restaurant-facts li:first-child {
-    padding-top: 0;
+.rst-hero--embed::after {
+    display: none;
 }
 
-.restaurant-facts__label {
-    color: var(--rst-accent);
-    text-transform: uppercase;
-    letter-spacing: .14em;
-    font-size: 11px;
+.rst-hero--embed iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
 }
 
-.restaurant-facts__value {
-    color: var(--rst-ink);
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.5;
-}
+/* ==========================================================================
+   2. Tiêu đề + đường phân cách kim cương
+   ========================================================================== */
 
-/* -------------------------------------------------- Cột bên: liên hệ */
-.restaurant-contact li {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 9px 0;
-}
-
-.restaurant-contact i {
-    color: var(--rst-accent);
-    width: 18px;
+.rst-title {
+    padding: 30px 20px 10px;
     text-align: center;
 }
 
-.restaurant-contact a {
+.rst-title__label {
+    margin-bottom: 6px;
+    color: var(--rst-accent);
+    font-family: var(--rst-heading-font);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: .45em;
+    text-transform: uppercase;
+}
+
+.rst-title__name {
+    margin: 0;
+    color: var(--rst-ink);
+    font-family: var(--rst-heading-font);
+    font-size: 56px;
+    font-weight: 300;
+    letter-spacing: .12em;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.rst-divider,
+.rst-heading__line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.rst-divider::before,
+.rst-divider::after,
+.rst-heading__line::before,
+.rst-heading__line::after {
+    content: "";
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--rst-accent), var(--rst-ink), var(--rst-accent), transparent);
+}
+
+.rst-diamond {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, var(--rst-accent), var(--rst-ink));
+    transform: rotate(45deg);
+}
+
+/* ==========================================================================
+   3. Nút VR360
+   ========================================================================== */
+
+.rst-vr {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 10px;
+}
+
+.rst-vr a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 32px;
+    background: var(--rst-ink);
+    color: #fff;
+    font-family: var(--rst-heading-font);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background .3s ease;
+}
+
+.rst-vr a:hover {
+    background: var(--rst-accent);
+    color: var(--btn-text-color-hover, #101010);
+}
+
+/* ==========================================================================
+   4. Nội dung giới thiệu
+   ========================================================================== */
+
+.rst-intro {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 30px 40px;
+    text-align: center;
+}
+
+.rst-intro__lead,
+.rst-intro .ck-content p {
+    margin-bottom: 14px;
+    color: #444;
+    font-size: 17px;
+    line-height: 1.9;
+}
+
+.rst-intro .ck-content ul,
+.rst-intro .ck-content ol {
+    display: inline-block;
+    text-align: start;
+}
+
+.rst-hours {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 30px;
+    border: 1px solid var(--rst-line);
     color: var(--rst-ink);
     font-size: 16px;
-    text-decoration: none;
-    word-break: break-word;
+    font-style: italic;
+    font-weight: 600;
 }
 
-.restaurant-contact a:hover {
-    color: var(--rst-accent);
+/* ==========================================================================
+   5. Heading dùng chung cho Gallery / Our Menu
+   ========================================================================== */
+
+.rst-heading {
+    margin-bottom: 30px;
+    text-align: center;
 }
 
-/* -------------------------------------------------- Đầu nội dung */
-.restaurant-eyebrow {
+.rst-heading__line {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.rst-heading__sub {
+    margin-bottom: 6px;
     color: var(--rst-accent);
+    font-family: var(--rst-heading-font);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: .45em;
     text-transform: uppercase;
-    letter-spacing: .2em;
-    font-size: 12px;
-    margin: 0 0 8px;
 }
 
-.restaurant-lead {
-    color: var(--rst-muted);
-    font-size: 18px;
-    line-height: 1.85;
-    margin: 0 0 26px;
-    padding-bottom: 26px;
-    border-bottom: 1px solid var(--rst-line);
+.rst-heading__main {
+    color: var(--rst-ink);
+    font-family: var(--rst-heading-font);
+    font-size: 42px;
+    font-weight: 300;
+    letter-spacing: .12em;
+    line-height: 1.1;
+    text-transform: uppercase;
 }
 
-/* -------------------------------------------------- Thẻ nhà hàng */
-.rst-listing {
-    padding: 70px 0 90px;
+.rst-heading__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
 }
 
-.rst-listing__grid {
+.rst-heading__bottom::before,
+.rst-heading__bottom::after {
+    content: "";
+    width: 50px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--rst-accent));
+}
+
+.rst-heading__bottom::after {
+    background: linear-gradient(to left, transparent, var(--rst-accent));
+}
+
+.rst-heading__bottom span {
+    color: var(--rst-accent);
+    font-family: var(--rst-heading-font);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+}
+
+/* Bản trên nền tối của khối Our Menu. */
+.rst-heading--light .rst-heading__main {
+    color: #fff;
+}
+
+.rst-heading--light .rst-heading__line::before,
+.rst-heading--light .rst-heading__line::after {
+    background: linear-gradient(to right, transparent, var(--rst-accent), rgba(255, 255, 255, .5), var(--rst-accent), transparent);
+}
+
+.rst-heading--light .rst-diamond {
+    background: linear-gradient(135deg, var(--rst-accent), #fff);
+}
+
+/* ==========================================================================
+   6. Lưới ảnh
+   ========================================================================== */
+
+.rst-gallery {
+    padding: 0 30px 50px;
+}
+
+.rst-gallery__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 1100px;
+    margin: 0 auto;
 }
+
+.rst-photo {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--rst-cream);
+    cursor: pointer;
+}
+
+.rst-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+
+.rst-photo:hover img {
+    transform: scale(1.06);
+}
+
+/* ==========================================================================
+   7. Our Menu — chỉ ảnh thực đơn, carousel 3D
+   ========================================================================== */
+
+.rst-menu {
+    position: relative;
+    padding: 50px 0 0;
+    overflow: hidden;
+    background: var(--rst-ink);
+}
+
+.rst-menu .rst-heading {
+    padding: 0 30px 40px;
+}
+
+.rst-carousel {
+    position: relative;
+    height: 620px;
+    perspective: 1400px;
+    cursor: grab;
+    user-select: none;
+}
+
+.rst-carousel:active {
+    cursor: grabbing;
+}
+
+.rst-carousel__stage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.rst-carousel__item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 380px;
+    height: 540px;
+    margin: -270px 0 0 -190px;
+    overflow: hidden;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, .5);
+    opacity: 0;
+    cursor: pointer;
+    transition: transform .5s ease, opacity .5s ease;
+}
+
+.rst-carousel__item.is-active {
+    z-index: 200;
+}
+
+.rst-carousel__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rst-carousel__nav {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px 0 40px;
+}
+
+.rst-carousel__nav button {
+    width: 50px;
+    height: 50px;
+    border: 1.5px solid var(--rst-accent);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .4);
+    color: var(--rst-accent);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all .3s ease;
+}
+
+.rst-carousel__nav button:hover {
+    border-color: #fff;
+    background: var(--rst-accent);
+    color: var(--btn-text-color-hover, #101010);
+}
+
+/* ==========================================================================
+   8. Thanh đặt bàn
+   ========================================================================== */
+
+.rst-reserve {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 6.6vw;
+    min-height: 70px;
+    background: var(--rst-ink);
+    color: #fff;
+    font-family: var(--rst-heading-font);
+    font-size: 3.33vw;
+    font-weight: 300;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background .35s ease, color .35s ease;
+}
+
+.rst-reserve:hover {
+    background: var(--rst-accent);
+    color: var(--btn-text-color-hover, #101010);
+}
+
+/* ==========================================================================
+   9. Các không gian khác
+   ========================================================================== */
+
+.rst-others {
+    padding: 60px 0;
+    background: var(--rst-cream);
+}
+
+.rst-others__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* ==========================================================================
+   10. Lightbox
+   ========================================================================== */
+
+.rst-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, .92);
+}
+
+.rst-lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.rst-lightbox__close {
+    position: absolute;
+    top: 20px;
+    inset-inline-end: 30px;
+    border: 0;
+    background: none;
+    color: #fff;
+    font-size: 40px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   11. Trang danh sách — các hàng ảnh / chữ xen kẽ
+   ========================================================================== */
+
+.rst-row {
+    padding: 60px 0;
+    background: var(--rst-cream);
+}
+
+.rst-row:nth-child(even) {
+    background: #fff;
+}
+
+.rst-row--reverse .row {
+    flex-direction: row-reverse;
+}
+
+.rst-row__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+}
+
+.rst-row__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+
+.rst-row__media:hover img {
+    transform: scale(1.04);
+}
+
+.rst-row__badge {
+    position: absolute;
+    top: 16px;
+    inset-inline-start: 16px;
+    padding: 6px 14px;
+    background: rgba(0, 0, 0, .55);
+    color: #fff;
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.rst-row__body {
+    padding: 30px 0 0;
+}
+
+.rst-row__hours {
+    margin-bottom: 10px;
+    color: var(--rst-accent);
+    font-size: 14px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.rst-row__title {
+    margin-bottom: 18px;
+    font-family: var(--rst-heading-font);
+    font-size: 40px;
+    font-weight: 300;
+    letter-spacing: .06em;
+}
+
+.rst-row__title a {
+    color: var(--rst-ink);
+}
+
+.rst-row__title a:hover {
+    color: var(--rst-accent);
+}
+
+.rst-row__desc {
+    margin-bottom: 24px;
+    color: var(--rst-muted);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+/* ==========================================================================
+   12. Responsive
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .rst-carousel {
+        height: 420px;
+    }
+
+    .rst-carousel__item {
+        width: 240px;
+        height: 350px;
+        margin: -175px 0 0 -120px;
+    }
+}
+
+@media (max-width: 768px) {
+    .rst-hero {
+        height: 60vw;
+        margin-top: 24px;
+    }
+
+    .rst-title__name {
+        font-size: 32px;
+        letter-spacing: .08em;
+    }
+
+    .rst-heading__main {
+        font-size: 28px;
+    }
+
+    .rst-intro {
+        padding: 24px 20px 32px;
+    }
+
+    .rst-gallery {
+        padding: 0 16px 40px;
+    }
+
+    .rst-gallery__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .rst-reserve {
+        height: auto;
+        padding: 22px 16px;
+        font-size: 22px;
+    }
+
+    .rst-row {
+        padding: 40px 0;
+    }
+
+    .rst-row__title {
+        font-size: 28px;
+    }
+}
+
+/* ==========================================================================
+   13. Thẻ nhà hàng (dùng ở "Các không gian khác")
+   ========================================================================== */
 
 .rst-card {
-    display: block;
-    height: 100%;
-    background-color: #fff;
-    border: 1px solid var(--rst-line);
-    text-decoration: none;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    transition: transform .3s ease, box-shadow .3s ease;
+    background: #fff;
+    border: 1px solid var(--rst-line);
+    color: inherit;
+    text-decoration: none;
+    transition: box-shadow .3s ease, transform .3s ease;
 }
 
 .rst-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(22, 25, 44, .13);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .1);
+    transform: translateY(-4px);
 }
 
 .rst-card__media {
     position: relative;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
-    background-color: var(--rst-cream);
+    background: var(--rst-cream);
 }
 
 .rst-card__media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform .6s ease;
+    transition: transform .5s ease;
 }
 
 .rst-card:hover .rst-card__media img {
-    transform: scale(1.07);
+    transform: scale(1.05);
 }
 
 .rst-card__badge {
     position: absolute;
-    top: 14px;
-    right: 14px;
-    background-color: rgba(22, 25, 44, .82);
+    top: 12px;
+    inset-inline-start: 12px;
+    padding: 5px 12px;
+    background: rgba(0, 0, 0, .55);
     color: #fff;
     font-size: 11px;
-    letter-spacing: .1em;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    padding: 6px 12px;
-    border-radius: 2px;
 }
 
 .rst-card__body {
-    padding: 24px 24px 28px;
+    padding: 22px;
 }
 
-.rst-card__eyebrow {
+.rst-card__eyebrow,
+.rst-card__meta {
+    margin-bottom: 6px;
     color: var(--rst-accent);
+    font-size: 12px;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    letter-spacing: .16em;
-    font-size: 11px;
-    margin: 0 0 8px;
 }
 
 .rst-card__title {
+    margin-bottom: 10px;
     color: var(--rst-ink);
-    font-size: 20px;
-    margin: 0 0 11px;
+    font-family: var(--rst-heading-font);
+    font-size: 22px;
+    font-weight: 400;
 }
 
 .rst-card__desc {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-bottom: 14px;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
     color: var(--rst-muted);
     font-size: 15px;
-    line-height: 1.75;
-    margin: 0 0 13px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.rst-card__meta {
-    color: var(--rst-ink);
-    font-size: 14px;
-    margin: 0 0 16px;
-}
-
-.rst-card__meta i {
-    color: var(--rst-accent);
-    margin-right: 7px;
+    line-height: 1.7;
 }
 
 .rst-card__more {
-    color: var(--rst-accent);
+    color: var(--rst-ink);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1em;
     text-transform: uppercase;
-    letter-spacing: .12em;
-    font-size: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
 }
 
-.rst-card__more i {
-    transition: transform .3s ease;
+.rst-card:hover .rst-card__more {
+    color: var(--rst-accent);
 }
 
-.rst-card:hover .rst-card__more i {
-    transform: translateX(5px);
+/* ==========================================================================
+   14. Dòng thông tin ngắn dưới phần giới thiệu
+   ========================================================================== */
+
+.rst-facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px 40px;
+    margin: 26px 0 0;
+    padding: 0;
+    list-style: none;
 }
 
-/* -------------------------------------------------- Màn hình nhỏ */
-@media (max-width: 991.98px) {
-    .rst-listing {
-        padding: 50px 0 60px;
-    }
+.rst-facts li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-    .restaurant-lead {
-        font-size: 16px;
-    }
+.rst-facts__label {
+    color: var(--rst-accent);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.rst-facts__value {
+    color: var(--rst-ink);
+    font-size: 15px;
+    font-weight: 600;
 }

@@ -21,6 +21,9 @@ return [
     'vr360_url' => 'Đường dẫn tour VR360',
     'vr360_url_help' => 'Liên kết tới tour VR360 đầy đủ của không gian này. Hiển thị thành nút ở trang chi tiết.',
 
+    'gallery_heading' => 'Gallery',
+    'our_menu' => 'Our Menu',
+
     'information' => 'Thông tin nhà hàng',
     'explore' => 'Khám phá',
     'reserve' => 'Đặt bàn',

@@ -1,162 +1,168 @@
 @php
     use Illuminate\Support\Arr;
 
-    Theme::asset()->container('footer')->usePath()
-        ->add('lightgallery-css', 'plugins/lightgallery/css/lightgallery.min.css');
-    Theme::asset()->container('footer')->usePath()
-        ->add('lightgallery-js', 'plugins/lightgallery/js/lightgallery.min.js');
-
+    // Hero + carousel thực đơn tự chạy bằng css/restaurant.css và js/restaurant.js,
+    // không cần slick nên bỏ hẳn slider cũ của trang Phòng.
     Theme::set('pageTitle', $restaurant->name);
+    Theme::set('breadcrumb', false);
 
     $items = collect($galleryItems ?? []);
 
-    // Ảnh lớn phía trên. Dùng đúng class `room-details-slider` của theme để
-    // slick + lightGallery trong public/js/main.js tự khởi tạo, khỏi thêm JS mới.
-    // Sau này thay khối này bằng khung nhúng VR360 là xong.
-    $sliderImages = $items
+    $galleryImages = $items
         ->filter(fn ($item) => Arr::get($item, 'type', 'image') === 'image' && Arr::get($item, 'img'))
         ->pluck('img')
         ->values();
 
-    if ($sliderImages->isEmpty()) {
-        $sliderImages = collect($restaurant->images);
+    if ($galleryImages->isEmpty()) {
+        $galleryImages = collect($restaurant->images);
     }
 
-    $videos = $items->filter(fn ($item) => Arr::get($item, 'type') === 'video');
-    $vr360s = $items->filter(fn ($item) => Arr::get($item, 'type') === 'vr360');
+    // Ảnh hero không lặp lại trong lưới gallery.
+    $banner = $restaurant->banner;
 
-    $facts = $restaurant->facts;
+    $menuImages = collect($restaurant->menu_images);
+
+    $subtitle = $restaurant->subtitle ?: theme_option('site_title');
     $phone = $restaurant->phone ?: theme_option('hotline');
-    $email = $restaurant->email ?: theme_option('email');
 @endphp
 
-<div class="about-area5 about-p p-relative room-details restaurant-details">
-    <div class="container pt-60 pb-40">
-        <div class="row">
+<div class="rst-detail">
 
-            <div class="col-sm-12 col-md-12 col-lg-4 order-2">
-                <aside class="sidebar services-sidebar">
+    {{-- 1. Hero: ảnh khổ lớn, sau này thay bằng khung VR360 --}}
+    @if ($restaurant->vr360_embed)
+        <div class="rst-hero rst-hero--embed">
+            <iframe src="{{ $restaurant->vr360_embed }}" title="{{ $restaurant->name }} VR360"
+                    loading="lazy" allowfullscreen></iframe>
+        </div>
+    @elseif ($banner)
+        <div class="rst-hero" style="background-image:url('{{ RvMedia::getImageUrl($banner) }}');"></div>
+    @endif
 
-                    @if ($restaurant->vr360_url)
-                        <div class="sidebar-widget categories mb-20">
-                            <div class="widget-content text-center">
-                                <a href="{{ $restaurant->vr360_url }}" target="_blank"
-                                   rel="noopener noreferrer" class="btn ss-btn w-100"
-                                   style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
-                                    <i class="fal fa-vr-cardboard" style="line-height:1;"></i>
-                                    <span style="text-decoration:none;">{{ trans('plugins/restaurant::restaurant.view_vr360') }}</span>
-                                </a>
-                            </div>
-                        </div>
-                    @endif
+    {{-- 2. Tiêu đề --}}
+    <div class="rst-title">
+        @if ($subtitle)
+            <div class="rst-title__label">{{ $subtitle }}</div>
+        @endif
+        <h1 class="rst-title__name">{{ $restaurant->name }}</h1>
+        <div class="rst-divider"><span class="rst-diamond"></span></div>
+    </div>
 
-                    @if ($facts)
-                        <div class="sidebar-widget categories">
-                            <div class="widget-content">
-                                <h2 class="widget-title">{{ trans('plugins/restaurant::restaurant.information') }}</h2>
-                                <ul class="restaurant-facts">
-                                    @foreach ($facts as $fact)
-                                        <li>
-                                            <span class="restaurant-facts__label">{{ $fact['label'] }}</span>
-                                            <span class="restaurant-facts__value">{{ $fact['value'] }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
+    {{-- 3. Nút VR360 --}}
+    @if ($restaurant->vr360_url)
+        <div class="rst-vr">
+            <a href="{{ $restaurant->vr360_url }}" target="_blank" rel="noopener noreferrer">
+                <i class="fal fa-vr-cardboard"></i>
+                {{ trans('plugins/restaurant::restaurant.view_vr360') }}
+            </a>
+        </div>
+    @endif
 
-                    @if ($phone || $email)
-                        <div class="sidebar-widget categories">
-                            <div class="widget-content">
-                                <h2 class="widget-title">{{ trans('plugins/restaurant::restaurant.reserve') }}</h2>
-                                <ul class="restaurant-contact">
-                                    @if ($phone)
-                                        <li>
-                                            <i class="fal fa-phone"></i>
-                                            <a href="tel:{{ preg_replace('/\D+/', '', $phone) }}">{{ $phone }}</a>
-                                        </li>
-                                    @endif
-                                    @if ($email)
-                                        <li>
-                                            <i class="fal fa-envelope"></i>
-                                            <a href="mailto:{{ $email }}">{{ $email }}</a>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
+    {{-- 4. Nội dung --}}
+    <div class="rst-intro">
+        @if ($restaurant->description)
+            <p class="rst-intro__lead">{{ $restaurant->description }}</p>
+        @endif
 
-                    {!! dynamic_sidebar('service_sidebar') !!}
-                </aside>
+        @if ($restaurant->content)
+            <div class="ck-content">{!! BaseHelper::clean($restaurant->content) !!}</div>
+        @endif
+
+        @if ($restaurant->opening_hours)
+            <div class="rst-hours">{{ $restaurant->opening_hours }}</div>
+        @endif
+
+        {{-- Vị trí / sức chứa / phong cách ẩm thực — trước đây nằm ở cột bên. --}}
+        @if ($restaurant->facts)
+            <ul class="rst-facts">
+                @foreach ($restaurant->facts as $fact)
+                    @continue($fact['label'] === trans('plugins/restaurant::restaurant.opening_hours'))
+                    <li>
+                        <span class="rst-facts__label">{{ $fact['label'] }}</span>
+                        <span class="rst-facts__value">{{ $fact['value'] }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </div>
+
+    {{-- 5. Gallery ảnh --}}
+    @if ($galleryImages->isNotEmpty())
+        <section class="rst-gallery">
+            <div class="rst-heading">
+                <div class="rst-heading__line"><span class="rst-diamond"></span></div>
+                <div class="rst-heading__sub">{{ $restaurant->name }}</div>
+                <div class="rst-heading__main">{{ trans('plugins/restaurant::restaurant.gallery_heading') }}</div>
+            </div>
+            <div class="rst-gallery__grid">
+                @foreach ($galleryImages as $image)
+                    <div class="rst-photo" data-rst-lightbox="{{ RvMedia::getImageUrl($image) }}">
+                        <img src="{{ RvMedia::getImageUrl($image, 'medium') }}"
+                             alt="{{ $restaurant->name }}" loading="lazy">
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    {{-- 6. Our Menu: chỉ là ảnh thực đơn --}}
+    @if ($menuImages->isNotEmpty())
+        <section class="rst-menu">
+            <div class="rst-heading rst-heading--light">
+                <div class="rst-heading__line"><span class="rst-diamond"></span></div>
+                <div class="rst-heading__sub">{{ $restaurant->name }}</div>
+                <div class="rst-heading__main">{{ trans('plugins/restaurant::restaurant.our_menu') }}</div>
+                @if ($restaurant->menu_heading)
+                    <div class="rst-heading__bottom"><span>{{ $restaurant->menu_heading }}</span></div>
+                @endif
             </div>
 
-            <div class="col-lg-8 col-md-12 col-sm-12 order-1">
-                <div class="service-detail">
-
-                    @if ($sliderImages->isNotEmpty())
-                        <div class="thumb">
-                            <div class="room-details-slider">
-                                @foreach ($sliderImages as $image)
-                                    <a href="{{ RvMedia::getImageUrl($image) }}">
-                                        <img src="{{ RvMedia::getImageUrl($image, 'room-image') }}"
-                                             alt="{{ $restaurant->name }}">
-                                    </a>
-                                @endforeach
-                            </div>
-                            @if ($sliderImages->count() > 1)
-                                <div class="room-details-slider-nav">
-                                    @foreach ($sliderImages as $image)
-                                        <img src="{{ RvMedia::getImageUrl($image, 'thumb') }}"
-                                             alt="{{ $restaurant->name }}">
-                                    @endforeach
-                                </div>
-                            @endif
+            <div class="rst-carousel" data-rst-carousel>
+                <div class="rst-carousel__stage">
+                    @foreach ($menuImages as $image)
+                        <div class="rst-carousel__item" data-rst-lightbox="{{ RvMedia::getImageUrl($image) }}">
+                            <img src="{{ RvMedia::getImageUrl($image, 'medium') }}"
+                                 alt="{{ $restaurant->name }} — menu {{ $loop->iteration }}" loading="lazy">
                         </div>
-                    @endif
-
-                    @if ($videos->isNotEmpty() || $vr360s->isNotEmpty())
-                        {!! Theme::partial('media-gallery', [
-                            'items' => $videos->merge($vr360s)->values()->toArray(),
-                            'id' => 'restaurant-gallery-' . $restaurant->id,
-                        ]) !!}
-                    @endif
-
-                    <div class="content-box">
-                        <div class="row align-items-center mb-30">
-                            <div class="col-12">
-                                <div class="price">
-                                    @if ($restaurant->location)
-                                        <p class="restaurant-eyebrow">{{ $restaurant->location }}</p>
-                                    @endif
-                                    <h2>{{ $restaurant->name }}</h2>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if ($restaurant->description)
-                            <p class="restaurant-lead">{{ $restaurant->description }}</p>
-                        @endif
-
-                        <div class="ck-content">{!! BaseHelper::clean($restaurant->content) !!}</div>
-
-                        @if ($others->isNotEmpty())
-                            <div class="content-box related-room">
-                                <h3>{{ trans('plugins/restaurant::restaurant.other_restaurants') }}</h3>
-                                <div class="row">
-                                    @foreach ($others as $item)
-                                        <div class="col-lg-6 mb-20">
-                                            {!! Theme::partial('restaurants.item', ['restaurant' => $item]) !!}
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                    </div>
+                    @endforeach
                 </div>
             </div>
 
-        </div>
-    </div>
+            @if ($menuImages->count() > 1)
+                <div class="rst-carousel__nav">
+                    <button type="button" data-rst-prev aria-label="Previous">&#10094;</button>
+                    <button type="button" data-rst-next aria-label="Next">&#10095;</button>
+                </div>
+            @endif
+        </section>
+    @endif
+
+    {{-- 7. Thanh đặt chỗ --}}
+    @if ($phone)
+        <a class="rst-reserve" href="tel:{{ preg_replace('/\D+/', '', $phone) }}">
+            {{ trans('plugins/restaurant::restaurant.reserve') }}
+        </a>
+    @endif
+
+    {{-- 8. Các không gian khác --}}
+    @if ($others->isNotEmpty())
+        <section class="rst-others">
+            <div class="container">
+                <div class="rst-heading">
+                    <div class="rst-heading__line"><span class="rst-diamond"></span></div>
+                    <div class="rst-heading__main">{{ trans('plugins/restaurant::restaurant.other_restaurants') }}</div>
+                </div>
+                <div class="rst-others__grid">
+                    @foreach ($others as $item)
+                        {!! Theme::partial('restaurants.item', ['restaurant' => $item]) !!}
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+</div>
+
+{{-- Lightbox dùng chung cho gallery và ảnh menu --}}
+<div class="rst-lightbox" data-rst-lightbox-root hidden>
+    <button type="button" class="rst-lightbox__close" data-rst-lightbox-close aria-label="Close">&times;</button>
+    <img src="" alt="">
 </div>

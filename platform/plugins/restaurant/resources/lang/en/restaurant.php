@@ -21,6 +21,9 @@ return [
     'vr360_url' => 'VR360 tour URL',
     'vr360_url_help' => 'Link to a full VR360 tour of this venue. Shown as a button on the detail page.',
 
+    'gallery_heading' => 'Gallery',
+    'our_menu' => 'Our Menu',
+
     'information' => 'Venue information',
     'explore' => 'Explore',
     'reserve' => 'Reserve a table',

@@ -8,11 +8,16 @@ use Illuminate\Support\Arr;
 
 /**
  * @property string $name
+ * @property string|null $subtitle
  * @property string|null $description
  * @property string|null $content
  * @property array $images
+ * @property string|null $banner_image
+ * @property array $menu_images
+ * @property string|null $menu_heading
  * @property array $videos
  * @property string|null $vr360_url
+ * @property string|null $vr360_embed
  * @property string|null $location
  * @property string|null $capacity
  * @property string|null $opening_hours
@@ -26,11 +31,16 @@ class Restaurant extends BaseModel
 
     protected $fillable = [
         'name',
+        'subtitle',
         'description',
         'content',
         'images',
+        'banner_image',
+        'menu_images',
+        'menu_heading',
         'videos',
         'vr360_url',
+        'vr360_embed',
         'location',
         'capacity',
         'opening_hours',
@@ -59,6 +69,19 @@ class Restaurant extends BaseModel
     public function getImageAttribute(): ?string
     {
         return Arr::first($this->images) ?: null;
+    }
+
+    public function getMenuImagesAttribute($value): array
+    {
+        return $this->decodeJsonList($value);
+    }
+
+    /**
+     * Ảnh hero khổ lớn. Chưa nhập thì lấy tạm ảnh đầu của gallery.
+     */
+    public function getBannerAttribute(): ?string
+    {
+        return $this->banner_image ?: $this->image;
     }
 
     public function getVideosAttribute($value): array
