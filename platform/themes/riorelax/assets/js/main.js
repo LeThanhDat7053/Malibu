@@ -509,16 +509,24 @@ $(document).ready(function () {
         let roomDetailsSlider = $('.room-details-slider');
         if (roomDetailsSlider.length) {
             let roomDetailsSliderNav = $('.room-details-slider-nav');
+            let vr360Frames = roomDetailsSlider.find('.room-vr360-frame');
 
             roomDetailsSlider.slick({
                 rtl: RiorelaxTheme.isRtl(),
                 slidesToShow: 1,
                 slidesToScroll: 1,
-                infinite: true,
+                // An embedded VR360 tour must not be duplicated into slick's wrap-around clones,
+                // so infinite mode is dropped only on rooms that actually have one.
+                infinite: !vr360Frames.length,
                 autoplay: false,
                 arrows: false,
                 dots: false,
                 asNavFor: '.room-details-slider-nav'
+            });
+
+            // Deferred until after slick has built the track, so the tour loads once and only when present.
+            vr360Frames.each(function () {
+                this.src = $(this).data('src');
             });
 
             roomDetailsSlider.lightGallery({

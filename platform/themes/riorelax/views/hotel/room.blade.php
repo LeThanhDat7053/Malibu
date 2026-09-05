@@ -9,6 +9,25 @@
     $roomGalleryItems = function_exists('gallery_meta_data') ? gallery_meta_data($room) : [];
     $roomVideos = collect($room->videos ?? []);
     $roomGalleryVr360s = collect($roomGalleryItems)->filter(fn($item) => Arr::get($item, 'type') === 'vr360');
+
+    // VR360 tours shown as the first slide(s) of the room gallery.
+    // Sources: the dedicated vr360_url field + any gallery item of type vr360.
+    $roomVr360Items = collect([['img' => $room->vr360_url ?? null, 'thumb' => null, 'description' => null]])
+        ->merge($roomGalleryVr360s)
+        ->filter(fn($item) => ! empty(Arr::get($item, 'img')))
+        ->unique(fn($item) => Arr::get($item, 'img'))
+        ->values();
+
+    // Poster for a VR360 slide: its own thumb, else the room's first image.
+    $roomVr360Poster = function (array $item) use ($room) {
+        $thumb = Arr::get($item, 'thumb');
+
+        if ($thumb) {
+            return str_starts_with($thumb, 'http') ? $thumb : RvMedia::getImageUrl($thumb);
+        }
+
+        return ($first = Arr::first($room->images ?? [])) ? RvMedia::getImageUrl($first, 'room-image') : RvMedia::getDefaultImage();
+    };
 @endphp
 {{-- data-mlb-room feeds the "recently viewed" strip on the homepage --}}
 <div class="about-area5 about-p p-relative room-details" data-mlb-room="{{ $room->getKey() }}">
@@ -16,15 +35,6 @@
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-4 order-2">
                 <aside class="sidebar services-sidebar">
-                    @if (!empty($room->vr360_url))
-                        <div class="sidebar-widget categories mb-20">
-                            <div class="widget-content text-center">
-                                <a href="{{ $room->vr360_url }}" target="_blank" rel="noopener noreferrer" class="btn ss-btn w-100" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
-                                    <i class="fal fa-vr-cardboard" style="line-height:1;"></i> <span style="text-decoration:none;">{{ __('View VR360') }}</span>
-                                </a>
-                            </div>
-                        </div>
-                    @endif
                     @if (HotelHelper::isBookingEnabled())
                         <div class="sidebar-widget categories">
                             <div class="widget-content">
@@ -45,6 +55,19 @@
                 <div class="service-detail">
                     <div class="thumb">
                         <div class="room-details-slider">
+                            {{-- VR360 embedded inline as the first slide(s). src is deferred to data-src and
+                                 filled by roomDetailsSlider() so slick's clones don't load the tour twice.
+                                 Not an <a>, so lightGallery (selector: 'a') skips it and only indexes photos. --}}
+                            @foreach ($roomVr360Items as $vr360)
+                                <div class="room-vr360-slide">
+                                    <iframe class="room-vr360-frame"
+                                            data-src="{{ Arr::get($vr360, 'img') }}"
+                                            title="{{ Arr::get($vr360, 'description') ?: __('View VR360') }}"
+                                            frameborder="0"
+                                            allow="accelerometer; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
+                                            allowfullscreen></iframe>
+                                </div>
+                            @endforeach
                             @foreach ($room->images as $img)
                                 <a href="{{ RvMedia::getImageUrl($img) }}">
                                     <img src="{{ RvMedia::getImageUrl($img, 'room-image') }}" alt="{{ $room->name }}">
@@ -52,17 +75,23 @@
                             @endforeach
                         </div>
                         <div class="room-details-slider-nav">
+                            @foreach ($roomVr360Items as $vr360)
+                                <div class="room-vr360-nav-thumb">
+                                    <img src="{{ $roomVr360Poster($vr360) }}" alt="{{ Arr::get($vr360, 'description') ?: $room->name }}">
+                                    <span class="room-vr360-badge">
+                                        <i class="fal fa-vr-cardboard"></i>
+                                    </span>
+                                </div>
+                            @endforeach
                             @foreach ($room->images as $img)
                                 <img src="{{ RvMedia::getImageUrl($img, 'thumb') }}" alt="{{ $room->name }}">
                             @endforeach
                         </div>
                     </div>
 
-                    @if ($roomVideos->isNotEmpty() || $roomGalleryVr360s->isNotEmpty())
-                        @php
-                            $videoAndVr360Items = $roomVideos->merge($roomGalleryVr360s)->values()->toArray();
-                        @endphp
-                        {!! Theme::partial('media-gallery', ['items' => $videoAndVr360Items, 'id' => 'room-gallery']) !!}
+                    {{-- VR360 now lives in the slider above, so this block only carries videos --}}
+                    @if ($roomVideos->isNotEmpty())
+                        {!! Theme::partial('media-gallery', ['items' => $roomVideos->values()->toArray(), 'id' => 'room-gallery']) !!}
                     @endif
                     <div class="content-box">
                         <div class="row align-items-center mb-50">
