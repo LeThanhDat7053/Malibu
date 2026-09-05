@@ -1,0 +1,148 @@
+/* Floating Chat/Contact Buttons */
+#button-contact-vr {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    z-index: 9999;
+}
+
+#gom-all-in-one {
+    position: relative;
+}
+
+.button-contact {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.phone-vr {
+    position: relative;
+    cursor: pointer;
+    width: 45px;
+    height: 45px;
+}
+
+.phone-vr-circle-fill {
+    width: 45px;
+    height: 45px;
+    top: 0;
+    left: 0;
+    position: absolute;
+    border-radius: 50%;
+    background-color: rgba(0, 175, 79, 0.5);
+    animation: phone-vr-circle-fill 2.3s infinite ease-in-out;
+    opacity: 0.6;
+}
+
+#fanpage-vr .phone-vr-circle-fill {
+    background-color: rgba(59, 89, 152, 0.5);
+}
+
+#tiktok-vr .phone-vr-circle-fill {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#instagram-vr .phone-vr-circle-fill {
+    background-color: rgba(228, 64, 95, 0.5);
+}
+
+#zalo-vr .phone-vr-circle-fill {
+    background-color: rgba(0, 132, 255, 0.5);
+}
+
+#phone-vr .phone-vr-circle-fill {
+    background-color: rgba(0, 175, 79, 0.5);
+}
+
+.phone-vr-img-circle {
+    background-color: #40bf00;
+    width: 45px;
+    height: 45px;
+    line-height: 45px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+#fanpage-vr .phone-vr-img-circle {
+    background-color: #3b5998;
+}
+
+#tiktok-vr .phone-vr-img-circle {
+    background-color: #010101;
+}
+
+#instagram-vr .phone-vr-img-circle {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+#zalo-vr .phone-vr-img-circle {
+    background-color: #0084ff;
+}
+
+#phone-vr .phone-vr-img-circle {
+    background-color: #40bf00;
+}
+
+.phone-vr-img-circle i {
+    color: #fff;
+    font-size: 22px;
+}
+
+.phone-vr-img-circle .zalo-icon-text {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    font-family: Arial, sans-serif;
+}
+
+.phone-bar {
+    position: absolute;
+    bottom: 18px;
+    right: 45px;
+    background: #40bf00;
+    border-radius: 30px;
+    padding: 5px 15px 5px 20px;
+    white-space: nowrap;
+    animation: phone-bar-fade 3s infinite ease-in-out;
+}
+
+.phone-bar a {
+    text-decoration: none;
+}
+
+.phone-bar .text-phone {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+@keyframes phone-vr-circle-fill {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes phone-bar-fade {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
