@@ -325,7 +325,7 @@ a.booking-bar-btn {
 .booking-submit {
     width: 100%;
     padding: 12px;
-    background: #052d5c;
+    background: var(--booking-panel-bg-darker, #052d5c);
     color: #fff;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
@@ -338,7 +338,7 @@ a.booking-bar-btn {
 }
 
 .booking-submit:hover {
-    background: #021530;
+    background: var(--booking-panel-bg-darkest, #021530);
     border-color: rgba(255, 255, 255, 0.5);
     color: #fff;
 }

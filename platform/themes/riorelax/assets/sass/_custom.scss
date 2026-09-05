@@ -38,6 +38,8 @@
 .f-contact {
     .icon {
         margin-top: unset;
+        // là flex item nên phải khoá lại, không thì địa chỉ dài bóp méo vòng tròn
+        flex: none;
     }
 
     ul {

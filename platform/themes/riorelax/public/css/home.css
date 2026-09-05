@@ -6,11 +6,18 @@
 :root {
     --mlb-paper: #fbfaf7;
     --mlb-paper-alt: #f2eee8;
+    /* Mực lấy từ Theme Options > Secondary color, các sắc nhạt pha ra từ chính nó.
+       Mỗi biến khai báo 2 lần: dòng đầu cho trình duyệt chưa hỗ trợ color-mix. */
     --mlb-ink: #16192c;
+    --mlb-ink: var(--secondary-color, #16192c);
     --mlb-ink-soft: #4c5064;
+    --mlb-ink-soft: color-mix(in srgb, var(--mlb-ink) 76%, #ffffff);
     --mlb-ink-mute: #7c8092;
+    --mlb-ink-mute: color-mix(in srgb, var(--mlb-ink) 52%, #ffffff);
     --mlb-line: rgba(22, 25, 44, 0.14);
+    --mlb-line: color-mix(in srgb, var(--mlb-ink) 14%, transparent);
     --mlb-line-soft: rgba(22, 25, 44, 0.08);
+    --mlb-line-soft: color-mix(in srgb, var(--mlb-ink) 8%, transparent);
     --mlb-accent: var(--primary-color, #e4762c);
     /* flooded sections use the deeper brand orange: white text on the bright one
        only reaches 2.9:1, this reaches ~4.4:1 */
@@ -900,6 +907,7 @@ body.mlb-bar-hidden .booking-bar {
 }
 
 .mlb-room {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: #fff;
@@ -907,8 +915,11 @@ body.mlb-bar-hidden .booking-bar {
     transition: border-color 0.3s ease, transform 0.3s ease;
 }
 
+/* Rê chuột: viền đổi sang màu chủ đạo.
+   z-index để nhãn tiện nghi tràn ngang không bị card kế bên che. */
 .mlb-room:hover {
-    border-color: var(--mlb-line);
+    z-index: 2;
+    border-color: var(--mlb-accent);
     transform: translateY(-3px);
 }
 
@@ -984,28 +995,39 @@ body.mlb-bar-hidden .booking-bar {
     padding-left: 15px;
 }
 
+/* canh giữa theo chiều cao dòng, không đặt top cố định vì line-height mỗi trang một khác */
 .mlb-room__meta li + li::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 4px;
     height: 1px;
     background: currentColor;
 }
 
-/* base.blade.php trả bullet và padding lại cho .ck-content ul, phải gỡ như hàng cam kết */
-.mlb-home .mlb-room__meta,
-.mlb-home .mlb-room__meta li {
+/* base.blade.php trả bullet và padding lại cho .ck-content ul, phải gỡ như hàng cam kết.
+   Neo vào .mlb-room__body để card dùng ở đâu cũng đúng, không riêng trang chủ. */
+.mlb-room__body .mlb-room__meta,
+.mlb-room__body .mlb-room__meta li,
+.mlb-room__body .mlb-room__amenities,
+.mlb-room__body .mlb-room__amenities li {
     list-style: none;
 }
 
-.mlb-home .mlb-room__meta {
+.mlb-room__body .mlb-room__meta {
     margin: 0 0 14px;
     padding: 0 0 14px;
 }
 
-.mlb-home .mlb-room__meta li {
+.mlb-room__body .mlb-room__amenities {
+    margin: auto 0 20px;
+    padding: 0;
+}
+
+.mlb-room__body .mlb-room__meta li,
+.mlb-room__body .mlb-room__amenities li {
     margin-bottom: 0;
 }
 
@@ -1016,12 +1038,135 @@ body.mlb-bar-hidden .booking-bar {
     color: var(--mlb-ink-soft);
 }
 
+/* Hàng icon tiện nghi, tên đặt ở title + span ẩn cho trình đọc màn hình.
+   margin-top:auto để nó nuốt hết khoảng trống, cụm icon + nút của mọi card
+   nhờ vậy nằm cùng một hàng dù mô tả dài ngắn khác nhau. */
+.mlb-room__amenities {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin: auto 0 20px;
+    padding: 0;
+    list-style: none;
+}
+
+.mlb-room__amenities li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--mlb-accent);
+    line-height: 1;
+}
+
+.mlb-room__amenities li > img,
+.mlb-room__amenities li > svg {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    transition: transform 0.22s var(--mlb-ease);
+}
+
+.mlb-room__amenities li:hover > img,
+.mlb-room__amenities li:hover > svg {
+    transform: translateY(-2px) scale(1.08);
+}
+
+/* Nhãn tên tiện nghi nổi lên trên icon khi rê chuột.
+   ::after là hộp chữ, ::before là mũi tên nhỏ nối xuống icon. */
+.mlb-room__amenities li::before,
+.mlb-room__amenities li::after {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, 5px);
+    transition: opacity 0.2s var(--mlb-ease), transform 0.2s var(--mlb-ease), visibility 0.2s;
+}
+
+.mlb-room__amenities li::after {
+    content: attr(data-tip);
+    z-index: 3;
+    width: max-content;
+    max-width: 180px;
+    margin-bottom: 12px;
+    padding: 7px 11px;
+    border-radius: 3px;
+    background: var(--mlb-ink);
+    color: var(--mlb-paper);
+    box-shadow: 0 10px 24px rgba(22, 25, 44, 0.24);
+    font-family: var(--mlb-body-font);
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    white-space: normal;
+}
+
+.mlb-room__amenities li::before {
+    content: '';
+    z-index: 4;
+    margin-bottom: 6px;
+    border-style: solid;
+    border-width: 6px 5px 0;
+    border-color: var(--mlb-ink) transparent transparent;
+}
+
+.mlb-room__amenities li:hover::before,
+.mlb-room__amenities li:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+/* Icon đầu và cuối hàng: neo hộp chữ vào mép thay vì căn giữa, không thì nhãn
+   tràn ra khỏi card và bị cắt mất trên màn hình hẹp. Mũi tên vẫn chỉ đúng icon. */
+.mlb-room__amenities li:first-child::after {
+    left: -6px;
+    transform: translate(0, 5px);
+}
+
+.mlb-room__amenities li:last-child::after {
+    left: auto;
+    right: -6px;
+    transform: translate(0, 5px);
+}
+
+.mlb-room__amenities li:first-child:hover::after,
+.mlb-room__amenities li:last-child:hover::after {
+    transform: translate(0, 0);
+}
+
+.mlb-room__amenities .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    border: 0;
+}
+
 .mlb-room__actions {
     display: flex;
     align-items: center;
     gap: 18px;
     flex-wrap: wrap;
     margin-top: auto;
+}
+
+/* card nào có hàng icon thì hàng icon đã gánh khoảng trống rồi, nút bám ngay dưới */
+.mlb-room__amenities ~ .mlb-room__actions {
+    margin-top: 0;
 }
 
 /* --------------------------------------------------------- recently viewed */
@@ -1096,6 +1241,12 @@ body.mlb-bar-hidden .booking-bar {
 .mlb-columns {
     padding-block: var(--mlb-section-y);
     background: var(--mlb-paper-alt);
+}
+
+/* Khối "phòng vừa xem" cùng nền paper-alt nên hai section dính liền nhau,
+   để nguyên đệm kép sẽ hở một mảng trống rất lớn ở giữa. */
+.mlb-recent:not([hidden]) + .mlb-columns {
+    padding-top: clamp(24px, 3vw, 44px);
 }
 
 .mlb-columns__grid {

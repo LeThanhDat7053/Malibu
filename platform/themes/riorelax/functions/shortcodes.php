@@ -194,6 +194,7 @@ app()->booted(function (): void {
                     'with' => [
                         'amenities',
                         'amenities.metadata',
+                        'category',
                         'slugable',
                         'activeBookingRooms' => function ($query) use ($startDate, $endDate) {
                             return $query
@@ -366,6 +367,7 @@ app()->booted(function (): void {
 
                 $rooms = Room::query()
                     ->wherePublished()
+                    ->with(['amenities.metadata', 'category', 'slugable'])
                     ->orderBy('order')
                     ->orderBy('id')
                     ->limit($limit)
@@ -408,6 +410,7 @@ app()->booted(function (): void {
                 'with' => [
                     'amenities',
                     'amenities.metadata',
+                    'category',
                     'slugable',
                     'activeBookingRooms' => function ($query) use ($startDate, $endDate) {
                         return $query

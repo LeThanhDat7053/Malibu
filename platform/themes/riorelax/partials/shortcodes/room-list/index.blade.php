@@ -1,10 +1,8 @@
 <section class="services-area pt-90 pb-90">
     <div class="container">
-        <div class="row">
+        <div class="mlb-rooms__grid">
             @foreach ($rooms as $room)
-                <div class="col-xl-4 col-md-6">
-                    {!! Theme::partial('rooms.item', compact('room', 'startDate', 'endDate', 'nights', 'adults')) !!}
-                </div>
+                {!! Theme::partial('rooms.item-editorial', compact('room', 'startDate', 'endDate', 'nights', 'adults')) !!}
             @endforeach
         </div>
     </div>

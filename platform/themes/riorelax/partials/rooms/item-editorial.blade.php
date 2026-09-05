@@ -44,6 +44,28 @@
             <p class="mlb-room__text">{{ Str::limit(strip_tags($description), 110) }}</p>
         @endif
 
+        @php
+            $roomAmenities = $room->amenities
+                ->filter(fn ($amenity) => $amenity->getMetaData('icon_image', true) || $amenity->icon)
+                ->take(6);
+        @endphp
+
+        @if ($roomAmenities->isNotEmpty())
+            <ul class="mlb-room__amenities">
+                @foreach ($roomAmenities as $amenity)
+                    @php($amenityIcon = $amenity->getMetaData('icon_image', true))
+                    <li data-tip="{{ $amenity->name }}">
+                        @if ($amenityIcon)
+                            <img src="{{ RvMedia::getImageUrl($amenityIcon) }}" alt="{{ $amenity->name }}" width="18" height="18" loading="lazy">
+                        @else
+                            <x-core::icon :name="$amenity->icon"/>
+                        @endif
+                        <span class="visually-hidden">{{ $amenity->name }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+
         <div class="mlb-room__actions">
             <a class="mlb-btn mlb-btn--sm" href="{{ $roomUrl }}">{{ __('View room & book') }}</a>
 

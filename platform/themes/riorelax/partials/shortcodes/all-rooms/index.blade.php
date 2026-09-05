@@ -1,14 +1,16 @@
-<section class="services-area pt-20 pb-40">
-    <h3 class="mb-20">{{ __(':count rooms available', ['count' => $rooms->total()]) }}</h3>
+{{-- trang /rooms đã có nhịp đệm riêng nên phần này không cần padding --}}
+<section class="mlb-rooms-list">
+    <div class="mlb-section-head mlb-section-head--tight">
+        <h2 class="mlb-display mlb-display--sm">{{ __(':count rooms available', ['count' => $rooms->total()]) }}</h2>
+    </div>
 
     @if ($rooms->isNotEmpty())
-        <div class="row">
+        <div class="mlb-rooms__grid">
             @foreach ($rooms as $room)
-                <div class="col-md-6">
-                    {!! Theme::partial('rooms.item', compact('room', 'startDate', 'endDate', 'nights', 'adults')) !!}
-                </div>
+                {!! Theme::partial('rooms.item-editorial', compact('room', 'startDate', 'endDate', 'nights', 'adults')) !!}
             @endforeach
         </div>
+
         @if ($rooms instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator)
             <div class="text-center mt-30">
                 {!! $rooms->withQueryString()->links(Theme::getThemeNamespace('partials.pagination')) !!}
@@ -16,4 +18,3 @@
         @endif
     @endif
 </section>
-

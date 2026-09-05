@@ -13,23 +13,50 @@
 
     <style>
         @php
-            // Nút "Đặt phòng" nổi ở cạnh màn hình. Sắc độ đậm hơn của bảng đặt phòng
-            // được tính ra từ chính màu nền, khỏi bắt người dùng chọn thêm một màu nữa.
-            $bookingPanelBg = theme_option('booking_panel_bg_color', '#0e4d97');
-            $bookingPanelRgb = BaseHelper::hexToRgb($bookingPanelBg);
-            $bookingPanelBgDark = sprintf(
+            // Nút "Đặt phòng" nổi ở cạnh màn hình. Các sắc độ đậm hơn của bảng đặt phòng
+            // được tính ra từ chính màu nền, khỏi bắt người dùng chọn thêm màu nào nữa.
+            // Color picker lưu cả '#rrggbb' lẫn 'rgb(r, g, b)' nên phải đọc được cả hai.
+            $parseColor = function (?string $color): array {
+                $color = trim((string) $color);
+
+                if (preg_match('/^#?([0-9a-f]{3})$/i', $color, $matches)) {
+                    [$r, $g, $b] = str_split($matches[1]);
+
+                    return [hexdec($r . $r), hexdec($g . $g), hexdec($b . $b)];
+                }
+
+                if (preg_match('/^#?([0-9a-f]{6})$/i', $color, $matches)) {
+                    return array_map('hexdec', str_split($matches[1], 2));
+                }
+
+                if (preg_match('/(\d+)\D+(\d+)\D+(\d+)/', $color, $matches)) {
+                    return [(int) $matches[1], (int) $matches[2], (int) $matches[3]];
+                }
+
+                return [14, 77, 151];
+            };
+
+            $shadeColor = fn (array $rgb, float $factor) => sprintf(
                 '#%02x%02x%02x',
-                (int) max(0, $bookingPanelRgb['red'] * .78),
-                (int) max(0, $bookingPanelRgb['green'] * .78),
-                (int) max(0, $bookingPanelRgb['blue'] * .78)
+                ...array_map(fn ($channel) => (int) max(0, min(255, $channel * $factor)), $rgb)
             );
+
+            // Nền bảng lấy sắc đậm của màu chính để chữ trắng còn đọc được
+            $bookingPanelBg = theme_option('booking_panel_bg_color') ?: theme_option('primary_color_hover', '#066a4c');
+            $bookingPanelRgb = $parseColor($bookingPanelBg);
+            $bookingPanelBgDark = $shadeColor($bookingPanelRgb, .78);
+            $bookingPanelBgDarker = $shadeColor($bookingPanelRgb, .56);
+            $bookingPanelBgDarkest = $shadeColor($bookingPanelRgb, .38);
         @endphp
         :root {
-            --booking-btn-bg: {{ theme_option('booking_button_bg_color', '#0e4d97') }};
+            {{-- chưa đặt riêng thì nút đặt phòng lấy màu chính của theme --}}
+            --booking-btn-bg: {{ theme_option('booking_button_bg_color') ?: theme_option('primary_color', '#fec201') }};
             --booking-btn-text: {{ theme_option('booking_button_text_color', '#ffffff') }};
-            --booking-btn-bg-hover: {{ theme_option('booking_button_hover_bg_color', '#0a3f80') }};
+            --booking-btn-bg-hover: {{ theme_option('booking_button_hover_bg_color') ?: theme_option('primary_color_hover', '#066a4c') }};
             --booking-panel-bg: {{ $bookingPanelBg }};
             --booking-panel-bg-dark: {{ $bookingPanelBgDark }};
+            --booking-panel-bg-darker: {{ $bookingPanelBgDarker }};
+            --booking-panel-bg-darkest: {{ $bookingPanelBgDarkest }};
             --primary-color: {{ theme_option('primary_color', '#fec201') }};
             --secondary-color: {{ theme_option('secondary_color', '#034460') }};
             --input-border-color: {{ theme_option('input_border_color', '#d7cfc8') }};

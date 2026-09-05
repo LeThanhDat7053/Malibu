@@ -281,9 +281,10 @@ app()->booted(function (): void {
             'section_id' => 'opt-text-subsection-booking-button',
             'type' => 'customColor',
             'label' => __('Button background color'),
+            // mặc định bám theo màu chính của theme cho đồng bộ
             'attributes' => [
                 'name' => 'booking_button_bg_color',
-                'value' => '#0e4d97',
+                'value' => theme_option('primary_color', '#fec201'),
             ],
         ])
         ->setField([
@@ -303,7 +304,7 @@ app()->booted(function (): void {
             'label' => __('Button background color on hover'),
             'attributes' => [
                 'name' => 'booking_button_hover_bg_color',
-                'value' => '#0a3f80',
+                'value' => theme_option('primary_color_hover', '#066a4c'),
             ],
         ])
         ->setField([
@@ -313,7 +314,7 @@ app()->booted(function (): void {
             'label' => __('Booking panel background color'),
             'attributes' => [
                 'name' => 'booking_panel_bg_color',
-                'value' => '#0e4d97',
+                'value' => theme_option('primary_color_hover', '#066a4c'),
             ],
         ])
         ->setSection([
