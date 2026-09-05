@@ -1,0 +1,353 @@
+/* ==========================================================================
+   Trang liên hệ — bố cục theo mẫu Himara:
+   cột trái tiêu đề + form, cột phải bản đồ + thông tin liên hệ + mạng xã hội.
+
+   Token màu và font kế thừa từ :root của home.css nên đồng bộ với toàn site.
+   ========================================================================== */
+
+.mlb-contact {
+    padding-block: clamp(52px, 7vw, 104px);
+    background: var(--mlb-paper, #fbfaf7);
+    color: var(--mlb-ink, #16192c);
+    font-family: var(--mlb-body-font, sans-serif);
+}
+
+.mlb-contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: clamp(32px, 4.5vw, 72px);
+    align-items: start;
+}
+
+@media (max-width: 991px) {
+    .mlb-contact__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------- cột trái */
+
+.mlb-contact__main .mlb-display {
+    margin-bottom: 0;
+}
+
+.mlb-contact__main .mlb-lede {
+    max-width: 68ch;
+}
+
+.mlb-contact__form {
+    margin-top: clamp(28px, 3.4vw, 44px);
+}
+
+/* Form của plugin Liên hệ: gọn lại theo hệ thiết kế chung */
+.mlb-contact__form .contact-form-group,
+.mlb-contact__form .form-group {
+    margin-bottom: 16px;
+}
+
+.mlb-contact__form label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute, #7c8092);
+}
+
+.mlb-contact__form input[type="text"],
+.mlb-contact__form input[type="email"],
+.mlb-contact__form input[type="tel"],
+.mlb-contact__form input[type="number"],
+.mlb-contact__form select,
+.mlb-contact__form textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--mlb-line, rgba(22, 25, 44, 0.14));
+    border-radius: 2px;
+    background: #fff;
+    color: var(--mlb-ink, #16192c);
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mlb-contact__form textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.mlb-contact__form input:focus,
+.mlb-contact__form select:focus,
+.mlb-contact__form textarea:focus {
+    border-color: var(--mlb-accent, #e4762c);
+    box-shadow: 0 0 0 3px rgba(228, 118, 44, 0.14);
+    outline: none;
+}
+
+/* Dòng đồng ý điều khoản: nhãn nằm ngang cạnh ô tick, không dùng kiểu nhãn
+   in hoa đặt phía trên như các ô nhập khác. */
+.mlb-contact__form label.form-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Bootstrap chừa 1.5em bên trái cho ô tick thả nổi, ở đây dùng flex nên bỏ */
+    padding-left: 0;
+    margin-bottom: 0;
+    min-height: 0;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.6;
+    text-transform: none;
+    color: var(--mlb-ink-soft, #4c5064);
+    cursor: pointer;
+}
+
+.mlb-contact__form .form-check-label {
+    flex: 1;
+}
+
+/* Ô tick tự vẽ để đồng bộ màu và bo góc với phần còn lại của trang */
+.mlb-contact__form input[type="checkbox"] {
+    flex: none;
+    /* Bootstrap cho ô tick float: left + margin âm, phải gỡ để flex xếp đúng */
+    float: none;
+    display: inline-grid;
+    place-content: center;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--mlb-line, rgba(22, 25, 44, 0.14));
+    border-radius: 3px;
+    /* tắt dấu tick SVG mặc định của Bootstrap, dấu tick tự vẽ ở ::before */
+    background-color: #fff;
+    background-image: none;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.mlb-contact__form input[type="checkbox"]::before {
+    content: '';
+    width: 11px;
+    height: 11px;
+    background: #fff;
+    transform: scale(0);
+    transition: transform 0.15s ease;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.mlb-contact__form input[type="checkbox"]:checked {
+    border-color: var(--mlb-accent, #e4762c);
+    background-color: var(--mlb-accent, #e4762c);
+    background-image: none;
+}
+
+.mlb-contact__form input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+.mlb-contact__form input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--mlb-accent, #e4762c);
+    outline-offset: 2px;
+}
+
+.mlb-contact__form button[type="submit"],
+.mlb-contact__form .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 17px 40px;
+    border: 1px solid var(--mlb-accent, #e4762c);
+    border-radius: 2px;
+    background: var(--mlb-accent, #e4762c);
+    color: #fff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    line-height: 1;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.mlb-contact__form button[type="submit"]:hover,
+.mlb-contact__form .btn:hover {
+    border-color: var(--mlb-flood, #be5c1a);
+    background: var(--mlb-flood, #be5c1a);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ------------------------------------------------------------ cột phải */
+
+/* Bản đồ khung tròn viền trắng, nút chuyển VR360 tràn ra mép dưới bên trái */
+.mlb-contact__map {
+    position: relative;
+    width: min(100%, 460px);
+    margin-inline: auto;
+    aspect-ratio: 1 / 1;
+}
+
+.mlb-contact__map-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: 8px solid #fff;
+    border-radius: 50%;
+    background: var(--mlb-paper-alt, #f2eee8);
+    box-shadow: 0 26px 60px -28px rgba(9, 11, 22, 0.45);
+}
+
+.mlb-contact__map-pane {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease;
+}
+
+.mlb-contact__map-pane.is-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mlb-contact__map-pane iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.mlb-contact__map-toggle {
+    position: absolute;
+    left: 2%;
+    bottom: 7%;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(56px, 16%, 76px);
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 12px 30px -10px rgba(9, 11, 22, 0.4);
+    color: var(--mlb-ink, #16192c);
+    font-size: clamp(18px, 5vw, 24px);
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.mlb-contact__map-toggle:hover {
+    background: var(--mlb-accent, #e4762c);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.mlb-contact__map.is-vr .mlb-contact__map-toggle {
+    background: var(--mlb-accent, #e4762c);
+    color: #fff;
+}
+
+.mlb-contact__info {
+    margin-top: clamp(24px, 3vw, 40px);
+    padding: clamp(24px, 2.6vw, 34px);
+    border: 1px solid var(--mlb-line-soft, rgba(22, 25, 44, 0.08));
+    border-radius: 3px;
+    background: #fff;
+}
+
+.mlb-contact__info-title {
+    margin: 0 0 18px;
+    font-family: var(--mlb-display-font, serif);
+    font-size: clamp(20px, 1.8vw, 26px);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--mlb-ink, #16192c);
+}
+
+.mlb-contact__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mlb-contact__list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--mlb-line-soft, rgba(22, 25, 44, 0.08));
+    list-style: none;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--mlb-ink-soft, #4c5064);
+}
+
+.mlb-contact__list li:first-child {
+    padding-top: 0;
+}
+
+.mlb-contact__list li:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.mlb-contact__list i {
+    flex: none;
+    margin-top: 3px;
+    width: 18px;
+    text-align: center;
+    color: var(--mlb-accent, #e4762c);
+}
+
+.mlb-contact__list a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.mlb-contact__list a:hover {
+    color: var(--mlb-accent, #e4762c);
+}
+
+.mlb-contact__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid var(--mlb-line-soft, rgba(22, 25, 44, 0.08));
+}
+
+.mlb-contact__social a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--mlb-line, rgba(22, 25, 44, 0.14));
+    border-radius: 50%;
+    color: var(--mlb-ink, #16192c);
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+.mlb-contact__social a:hover {
+    border-color: var(--mlb-accent, #e4762c);
+    background: var(--mlb-accent, #e4762c);
+    color: #fff;
+}

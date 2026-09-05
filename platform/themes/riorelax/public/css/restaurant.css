@@ -1,92 +1,117 @@
 /* ==========================================================================
    Nhà hàng — The Malibu Hotel
 
-   Layout dựng theo mẫu: hero khổ lớn (sau này thay bằng khung VR360) → tiêu đề
-   → nội dung → lưới ảnh → "Our Menu" chỉ gồm ảnh thực đơn → thanh đặt bàn.
+   Bố cục trang chi tiết theo mẫu botonbluehotels.com/nha-hang-asian:
+   banner → nút VR360 → khung giờ → nội dung → Gallery lưới vuông → Our Menu
+   carousel 3D trên nền mực → các không gian khác → CTA đặt bàn chốt trang.
 
-   Màu lấy từ biến của theme (--primary-color / --secondary-color) nên đổi
-   theme option là toàn bộ trang đổi theo, không phải sửa file này.
+   Chữ và màu lấy theo trang chủ mới: tiêu đề Playfair Display
+   (--mlb-display-font), thân bài --primary-font, token màu từ .mlb-page.
+
+   Lớp .rst-carousel / .rst-lightbox giữ nguyên tên vì js/restaurant.js bám vào.
    ========================================================================== */
 
-.rst-detail,
-.rst-listing {
-    --rst-ink: var(--secondary-color, #034460);
-    --rst-accent: var(--primary-color, #fec201);
-    --rst-cream: #faf7f2;
-    --rst-muted: #6b7280;
-    --rst-line: #e8e2d8;
-    --rst-heading-font: var(--heading-font, sans-serif);
+.mlb-rst-page {
+    overflow-x: clip;
 }
 
 /* ==========================================================================
-   1. Hero
+   1. Banner — ảnh trơn, navbar mờ đè lên, chữ nằm ở khối tiêu đề bên dưới
    ========================================================================== */
 
-/* Cách header một khoảng nhỏ để khối VR360 sau này không dính sát menu. */
 .rst-hero {
     position: relative;
     width: 100%;
     height: 55vw;
     max-height: 600px;
-    margin-top: 40px;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
 }
 
-/* Dải trắng mờ dần ở đáy để nối liền với phần tiêu đề bên dưới. */
+/* dải sáng mờ dần ở đáy để nối liền xuống khối tiêu đề */
 .rst-hero::after {
-    content: "";
+    content: '';
     position: absolute;
     inset: auto 0 0 0;
     height: 40%;
-    background: linear-gradient(to top, #fff 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-.rst-hero--embed {
-    background: #000;
-}
-
-.rst-hero--embed::after {
-    display: none;
-}
-
-.rst-hero--embed iframe {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 0;
+    background: linear-gradient(to top, var(--mlb-paper) 0%, transparent 100%);
 }
 
 /* ==========================================================================
-   2. Tiêu đề + đường phân cách kim cương
+   2. Tiêu đề trang
    ========================================================================== */
 
 .rst-title {
-    padding: 30px 20px 10px;
+    padding: clamp(26px, 3vw, 40px) 20px 0;
     text-align: center;
 }
 
 .rst-title__label {
-    margin-bottom: 6px;
-    color: var(--rst-accent);
-    font-family: var(--rst-heading-font);
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: .45em;
+    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
+    color: var(--mlb-accent);
 }
 
 .rst-title__name {
     margin: 0;
-    color: var(--rst-ink);
-    font-family: var(--rst-heading-font);
-    font-size: 56px;
-    font-weight: 300;
-    letter-spacing: .12em;
-    line-height: 1.1;
-    text-transform: uppercase;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(32px, 5vw, 58px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    color: var(--mlb-ink);
 }
+
+.rst-title .rst-divider {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+.rst-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.rst-crumbs li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rst-crumbs li + li::before {
+    content: '/';
+    padding: 0 10px;
+    color: var(--mlb-line);
+}
+
+.rst-crumbs a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.rst-crumbs a:hover {
+    color: var(--mlb-accent);
+}
+
+/* ==========================================================================
+   3. Đường phân cách kim cương — mô típ dùng lại ở mọi tiêu đề khối
+   ========================================================================== */
 
 .rst-divider,
 .rst-heading__line {
@@ -94,126 +119,287 @@
     align-items: center;
     justify-content: center;
     gap: 18px;
-    margin-top: 16px;
+    margin-bottom: 10px;
 }
 
 .rst-divider::before,
 .rst-divider::after,
 .rst-heading__line::before,
 .rst-heading__line::after {
-    content: "";
+    content: '';
     width: 80px;
     height: 1px;
-    background: linear-gradient(to right, transparent, var(--rst-accent), var(--rst-ink), var(--rst-accent), transparent);
+    background: linear-gradient(to right, transparent, var(--mlb-accent), var(--mlb-ink), var(--mlb-accent), transparent);
 }
 
 .rst-diamond {
     flex-shrink: 0;
     width: 10px;
     height: 10px;
-    background: linear-gradient(135deg, var(--rst-accent), var(--rst-ink));
+    background: linear-gradient(135deg, var(--mlb-accent), var(--mlb-ink));
     transform: rotate(45deg);
 }
 
 /* ==========================================================================
-   3. Nút VR360
+   4. Nút VR360
    ========================================================================== */
 
 .rst-vr {
     display: flex;
     justify-content: center;
-    margin: 20px 0 10px;
+    padding: clamp(28px, 3.5vw, 44px) 20px 0;
 }
 
 .rst-vr a {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 32px;
-    background: var(--rst-ink);
+    padding: 14px 32px;
+    border-radius: 2px;
+    background: var(--mlb-ink);
     color: #fff;
-    font-family: var(--rst-heading-font);
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: .3em;
+    font-family: var(--mlb-body-font);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1;
     text-transform: uppercase;
     text-decoration: none;
-    transition: background .3s ease;
+    transition: background 0.3s ease;
 }
 
-.rst-vr a:hover {
-    background: var(--rst-accent);
-    color: var(--btn-text-color-hover, #101010);
+.rst-vr a:hover,
+.rst-vr a:focus-visible {
+    background: var(--mlb-accent);
+    color: #fff;
 }
 
 /* ==========================================================================
-   4. Nội dung giới thiệu
+   5. Khung giờ phục vụ — mỗi khung một ô đóng khung, dàn ngang căn giữa
    ========================================================================== */
 
-.rst-intro {
-    max-width: 900px;
+.rst-hours {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: 14px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 30px 30px 40px;
+    padding: clamp(28px, 3.5vw, 44px) 30px 0;
+}
+
+.rst-hours__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 14px 30px;
+    border: 1px solid var(--mlb-line);
+    color: var(--mlb-ink);
     text-align: center;
 }
 
-.rst-intro__lead,
-.rst-intro .ck-content p {
-    margin-bottom: 14px;
-    color: #444;
-    font-size: 17px;
-    line-height: 1.9;
+.rst-hours__name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mlb-accent);
 }
 
-.rst-intro .ck-content ul,
-.rst-intro .ck-content ol {
-    display: inline-block;
+.rst-hours__time {
+    font-size: clamp(17px, 1.4vw, 20px);
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.rst-hours__days {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--mlb-ink-mute);
+}
+
+@media (max-width: 575px) {
+    .rst-hours {
+        padding-inline: 20px;
+    }
+
+    .rst-hours__item {
+        flex: 1 1 100%;
+        padding-inline: 20px;
+    }
+}
+
+/* ==========================================================================
+   6. Nội dung giới thiệu — một cột, chữ căn đều hai bên
+   ========================================================================== */
+
+/* 1160px trừ 30px đệm mỗi bên = đúng 1100px, bằng lưới Gallery và khung VR360
+   bên dưới, nên lề trái phải của cả trang thẳng hàng nhau. */
+.rst-content {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: clamp(28px, 3.5vw, 44px) 30px clamp(36px, 4.5vw, 56px);
     text-align: start;
 }
 
-.rst-hours {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 10px 30px;
-    border: 1px solid var(--rst-line);
-    color: var(--rst-ink);
-    font-size: 16px;
-    font-style: italic;
-    font-weight: 600;
+/* Description: chữ display căn giữa, đậm màu mực, có gạch màu chính khép lại
+   bên dưới — nhìn là biết ngay đây là dòng dẫn chứ không phải thân bài. */
+.rst-content__lead {
+    max-width: 900px;
+    margin: 0 auto clamp(30px, 3.4vw, 46px);
+    padding-bottom: clamp(24px, 2.8vw, 36px);
+    font-family: var(--mlb-display-font);
+    font-size: clamp(21px, 2vw, 31px);
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--mlb-ink);
 }
 
-/* ==========================================================================
-   5. Heading dùng chung cho Gallery / Our Menu
-   ========================================================================== */
+.rst-content__lead::after {
+    content: '';
+    display: block;
+    width: 54px;
+    height: 2px;
+    margin: clamp(20px, 2.4vw, 30px) auto 0;
+    background: var(--mlb-accent);
+}
 
-.rst-heading {
-    margin-bottom: 30px;
+/* Thân bài căn đều hai bên, trải hết khổ 1100px của khối */
+.rst-content .ck-content {
+    font-size: 18px;
+    line-height: 1.85;
+    text-align: justify;
+    text-justify: inter-word;
+    color: var(--mlb-ink-soft);
+}
+
+.rst-content .ck-content p {
+    margin-bottom: 16px;
+}
+
+.rst-content .ck-content h2,
+.rst-content .ck-content h3,
+.rst-content .ck-content h4 {
+    margin: 34px 0 12px;
+    font-family: var(--mlb-display-font);
+    font-weight: 400;
+    line-height: 1.2;
+    text-align: start;
+    color: var(--mlb-ink);
+}
+
+/* gạch màu chính ngắn trên mỗi tiêu đề phụ để tách khối */
+.rst-content .ck-content h2::before,
+.rst-content .ck-content h3::before {
+    content: '';
+    display: block;
+    width: 34px;
+    height: 2px;
+    margin-bottom: 14px;
+    background: var(--mlb-accent);
+}
+
+.rst-content .ck-content h2 { font-size: clamp(22px, 2.2vw, 30px); }
+.rst-content .ck-content h3 { font-size: clamp(19px, 1.8vw, 24px); }
+.rst-content .ck-content h4 { font-size: 18px; }
+
+.rst-content .ck-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.rst-content .ck-content ul,
+.rst-content .ck-content ol {
+    margin-bottom: 16px;
+}
+
+/* Dải thông tin căn giữa dưới nội dung, gạch ngăn giữa các mục */
+.rst-facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px clamp(36px, 5vw, 72px);
+    margin: clamp(32px, 3.6vw, 46px) 0 0;
+    padding: clamp(24px, 2.6vw, 34px) 0 0;
+    border-top: 1px solid var(--mlb-line-soft);
+    list-style: none;
     text-align: center;
 }
 
-.rst-heading__line {
-    margin-top: 0;
-    margin-bottom: 8px;
+.rst-facts li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    list-style: none;
+}
+
+.rst-facts li + li::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    inset-inline-start: calc(clamp(36px, 5vw, 72px) / -2);
+    width: 1px;
+    background: var(--mlb-line-soft);
+}
+
+.rst-facts__label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.rst-facts__value {
+    font-size: clamp(17px, 1.4vw, 20px);
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--mlb-ink);
+}
+
+.rst-facts__value a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.rst-facts__value a:hover {
+    color: var(--mlb-accent);
+}
+
+/* ==========================================================================
+   7. Tiêu đề khối dùng chung cho Gallery / Our Menu / Không gian khác
+   ========================================================================== */
+
+.rst-heading {
+    margin-bottom: clamp(24px, 3vw, 38px);
+    text-align: center;
 }
 
 .rst-heading__sub {
-    margin-bottom: 6px;
-    color: var(--rst-accent);
-    font-family: var(--rst-heading-font);
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: .45em;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
+    color: var(--mlb-accent);
 }
 
 .rst-heading__main {
-    color: var(--rst-ink);
-    font-family: var(--rst-heading-font);
-    font-size: 42px;
-    font-weight: 300;
-    letter-spacing: .12em;
+    margin: 0;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(28px, 3.4vw, 44px);
+    font-weight: 400;
     line-height: 1.1;
-    text-transform: uppercase;
+    letter-spacing: -0.015em;
+    color: var(--mlb-ink);
 }
 
 .rst-heading__bottom {
@@ -226,45 +412,75 @@
 
 .rst-heading__bottom::before,
 .rst-heading__bottom::after {
-    content: "";
+    content: '';
     width: 50px;
     height: 1px;
-    background: linear-gradient(to right, transparent, var(--rst-accent));
+    background: linear-gradient(to right, transparent, var(--mlb-accent));
 }
 
 .rst-heading__bottom::after {
-    background: linear-gradient(to left, transparent, var(--rst-accent));
+    background: linear-gradient(to left, transparent, var(--mlb-accent));
 }
 
 .rst-heading__bottom span {
-    color: var(--rst-accent);
-    font-family: var(--rst-heading-font);
     font-size: 11px;
-    font-weight: 400;
-    letter-spacing: .3em;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    color: var(--mlb-accent);
 }
 
-/* Bản trên nền tối của khối Our Menu. */
+/* bản trên nền mực của khối Our Menu */
 .rst-heading--light .rst-heading__main {
     color: #fff;
 }
 
 .rst-heading--light .rst-heading__line::before,
 .rst-heading--light .rst-heading__line::after {
-    background: linear-gradient(to right, transparent, var(--rst-accent), rgba(255, 255, 255, .5), var(--rst-accent), transparent);
+    background: linear-gradient(to right, transparent, var(--mlb-accent), rgba(255, 255, 255, 0.5), var(--mlb-accent), transparent);
 }
 
 .rst-heading--light .rst-diamond {
-    background: linear-gradient(135deg, var(--rst-accent), #fff);
+    background: linear-gradient(135deg, var(--mlb-accent), #fff);
 }
 
 /* ==========================================================================
-   6. Lưới ảnh
+   8. VR360 nhúng
+   ========================================================================== */
+
+.rst-embed {
+    padding: clamp(36px, 4.5vw, 64px) 30px;
+    background: var(--mlb-paper-alt);
+}
+
+.rst-embed__frame {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #0b0d16;
+}
+
+.rst-embed__frame iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+@media (max-width: 575px) {
+    .rst-embed__frame {
+        aspect-ratio: 4 / 3;
+    }
+}
+
+/* ==========================================================================
+   9. Gallery — lưới vuông 3 cột
    ========================================================================== */
 
 .rst-gallery {
-    padding: 0 30px 50px;
+    padding: 0 30px clamp(40px, 5vw, 64px);
 }
 
 .rst-gallery__grid {
@@ -279,8 +495,8 @@
     position: relative;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    background: var(--rst-cream);
-    cursor: pointer;
+    background: var(--mlb-paper-alt);
+    cursor: zoom-in;
 }
 
 .rst-photo img {
@@ -288,7 +504,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform .4s ease;
+    transition: transform 0.4s ease;
 }
 
 .rst-photo:hover img {
@@ -296,18 +512,18 @@
 }
 
 /* ==========================================================================
-   7. Our Menu — chỉ ảnh thực đơn, carousel 3D
+   10. Our Menu — carousel ảnh thực đơn trên nền mực
    ========================================================================== */
 
 .rst-menu {
     position: relative;
-    padding: 50px 0 0;
+    padding: clamp(44px, 5.5vw, 72px) 0 0;
     overflow: hidden;
-    background: var(--rst-ink);
+    background: var(--mlb-ink, #16192c);
 }
 
 .rst-menu .rst-heading {
-    padding: 0 30px 40px;
+    padding: 0 30px;
 }
 
 .rst-carousel {
@@ -322,6 +538,8 @@
     cursor: grabbing;
 }
 
+/* Không dùng preserve-3d: trong ngữ cảnh 3D trình duyệt xếp lớp theo độ sâu
+   và bỏ qua z-index, ảnh nghiêng sẽ trượt đè lên ảnh đang xem ở giữa. */
 .rst-carousel__stage {
     position: absolute;
     width: 100%;
@@ -336,14 +554,10 @@
     height: 540px;
     margin: -270px 0 0 -190px;
     overflow: hidden;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, .5);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
     opacity: 0;
     cursor: pointer;
-    transition: transform .5s ease, opacity .5s ease;
-}
-
-.rst-carousel__item.is-active {
-    z-index: 200;
+    transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .rst-carousel__item img {
@@ -356,74 +570,412 @@
     display: flex;
     justify-content: center;
     gap: 30px;
-    padding: 20px 0 40px;
+    padding: 20px 0 clamp(40px, 5vw, 64px);
 }
 
 .rst-carousel__nav button {
     width: 50px;
     height: 50px;
-    border: 1.5px solid var(--rst-accent);
+    border: 1.5px solid var(--mlb-accent);
     border-radius: 50%;
-    background: rgba(0, 0, 0, .4);
-    color: var(--rst-accent);
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.15), inset 0 0 8px rgba(0, 0, 0, 0.5);
+    color: var(--mlb-accent);
     font-size: 24px;
     line-height: 1;
     cursor: pointer;
-    transition: all .3s ease;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .rst-carousel__nav button:hover {
     border-color: #fff;
-    background: var(--rst-accent);
-    color: var(--btn-text-color-hover, #101010);
+    background: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.25), inset 0 0 8px rgba(0, 0, 0, 0.5);
+    color: #fff;
 }
 
 /* ==========================================================================
-   8. Thanh đặt bàn
+   11. CTA chốt trang
    ========================================================================== */
 
-.rst-reserve {
+/* Khối chốt trang: ảnh bìa nhà hàng phủ lớp mực, thông tin liên hệ của chính
+   nhà hàng đó. Đặt cuối trang chi tiết, ngay trên footer của site. */
+.rst-cta {
     position: relative;
-    z-index: 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 6.6vw;
-    min-height: 70px;
-    background: var(--rst-ink);
-    color: #fff;
-    font-family: var(--rst-heading-font);
-    font-size: 3.33vw;
-    font-weight: 300;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: background .35s ease, color .35s ease;
+    padding: clamp(56px, 7vw, 110px) 20px;
+    background-color: var(--mlb-ink);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    text-align: center;
 }
 
-.rst-reserve:hover {
-    background: var(--rst-accent);
-    color: var(--btn-text-color-hover, #101010);
+.rst-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(9, 11, 22, 0.86) 0%, rgba(9, 11, 22, 0.92) 100%);
+}
+
+.rst-cta__inner {
+    position: relative;
+    z-index: 1;
+    width: min(100% - 40px, 760px);
+    margin-inline: auto;
+}
+
+.rst-cta__eyebrow {
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mlb-accent);
+}
+
+.rst-cta__title {
+    margin: 0;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(30px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    color: #fff;
+}
+
+/* đường kim cương bản sáng: bản mặc định lấy màu mực nên chìm vào nền tối */
+.rst-cta .rst-divider::before,
+.rst-cta .rst-divider::after {
+    background: linear-gradient(to right, transparent, var(--mlb-accent), rgba(255, 255, 255, 0.55), var(--mlb-accent), transparent);
+}
+
+.rst-cta .rst-divider {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+.rst-cta .rst-diamond {
+    background: linear-gradient(135deg, var(--mlb-accent), #fff);
+}
+
+.rst-cta__lede {
+    margin: clamp(18px, 2.2vw, 28px) auto 0;
+    max-width: 60ch;
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.rst-cta__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 32px;
+    margin: clamp(18px, 2.2vw, 26px) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.rst-cta__meta li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    list-style: none;
+}
+
+.rst-cta__meta i {
+    color: var(--mlb-accent);
+}
+
+.rst-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: clamp(28px, 3.2vw, 42px);
+}
+
+.rst-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    padding: 18px 38px;
+    border: 1px solid var(--mlb-accent);
+    border-radius: 2px;
+    background: var(--mlb-accent);
+    box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-family: var(--mlb-body-font);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-decoration: none;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rst-cta__btn:hover,
+.rst-cta__btn:focus-visible {
+    border-color: var(--mlb-flood, #be5c1a);
+    background: var(--mlb-flood, #be5c1a);
+    box-shadow: 0 22px 46px -16px rgba(0, 0, 0, 0.9);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.rst-cta__btn--ghost {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: transparent;
+    box-shadow: none;
+    color: #fff;
+}
+
+.rst-cta__btn--ghost:hover,
+.rst-cta__btn--ghost:focus-visible {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+    color: #fff;
+}
+
+@media (max-width: 575px) {
+    .rst-cta__actions {
+        flex-direction: column;
+    }
+
+    .rst-cta__btn {
+        justify-content: center;
+        padding-inline: 22px;
+    }
+
+    .rst-cta__btn span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 /* ==========================================================================
-   9. Các không gian khác
+   12. Các không gian khác
    ========================================================================== */
 
 .rst-others {
-    padding: 60px 0;
-    background: var(--rst-cream);
+    padding: clamp(44px, 5.5vw, 80px) 0;
+    background: var(--mlb-paper-alt);
 }
 
-.rst-others__grid {
+.mlb-rst-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--mlb-gap);
+}
+
+.mlb-rst-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--mlb-line-soft);
+    border-radius: 3px;
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.35s var(--mlb-ease, ease), box-shadow 0.35s ease;
+}
+
+.mlb-rst-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px -40px rgba(9, 11, 22, 0.6);
+}
+
+.mlb-rst-card__media {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--mlb-paper-alt);
+}
+
+.mlb-rst-card__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--mlb-ease, ease);
+}
+
+.mlb-rst-card:hover .mlb-rst-card__media img {
+    transform: scale(1.06);
+}
+
+.mlb-rst-badge {
+    position: absolute;
+    top: 14px;
+    inset-inline-start: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px;
+    border-radius: 2px;
+    background: rgba(9, 11, 22, 0.62);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.mlb-rst-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: clamp(20px, 2vw, 28px);
+}
+
+.mlb-rst-card__title {
+    margin: 0 0 10px;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(20px, 1.8vw, 25px);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--mlb-ink);
+}
+
+.mlb-rst-card__desc {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0 0 20px;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--mlb-ink-soft);
+}
+
+.mlb-rst-card__meta {
+    margin: 0 0 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-rst-card__foot {
+    margin-top: auto;
 }
 
 /* ==========================================================================
-   10. Lightbox
+   13. Trang danh sách — các hàng ảnh / chữ xen kẽ
+   ========================================================================== */
+
+.mlb-rst-rows {
+    padding-block: clamp(52px, 7vw, 104px);
+}
+
+.mlb-rst-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: clamp(28px, 4.5vw, 76px);
+}
+
+.mlb-rst-row + .mlb-rst-row {
+    margin-top: clamp(44px, 6vw, 96px);
+    padding-top: clamp(44px, 6vw, 96px);
+    border-top: 1px solid var(--mlb-line-soft);
+}
+
+.mlb-rst-row--reverse .mlb-rst-row__media {
+    order: 2;
+}
+
+.mlb-rst-row__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--mlb-paper-alt);
+}
+
+.mlb-rst-row__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s var(--mlb-ease, ease);
+}
+
+.mlb-rst-row__media:hover img {
+    transform: scale(1.05);
+}
+
+.mlb-rst-row__title {
+    margin: 0 0 18px;
+    font-family: var(--mlb-display-font);
+    font-size: clamp(28px, 3.4vw, 46px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+}
+
+.mlb-rst-row__title a {
+    color: var(--mlb-ink);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.mlb-rst-row__title a:hover {
+    color: var(--mlb-accent);
+}
+
+.mlb-rst-row__desc {
+    margin: 0 0 26px;
+    max-width: 56ch;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--mlb-ink-soft);
+}
+
+.mlb-rst-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 26px;
+    margin: 0 0 22px;
+    padding: 0;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-rst-row__meta li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+}
+
+.mlb-rst-row__meta i {
+    color: var(--mlb-accent);
+}
+
+.mlb-rst-empty {
+    padding-block: clamp(60px, 9vw, 130px);
+    text-align: center;
+    color: var(--mlb-ink-mute);
+}
+
+/* ==========================================================================
+   14. Lightbox
    ========================================================================== */
 
 .rst-lightbox {
@@ -433,111 +985,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, .92);
+    padding: 24px;
+    background: rgba(9, 11, 22, 0.94);
 }
 
 .rst-lightbox img {
-    max-width: 90vw;
-    max-height: 90vh;
+    max-width: 92vw;
+    max-height: 88vh;
     object-fit: contain;
 }
 
 .rst-lightbox__close {
     position: absolute;
-    top: 20px;
-    inset-inline-end: 30px;
+    top: 18px;
+    inset-inline-end: 24px;
     border: 0;
     background: none;
     color: #fff;
-    font-size: 40px;
+    font-size: 38px;
     line-height: 1;
     cursor: pointer;
 }
 
 /* ==========================================================================
-   11. Trang danh sách — các hàng ảnh / chữ xen kẽ
-   ========================================================================== */
-
-.rst-row {
-    padding: 60px 0;
-    background: var(--rst-cream);
-}
-
-.rst-row:nth-child(even) {
-    background: #fff;
-}
-
-.rst-row--reverse .row {
-    flex-direction: row-reverse;
-}
-
-.rst-row__media {
-    position: relative;
-    display: block;
-    overflow: hidden;
-}
-
-.rst-row__media img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform .5s ease;
-}
-
-.rst-row__media:hover img {
-    transform: scale(1.04);
-}
-
-.rst-row__badge {
-    position: absolute;
-    top: 16px;
-    inset-inline-start: 16px;
-    padding: 6px 14px;
-    background: rgba(0, 0, 0, .55);
-    color: #fff;
-    font-size: 12px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-}
-
-.rst-row__body {
-    padding: 30px 0 0;
-}
-
-.rst-row__hours {
-    margin-bottom: 10px;
-    color: var(--rst-accent);
-    font-size: 14px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-}
-
-.rst-row__title {
-    margin-bottom: 18px;
-    font-family: var(--rst-heading-font);
-    font-size: 40px;
-    font-weight: 300;
-    letter-spacing: .06em;
-}
-
-.rst-row__title a {
-    color: var(--rst-ink);
-}
-
-.rst-row__title a:hover {
-    color: var(--rst-accent);
-}
-
-.rst-row__desc {
-    margin-bottom: 24px;
-    color: var(--rst-muted);
-    font-size: 16px;
-    line-height: 1.8;
-}
-
-/* ==========================================================================
-   12. Responsive
+   15. Responsive
    ========================================================================== */
 
 @media (max-width: 1024px) {
@@ -552,171 +1023,55 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
     .rst-hero {
         height: 60vw;
-        margin-top: 24px;
     }
 
-    .rst-title__name {
-        font-size: 32px;
-        letter-spacing: .08em;
+    .rst-content {
+        padding-inline: 20px;
     }
 
-    .rst-heading__main {
-        font-size: 28px;
+    /* thân bài hẹp thì căn đều hai bên sẽ giãn chữ rất xấu */
+    .rst-content .ck-content {
+        font-size: 16px;
+        text-align: start;
     }
 
-    .rst-intro {
-        padding: 24px 20px 32px;
-    }
-
-    .rst-gallery {
-        padding: 0 16px 40px;
+    .rst-gallery,
+    .rst-embed {
+        padding-inline: 20px;
     }
 
     .rst-gallery__grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
-    .rst-reserve {
-        height: auto;
-        padding: 22px 16px;
-        font-size: 22px;
+    .rst-divider::before,
+    .rst-divider::after,
+    .rst-heading__line::before,
+    .rst-heading__line::after {
+        width: 46px;
     }
 
-    .rst-row {
-        padding: 40px 0;
+    .mlb-rst-row {
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    .rst-row__title {
-        font-size: 28px;
+    .mlb-rst-row--reverse .mlb-rst-row__media {
+        order: 0;
     }
 }
 
-/* ==========================================================================
-   13. Thẻ nhà hàng (dùng ở "Các không gian khác")
-   ========================================================================== */
+@media (max-width: 480px) {
+    .rst-carousel {
+        height: 360px;
+    }
 
-.rst-card {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid var(--rst-line);
-    color: inherit;
-    text-decoration: none;
-    transition: box-shadow .3s ease, transform .3s ease;
-}
-
-.rst-card:hover {
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .1);
-    transform: translateY(-4px);
-}
-
-.rst-card__media {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    background: var(--rst-cream);
-}
-
-.rst-card__media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform .5s ease;
-}
-
-.rst-card:hover .rst-card__media img {
-    transform: scale(1.05);
-}
-
-.rst-card__badge {
-    position: absolute;
-    top: 12px;
-    inset-inline-start: 12px;
-    padding: 5px 12px;
-    background: rgba(0, 0, 0, .55);
-    color: #fff;
-    font-size: 11px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-}
-
-.rst-card__body {
-    padding: 22px;
-}
-
-.rst-card__eyebrow,
-.rst-card__meta {
-    margin-bottom: 6px;
-    color: var(--rst-accent);
-    font-size: 12px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-}
-
-.rst-card__title {
-    margin-bottom: 10px;
-    color: var(--rst-ink);
-    font-family: var(--rst-heading-font);
-    font-size: 22px;
-    font-weight: 400;
-}
-
-.rst-card__desc {
-    display: -webkit-box;
-    overflow: hidden;
-    margin-bottom: 14px;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    color: var(--rst-muted);
-    font-size: 15px;
-    line-height: 1.7;
-}
-
-.rst-card__more {
-    color: var(--rst-ink);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-}
-
-.rst-card:hover .rst-card__more {
-    color: var(--rst-accent);
-}
-
-/* ==========================================================================
-   14. Dòng thông tin ngắn dưới phần giới thiệu
-   ========================================================================== */
-
-.rst-facts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 14px 40px;
-    margin: 26px 0 0;
-    padding: 0;
-    list-style: none;
-}
-
-.rst-facts li {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.rst-facts__label {
-    color: var(--rst-accent);
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-}
-
-.rst-facts__value {
-    color: var(--rst-ink);
-    font-size: 15px;
-    font-weight: 600;
+    .rst-carousel__item {
+        width: 200px;
+        height: 290px;
+        margin: -145px 0 0 -100px;
+    }
 }

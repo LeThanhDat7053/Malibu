@@ -53,6 +53,9 @@
 
     /* --------------------------------------------------------- Carousel */
 
+    // Hiện 5 ảnh: ảnh giữa và 2 ảnh mỗi bên.
+    var HALF_VISIBLE = 2;
+
     function initCarousel(wrapper) {
         var items = Array.prototype.slice.call(wrapper.querySelectorAll('.rst-carousel__item'));
 
@@ -77,17 +80,31 @@
                 }
 
                 var distance = Math.abs(offset);
-                var isNarrow = window.innerWidth <= 1024;
-                var step = isNarrow ? 170 : 260;
+                var visible = distance <= HALF_VISIBLE;
+
+                // Ảnh ngoài dải hiển thị đỗ ngay sát mép quạt ảnh và mờ hẳn, thay vì
+                // văng ra xa rồi bay ngang qua màn hình mỗi lần bấm mũi tên.
+                var slot = visible
+                    ? offset
+                    : (offset > 0 ? HALF_VISIBLE + 1 : -(HALF_VISIBLE + 1));
+                var slotDistance = Math.abs(slot);
+
+                // bước trượt theo từng breakpoint, khớp khổ thẻ khai báo trong restaurant.css
+                var width = window.innerWidth;
+                var step = width <= 480 ? 160 : (width <= 768 ? 190 : (width <= 1024 ? 220 : 280));
+                // ảnh hai bên nghiêng cố định 40°, càng xa càng nhỏ dần
+                var rotateY = slot === 0 ? 0 : (slot < 0 ? 40 : -40);
+                var scale = slot === 0 ? 1 : 0.72 - slotDistance * 0.06;
 
                 item.style.transform =
-                    'translateX(' + offset * step + 'px)' +
-                    ' translateZ(' + -distance * 220 + 'px)' +
-                    ' rotateY(' + offset * -28 + 'deg)';
-                item.style.opacity = distance > 2 ? '0' : String(1 - distance * 0.25);
-                item.style.zIndex = String(100 - distance);
+                    'translateX(' + slot * step + 'px)' +
+                    ' rotateY(' + rotateY + 'deg)' +
+                    ' scale(' + scale + ')';
+                item.style.opacity = visible ? '1' : '0';
+                // ảnh đang xem luôn nằm trên cùng, càng ra rìa càng xuống dưới
+                item.style.zIndex = visible ? String(100 - distance * 20) : '0';
+                item.style.pointerEvents = visible ? '' : 'none';
                 item.classList.toggle('is-active', distance === 0);
-                item.style.pointerEvents = distance > 2 ? 'none' : '';
             });
         }
 

@@ -67,6 +67,7 @@ return [
 
             $theme->asset()->usePath()->add('mlb-home-css', 'css/home.css', ['style-css']);
             $theme->asset()->usePath()->add('mlb-room-detail-css', 'css/room-detail.css', ['style-css']);
+            $theme->asset()->usePath()->add('mlb-contact-css', 'css/contact.css', ['style-css']);
 
             $theme->asset()->container('header')->usePath()->add('jquery', 'plugins/jquery.min.js');
             $theme->asset()->container('footer')->usePath()->add('imagesloaded', 'plugins/imagesloaded.min.js');

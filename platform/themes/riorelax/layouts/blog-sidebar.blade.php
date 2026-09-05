@@ -2,7 +2,7 @@
 
 @section('main')
 
-    <header class="header-area header-three">
+    <header class="header-area header-three {{ Theme::get('headerClass', 'mlb-header') }}">
         @if (theme_option('header_top_enabled', true))
             {!! Theme::partial('header-top') !!}
         @endif

@@ -54,14 +54,6 @@ class RestaurantForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
-            ->add('opening_hours', TextField::class, [
-                'label' => trans('plugins/restaurant::restaurant.opening_hours'),
-                'wrapper' => ['class' => $half],
-                'attr' => [
-                    'placeholder' => trans('plugins/restaurant::restaurant.opening_hours_placeholder'),
-                    'data-counter' => 160,
-                ],
-            ])
             ->add('cuisine', TextField::class, [
                 'label' => trans('plugins/restaurant::restaurant.cuisine'),
                 'wrapper' => ['class' => $half],
@@ -81,6 +73,21 @@ class RestaurantForm extends FormAbstract
                 'attr' => ['placeholder' => 'res@malibuhotel.com.vn', 'data-counter' => 120],
             ])
             ->add('rowClose1', 'html', ['html' => '</div>'])
+
+            // key phải đúng tên cột: form dịch đa ngôn ngữ chỉ giữ lại field
+            // nào trùng tên cột dịch được, field khác bị gỡ hết.
+            ->add('opening_hours_items', 'html', [
+                'html' => '<div class="form-group">'
+                    . '<label class="control-label">'
+                    . trans('plugins/restaurant::restaurant.opening_hours_items')
+                    . '</label>'
+                    . '<p class="text-muted small mb-2">'
+                    . trans('plugins/restaurant::restaurant.opening_hours_items_help')
+                    . '</p>'
+                    . view('plugins/restaurant::forms.opening-hours', ['model' => $this->getModel()])->render()
+                    . '</div>',
+                'wrapper' => ['class' => $this->formHelper->getConfig('defaults.wrapper_class')],
+            ])
 
             ->add('gallery_section', 'html', [
                 'html' => '<div class="form-group">'

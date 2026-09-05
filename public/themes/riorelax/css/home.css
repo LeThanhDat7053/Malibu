@@ -299,6 +299,49 @@
 
 /* ------------------------------------------------------------------- header */
 
+/* logo chừa khoảng thở trên dưới, min-height giữ nguyên chiều cao hàng menu cũ
+   nên không xê dịch phần hero bên dưới */
+.mlb-header .second-menu .logo {
+    display: flex;
+    align-items: center;
+    min-height: 61px;
+    padding-block: 12px;
+    line-height: 1;
+}
+
+.mlb-header .second-menu .logo img {
+    max-height: 46px;
+    width: auto;
+}
+
+@media (max-width: 767px) {
+    .mlb-header .second-menu .logo {
+        min-height: 56px;
+        padding-block: 9px;
+    }
+
+    .mlb-header .second-menu .logo img {
+        max-height: 38px;
+    }
+}
+
+/* Bảng menu mobile nằm trong .menu-area nhưng bị .navbar của Bootstrap chèn
+   thêm đệm và nền riêng, tạo khe hở lộ ảnh nền giữa header và bảng menu. */
+@media (max-width: 991px) {
+    .mlb-header .menu-mobile {
+        padding: 0;
+        background: transparent !important;
+    }
+
+    .mlb-header .menu-area .navbar-collapse {
+        margin: 0;
+    }
+
+    .mlb-header .menu-area.sticky-menu .navbar-collapse {
+        background: #fff;
+    }
+}
+
 .mlb-header .menu-area {
     background: rgba(9, 9, 12, 0.34);
     backdrop-filter: saturate(140%) blur(10px);
@@ -314,10 +357,18 @@
 }
 
 .mlb-header .menu-area.sticky-menu .main-menu ul li > a,
-.mlb-header .menu-area.sticky-menu .navbar-toggler,
 .mlb-header .menu-area.sticky-menu .menu-tigger,
 .mlb-header .menu-area.sticky-menu .bar-humburger a {
     color: var(--mlb-ink);
+}
+
+/* Nút hamburger mang sẵn class .text-white của Bootstrap (có !important) và
+   viền trắng cứng từ .btn-toggle-menu-mobile, nên khi navbar dính ở đầu trang
+   nền trắng ăn mất cả icon lẫn khung. Đổi cả hai sang màu chính. */
+.mlb-header .menu-area.sticky-menu .navbar-toggler,
+.mlb-header .menu-area.sticky-menu .btn-toggle-menu-mobile {
+    border-color: var(--mlb-accent);
+    color: var(--mlb-accent) !important;
 }
 
 .mlb-header .menu-area.sticky-menu .main-menu ul li > a:hover,

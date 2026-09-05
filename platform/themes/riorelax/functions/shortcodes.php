@@ -1819,4 +1819,89 @@ JS;
                 ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray());
         });
     }
+
+    if (is_plugin_active('contact')) {
+        // Trang liên hệ: cột trái form, cột phải bản đồ + thông tin + mạng xã hội.
+        // Mọi nội dung đều là ô nhập riêng nên sửa chữ không đụng vào bố cục.
+        Shortcode::register(
+            'contact-page',
+            __('Contact page'),
+            __('Malibu - contact form with map and contact details sidebar'),
+            function (ShortcodeCompiler $shortcode): ?string {
+                $form = \Botble\Contact\Forms\Fronts\ContactForm::createFromArray(
+                    Arr::except($shortcode->toArray(), ['name', 'email', 'phone', 'content', 'subject', 'address'])
+                );
+
+                // Nhãn nút gửi do plugin Liên hệ đặt cứng, ghi đè lại theo ô nhập
+                if ($buttonLabel = $shortcode->button_label) {
+                    $form->modify('submit', 'submit', ['label' => $buttonLabel]);
+                }
+
+                add_filter('contact_request_rules', function (array $rules, $request) use ($shortcode): array {
+                    return $request->applyRules($rules, $shortcode->display_fields, $shortcode->mandatory_fields);
+                }, 120, 2);
+
+                return Theme::partial('shortcodes.contact-page.index', compact('shortcode', 'form'));
+            }
+        );
+
+        Shortcode::ignoreLazyLoading(['contact-page']);
+        Shortcode::ignoreCaches(['contact-page']);
+
+        Shortcode::setAdminConfig('contact-page', function (array $attributes) {
+            return ShortcodeForm::createFromArray($attributes)
+                ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+                ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+                ->add('description', TextareaField::class, TextareaFieldOption::make()
+                    ->label(__('Description'))
+                    ->rows(3)
+                    ->toArray())
+                ->add('button_label', TextField::class, TextFieldOption::make()
+                    ->label(__('Submit button label'))
+                    ->toArray())
+                ->add(
+                    'display_fields',
+                    TextField::class,
+                    TextFieldOption::make()
+                        ->label(__('Form fields to show'))
+                        ->helperText(__('Comma separated: phone, email, subject, address'))
+                        ->toArray()
+                )
+                ->add(
+                    'mandatory_fields',
+                    TextField::class,
+                    TextFieldOption::make()
+                        ->label(__('Required form fields'))
+                        ->helperText(__('Comma separated: phone, email, subject, address'))
+                        ->toArray()
+                )
+                ->add('map_embed', TextareaField::class, TextareaFieldOption::make()
+                    ->label(__('Google map embed URL'))
+                    ->helperText(__('Paste only the src URL of the Google Maps embed iframe.'))
+                    ->rows(2)
+                    ->toArray())
+                ->add('vr360_url', TextareaField::class, TextareaFieldOption::make()
+                    ->label(__('VR360 tour URL'))
+                    ->helperText(__('Leave empty to hide the round toggle button on the map.'))
+                    ->rows(2)
+                    ->toArray())
+                ->add('info_title', TextField::class, TextFieldOption::make()->label(__('Sidebar heading'))->toArray())
+                ->add('address', TextareaField::class, TextareaFieldOption::make()
+                    ->label(__('Address'))
+                    ->rows(2)
+                    ->toArray())
+                ->add('phone', TextField::class, TextFieldOption::make()->label(__('Phone'))->toArray())
+                ->add('hotline', TextField::class, TextFieldOption::make()->label(__('Hotline'))->toArray())
+                ->add('email', TextField::class, TextFieldOption::make()->label(__('Email'))->toArray())
+                ->add('website', TextField::class, TextFieldOption::make()->label(__('Website'))->toArray())
+                ->add(
+                    'show_social',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Show social links'))
+                        ->choices(['1' => __('Yes'), '0' => __('No')])
+                        ->toArray()
+                );
+        });
+    }
 });

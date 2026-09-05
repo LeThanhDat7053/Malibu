@@ -59,6 +59,7 @@ class RestaurantServiceProvider extends ServiceProvider
                 'location',
                 'capacity',
                 'opening_hours',
+                'opening_hours_items',
                 'cuisine',
             ]);
         }
