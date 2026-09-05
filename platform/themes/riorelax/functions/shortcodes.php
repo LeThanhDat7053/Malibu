@@ -2,12 +2,14 @@
 
 use Botble\Base\Facades\Assets;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
+use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\InputFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\HtmlField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
@@ -25,6 +27,8 @@ use Botble\Hotel\Models\Room;
 use Botble\Hotel\Models\Service;
 use Botble\Hotel\Repositories\Interfaces\RoomInterface;
 use Botble\LanguageAdvanced\Supports\LanguageAdvancedManager;
+use Botble\Page\Models\Page;
+use Botble\Restaurant\Models\Restaurant;
 use Botble\Hotel\Shortcodes\Forms\ShortcodeHotelPlaceForm;
 use Botble\Hotel\Shortcodes\Forms\ShortcodeHotelServiceForm;
 use Botble\Shortcode\Compilers\Shortcode as ShortcodeCompiler;
@@ -1386,15 +1390,164 @@ app()->booted(function (): void {
         __('Malibu homepage - image + blurb + link grid'),
         function (ShortcodeCompiler $shortcode): ?string {
             $tabs = Shortcode::fields()->getTabsData(
-                ['image', 'eyebrow', 'title', 'description', 'link_label', 'link_url'],
+                ['page_id', 'image', 'eyebrow', 'title', 'description', 'link_label', 'link_url'],
                 $shortcode
             );
+
+            $selected = collect($tabs)->pluck('page_id')->filter()->unique();
+
+            if ($selected->isNotEmpty()) {
+                // giá trị dạng "loại:id"; giá trị cũ chỉ có id thì hiểu là trang
+                $sources = collect();
+
+                $selected
+                    ->mapToGroups(function (string $value): array {
+                        [$type, $id] = str_contains($value, ':')
+                            ? explode(':', $value, 2)
+                            : ['page', $value];
+
+                        return [$type => (int) $id];
+                    })
+                    ->each(function ($ids, string $type) use ($sources): void {
+                        $model = Arr::get([
+                            'page' => Page::class,
+                            'service' => Service::class,
+                            'restaurant' => Restaurant::class,
+                        ], $type);
+
+                        if (! $model || ! class_exists($model)) {
+                            return;
+                        }
+
+                        $model::query()
+                            ->wherePublished()
+                            ->whereIn('id', $ids)
+                            ->with('slugable')
+                            ->get()
+                            ->each(fn ($item) => $sources->put($type . ':' . $item->getKey(), $item));
+                    });
+
+                // ô nhập tay được ưu tiên; chọn nguồn ở admin đã tự điền sẵn các ô này
+                $tabs = collect($tabs)
+                    ->map(function (array $item) use ($sources) {
+                        $key = (string) Arr::get($item, 'page_id');
+                        $source = $sources->get(str_contains($key, ':') ? $key : 'page:' . $key);
+
+                        if (! $source) {
+                            return $item;
+                        }
+
+                        $item['title'] = Arr::get($item, 'title') ?: $source->name;
+                        $item['description'] = Arr::get($item, 'description') ?: $source->description;
+                        $item['link_url'] = Arr::get($item, 'link_url') ?: $source->url;
+
+                        return $item;
+                    })
+                    ->all();
+            }
 
             return Theme::partial('shortcodes.highlight-columns.index', compact('shortcode', 'tabs'));
         }
     );
 
     Shortcode::setAdminConfig('highlight-columns', function (array $attributes) {
+        // gom trang, tiện nghi và nhà hàng vào một ô chọn, mỗi loại một nhóm
+        $pageChoices = ['' => __('-- Select --')];
+        $sourceData = [];
+
+        $sourceGroups = [
+            'page' => [Page::class, __('Pages')],
+            'service' => [Service::class, __('Services')],
+            'restaurant' => [Restaurant::class, __('Restaurants')],
+        ];
+
+        foreach ($sourceGroups as $type => [$model, $groupLabel]) {
+            if (! class_exists($model)) {
+                continue;
+            }
+
+            $records = $model::query()
+                ->wherePublished()
+                ->with('slugable')
+                ->orderBy('name')
+                ->get();
+
+            if ($records->isEmpty()) {
+                continue;
+            }
+
+            $options = [];
+
+            foreach ($records as $record) {
+                $key = $type . ':' . $record->getKey();
+
+                $options[$key] = $record->name;
+                $sourceData[$key] = [
+                    'title' => (string) $record->name,
+                    'description' => (string) $record->description,
+                    'link_url' => (string) $record->url,
+                ];
+            }
+
+            $pageChoices[$groupLabel] = $options;
+        }
+
+        // chọn nguồn ở ô trên thì tự điền Title / Description / Link URL của tab đó
+        $syncScript = <<<'JS'
+<script>
+(function (data) {
+    // form nạp lại mỗi lần mở modal, chỉ gắn listener một lần và làm mới dữ liệu
+    window.mlbColumnSource = data;
+
+    if (window.mlbColumnSourceBound) {
+        return;
+    }
+
+    window.mlbColumnSourceBound = true;
+
+    document.addEventListener('change', function (event) {
+        var select = event.target;
+
+        if (! select || select.tagName !== 'SELECT') {
+            return;
+        }
+
+        var name = select.getAttribute('data-name') || select.getAttribute('name') || '';
+        var matched = name.match(/^page_id_(\d+)$/);
+
+        if (! matched) {
+            return;
+        }
+
+        var source = window.mlbColumnSource[select.value];
+
+        if (! source) {
+            return;
+        }
+
+        var box = select.closest('.accordion-item') || document;
+
+        ['title', 'description', 'link_url'].forEach(function (field) {
+            var input = box.querySelector('[data-name="' + field + '_' + matched[1] + '"]');
+
+            if (! input) {
+                return;
+            }
+
+            input.value = source[field] || '';
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    });
+})(__SOURCE_DATA__);
+</script>
+JS;
+
+        $syncScript = str_replace(
+            '__SOURCE_DATA__',
+            json_encode($sourceData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG),
+            $syncScript
+        );
+
         return ShortcodeForm::createFromArray($attributes)
             ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
             ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
@@ -1415,6 +1568,12 @@ app()->booted(function (): void {
                     ->attrs($attributes)
                     ->max(12)
                     ->fields([
+                        'page_id' => [
+                            'type' => 'select',
+                            'title' => __('Linked content'),
+                            'choices' => $pageChoices,
+                            'helper' => __('Title, description and link follow the item picked here. The fields below are used only when it has none.'),
+                        ],
                         'image' => ['type' => 'image', 'title' => __('Image')],
                         'eyebrow' => ['type' => 'text', 'title' => __('Eyebrow')],
                         'title' => ['type' => 'text', 'title' => __('Title')],
@@ -1423,6 +1582,11 @@ app()->booted(function (): void {
                         'link_url' => ['type' => 'url', 'title' => __('Link URL')],
                     ])
                     ->toArray()
+            )
+            ->add(
+                'page_sync_script',
+                HtmlField::class,
+                HtmlFieldOption::make()->content($syncScript)->toArray()
             );
     });
 
@@ -1608,7 +1772,6 @@ app()->booted(function (): void {
 
         Shortcode::setAdminConfig('booking-strip', function (array $attributes) {
             return ShortcodeForm::createFromArray($attributes)
-                ->add('title', TextField::class, TextFieldOption::make()->label(__('Eyebrow text'))->toArray())
                 ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
                 ->add(
                     'promo_enabled',

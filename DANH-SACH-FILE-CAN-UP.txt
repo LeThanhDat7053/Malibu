@@ -1,0 +1,16 @@
+﻿.
+├── composer.lock
+└── platform
+    └── themes
+        └── riorelax
+            ├── partials
+            │   └── shortcodes
+            │       ├── booking-strip
+            │       │   └── index.blade.php
+            │       └── simple-slider
+            │           └── index.blade.php
+            └── public
+                ├── css
+                │   └── home.css
+                └── js
+                    └── home.js

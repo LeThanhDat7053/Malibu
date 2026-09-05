@@ -994,6 +994,21 @@ body.mlb-bar-hidden .booking-bar {
     background: currentColor;
 }
 
+/* base.blade.php trả bullet và padding lại cho .ck-content ul, phải gỡ như hàng cam kết */
+.mlb-home .mlb-room__meta,
+.mlb-home .mlb-room__meta li {
+    list-style: none;
+}
+
+.mlb-home .mlb-room__meta {
+    margin: 0 0 14px;
+    padding: 0 0 14px;
+}
+
+.mlb-home .mlb-room__meta li {
+    margin-bottom: 0;
+}
+
 .mlb-room__text {
     margin: 0 0 20px;
     font-size: 14px;
