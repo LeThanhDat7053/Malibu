@@ -217,29 +217,6 @@
     border: 0;
 }
 
-/* iframe VR360 nuốt click nên phải có nút riêng để mở tour trong lightbox */
-.mlb-room-detail .mlb-rd-gallery .room-media-expand {
-    position: absolute;
-    right: 12px;
-    bottom: 12px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.55);
-    color: #fff;
-    font-size: 14px;
-    transition: background 0.25s ease;
-}
-
-.mlb-room-detail .mlb-rd-gallery .room-media-expand:hover {
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-}
-
 /* Slide video: poster phủ kín khung, nút play nằm giữa */
 .mlb-room-detail .mlb-rd-gallery .room-video-slide > a {
     position: absolute;
