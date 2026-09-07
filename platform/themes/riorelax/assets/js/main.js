@@ -589,9 +589,9 @@ $(document).ready(function () {
             }
 
             roomDetailsSlider.lightGallery({
-                // Cloned slides are skipped, otherwise infinite mode would list every photo twice
-                // in the lightbox. Order of the links = order of the slides: VR360, video, photos.
-                selector: '.slick-slide:not(.slick-cloned) a',
+                // Phải để nguyên 'a': slick gán class slick-slide thẳng vào thẻ <a> của ảnh,
+                // nên selector kiểu '.slick-slide a' sẽ không khớp ảnh nào và lightbox chết hẳn.
+                selector: 'a',
                 thumbnail: true,
                 share: false,
                 fullScreen: false,
