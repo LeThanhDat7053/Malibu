@@ -398,18 +398,6 @@
     color: #fff;
 }
 
-/* the floating booking bar steps aside while the in-page strip is on screen */
-.booking-bar {
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
-}
-
-body.mlb-bar-hidden .booking-bar {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(14px);
-    pointer-events: none;
-}
-
 /* --------------------------------------------------------------------- hero */
 
 .mlb-home .slider-area .single-slider.slider-bg {

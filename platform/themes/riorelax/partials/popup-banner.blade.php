@@ -41,33 +41,25 @@
 
         if (!overlay || !panel) return;
 
-        /* ---- Build booking URL with today/tomorrow dates ---- */
-        function buildBookingUrl() {
-            var now      = new Date();
-            var tomorrow = new Date(now);
-            tomorrow.setDate(now.getDate() + 1);
-            function fmt(d) {
-                var y = d.getFullYear();
-                var m = String(d.getMonth() + 1).padStart(2, '0');
-                var day = String(d.getDate()).padStart(2, '0');
-                return y + '-' + m + '-' + day;
-            }
-            return 'https://book-directonline.com/properties/botbluhotspadirect'
-                + '?locale=vi'
-                + '&items[0][adults]=2'
-                + '&items[0][children]=0'
-                + '&items[0][infants]=0'
-                + '&currency=VND'
-                + '&checkInDate=' + fmt(now)
-                + '&checkOutDate=' + fmt(tomorrow)
-                + '&trackPage=yes';
-        }
+        /* ---- Link dat phong lay tu Theme Options, bo trong thi anh khong bam duoc ---- */
+        var bookingMeta = document.querySelector('meta[name="mlb-booking-url"]');
+        var bookingUrl  = bookingMeta ? (bookingMeta.getAttribute('content') || '').trim() : '';
+        var fullLink    = document.getElementById('bannerFullscreenLink');
+        var panelLink   = document.getElementById('bannerPanelLink');
 
-        var bookingUrl = buildBookingUrl();
-        var fullLink  = document.getElementById('bannerFullscreenLink');
-        var panelLink = document.getElementById('bannerPanelLink');
-        if (fullLink)  fullLink.href  = bookingUrl;
-        if (panelLink) panelLink.href = bookingUrl;
+        [fullLink, panelLink].forEach(function (link) {
+            if (!link) return;
+
+            if (bookingUrl) {
+                link.href = bookingUrl;
+                return;
+            }
+
+            // Chua nhap link: giu nguyen anh nhung bam vao khong di dau ca
+            link.removeAttribute('href');
+            link.removeAttribute('target');
+            link.style.cursor = 'default';
+        });
 
         var autoTimer;
         var panelOpen = false;

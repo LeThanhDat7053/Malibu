@@ -81,12 +81,16 @@
                     <span>{{ $bookingLabel }}</span>
                 </a>
             @else
-                <button type="button" class="booking-bar-btn" id="booking-toggle">
+                {{-- Chua nhap link o dashboard: nut van hien nhung bam khong lam gi.
+                     Khong dat id="booking-toggle" nen bang chon ngay khong mo ra. --}}
+                <button type="button" class="booking-bar-btn">
                     <i class="far fa-calendar-alt"></i>
                     <span>{{ $bookingLabel }}</span>
                 </button>
             @endif
         </div>
+        @unless ($bookingUrl)
+        {{-- Bang chon ngay chi con y nghia khi khong co link ben ngoai --}}
         <div class="booking-bar-panel" id="booking-panel">
             <div class="booking-bar-panel-inner">
                 <h4 class="bm-title">{{ __('MAKE RESERVATION') }}</h4>
@@ -134,5 +138,6 @@
                 <button type="button" class="booking-close" id="booking-close">&times;</button>
             </div>
         </div>
+        @endunless
     </div>
     @endif

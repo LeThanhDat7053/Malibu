@@ -4,9 +4,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var toggleBtn = document.getElementById('booking-toggle');
     var closeBtn = document.getElementById('booking-close');
 
-    if (!bar || !panel || !toggleBtn) return;
+    // Chi can thanh nut la chay tiep: viec dat vi tri thanh nut ngay duoi header
+    // phai lam ca khi nut o dang link (luc do khong co #booking-toggle).
+    // Truoc day thoat som o day nen nut dang link bi dinh len sat dinh trang.
+    if (!bar) return;
 
-    var panelInner = panel.querySelector('.booking-bar-panel-inner');
+    var hasPanel = !!(panel && toggleBtn);
+    var panelInner = panel ? panel.querySelector('.booking-bar-panel-inner') : null;
 
     function updatePanelMaxHeight() {
         if (!panelInner) return;
@@ -15,33 +19,35 @@ document.addEventListener('DOMContentLoaded', function () {
         panelInner.style.maxHeight = Math.max(200, available) + 'px';
     }
 
-    // Toggle panel open/close
-    toggleBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        panel.classList.toggle('open');
-        if (panel.classList.contains('open')) {
-            updatePanelMaxHeight();
-        }
-    });
+    if (hasPanel) {
+        // Toggle panel open/close
+        toggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                updatePanelMaxHeight();
+            }
+        });
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () {
-            panel.classList.remove('open');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                panel.classList.remove('open');
+            });
+        }
+
+        // Prevent clicks inside the panel from bubbling to the document listener
+        // (fixes datepicker navigation causing the panel to close on re-render)
+        panel.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', function (e) {
+            if (bar && !bar.contains(e.target)) {
+                panel.classList.remove('open');
+            }
         });
     }
-
-    // Prevent clicks inside the panel from bubbling to the document listener
-    // (fixes datepicker navigation causing the panel to close on re-render)
-    panel.addEventListener('click', function (e) {
-        e.stopPropagation();
-    });
-
-    // Close when clicking outside
-    document.addEventListener('click', function (e) {
-        if (bar && !bar.contains(e.target)) {
-            panel.classList.remove('open');
-        }
-    });
 
     // Always snap bar directly below the header
     var header = document.getElementById('header-sticky') || document.querySelector('.menu-area') || document.querySelector('.header-area');
@@ -58,7 +64,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             headerBottom = header.getBoundingClientRect().bottom;
         }
-        bar.style.top = Math.max(0, headerBottom) + 'px';
+        // Header cuon khuat khoi man hinh: giu nut dung cho thanh header dinh sap
+        // xuat hien, khong de nut truot len sat dinh trang roi nhay nguoc xuong.
+        bar.style.top = Math.max(header.offsetHeight, headerBottom) + 'px';
     }
 
     // Defer scroll updates to the next animation frame so that main.js
@@ -75,7 +83,9 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('scroll', scheduleBarUpdate, { passive: true });
     window.addEventListener('resize', updateBarPosition);
 
-    initBookingCalendar();
+    if (hasPanel) {
+        initBookingCalendar();
+    }
 
     function initBookingCalendar() {
         if (typeof jQuery === 'undefined' || typeof jQuery.fn.datepicker === 'undefined') {

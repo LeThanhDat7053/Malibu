@@ -256,7 +256,7 @@ app()->booted(function (): void {
                     'placeholder' => 'https://',
                 ],
             ],
-            'helper' => __('Leave empty to open the built-in date picker. Enter a URL to link to an external booking system instead.'),
+            'helper' => __('Enter the URL of your booking system. Leave empty and every booking button on the site stays visible but does nothing when clicked.'),
         ])
         ->setField([
             'id' => 'booking_button_new_tab',

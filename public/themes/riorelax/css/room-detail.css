@@ -217,6 +217,61 @@
     border: 0;
 }
 
+/* Nút mở tour trong khung xem to. Chỉ chiếm một góc để phần còn lại của slide
+   vẫn kéo xoay tour tại chỗ được; đặt trên iframe nên cần z-index. */
+.mlb-room-detail .mlb-rd-gallery .room-vr360-slide .room-vr360-expand {
+    position: absolute;
+    z-index: 3;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    backdrop-filter: blur(2px);
+    transition: background 0.3s ease;
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-vr360-slide .room-vr360-expand:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+.mlb-rd-gallery .room-vr360-slide .room-vr360-expand i {
+    font-size: 15px;
+    color: #00d4ff;
+}
+
+/* Khung xem to của bộ ảnh phòng (lightGallery, class đặt từ main.js).
+   lightGallery tự ẩn thanh công cụ sau vài giây và chỉ hiện lại khi chuột động
+   trong khung — mà slide VR360/video là iframe nuốt hết chuột, nên nút đóng sẽ
+   không bao giờ hiện lại. Ở bộ ảnh phòng thì giữ nút đóng và mũi tên luôn hiện. */
+.lg-outer.lg-room-gallery.lg-hide-items .lg-toolbar,
+.lg-outer.lg-room-gallery.lg-hide-items .lg-prev,
+.lg-outer.lg-room-gallery.lg-hide-items .lg-next {
+    opacity: 1;
+    transform: none;
+}
+
+.lg-outer.lg-room-gallery .lg-toolbar {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.lg-outer.lg-room-gallery .lg-toolbar .lg-icon,
+.lg-outer.lg-room-gallery .lg-prev,
+.lg-outer.lg-room-gallery .lg-next {
+    color: #fff;
+}
+
 /* Slide video: poster phủ kín khung, nút play nằm giữa */
 .mlb-room-detail .mlb-rd-gallery .room-video-slide > a {
     position: absolute;

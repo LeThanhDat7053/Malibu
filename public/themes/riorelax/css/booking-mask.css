@@ -47,6 +47,12 @@ a.booking-bar-btn {
     text-decoration: none;
 }
 
+/* lightGallery mo khung xem anh/VR360 phu kin man hinh (body.lg-on):
+   nut dat phong noi phai an di, khong thi no de len nut dong cua khung xem. */
+body.lg-on .booking-bar {
+    display: none;
+}
+
 .booking-bar-btn i {
     font-size: 14px;
 }

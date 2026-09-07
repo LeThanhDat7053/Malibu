@@ -249,7 +249,6 @@
         })
 
         restoreStay($start, $end, $adults, $children)
-        deferFloatingBar()
 
         form.addEventListener('submit', function () {
             var start = pickerDate($start)
@@ -330,48 +329,6 @@
         }
 
         node.textContent = part + ' — ' + (node.getAttribute('data-default') || '')
-    }
-
-    // The theme's floating booking bar is fixed near the top-right, exactly where the
-    // in-page strip sits. Hide it until the page has scrolled past that strip.
-    // Deliberately not an IntersectionObserver: during a fast scroll it can deliver a
-    // stale "still intersecting" entry after a newer one and flick the bar back off.
-    function deferFloatingBar() {
-        var strip = document.querySelector('.mlb-booking')
-        var bar = document.querySelector('.booking-bar')
-
-        if (!strip || !bar) {
-            return
-        }
-
-        var showFrom = 0
-        var ticking = false
-
-        function measure() {
-            showFrom = strip.getBoundingClientRect().bottom + window.pageYOffset
-            sync()
-        }
-
-        function sync() {
-            document.body.classList.toggle('mlb-bar-hidden', window.pageYOffset < showFrom)
-        }
-
-        function onScroll() {
-            if (ticking) {
-                return
-            }
-
-            ticking = true
-            window.requestAnimationFrame(function () {
-                ticking = false
-                sync()
-            })
-        }
-
-        measure()
-        window.addEventListener('scroll', onScroll, { passive: true })
-        window.addEventListener('resize', measure)
-        window.addEventListener('load', measure)
     }
 
     // prefill the coupon field on the booking page with what was typed on the homepage

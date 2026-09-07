@@ -589,15 +589,40 @@ $(document).ready(function () {
             }
 
             roomDetailsSlider.lightGallery({
-                // Cloned slides are skipped, otherwise infinite mode would list every photo twice
-                // in the lightbox. Order of the links = order of the slides: VR360, video, photos.
-                selector: '.slick-slide:not(.slick-cloned) a',
+                // Ảnh nằm thẳng trong slider nên slick gắn .slick-slide lên CHÍNH thẻ <a>,
+                // còn slide video là <div> bọc <a> bên trong — phải nhận cả hai kiểu.
+                // Chỉ dùng vế sau thì lightGallery chỉ thấy đúng một item, mất nút lướt
+                // và ảnh không được bắt click nên trình duyệt nhảy thẳng sang link ảnh gốc.
+                // Bỏ qua slide nhân bản, không thì chế độ vòng lặp liệt kê mỗi ảnh hai lần.
+                selector: '.slick-slide:not(.slick-cloned) a, a.slick-slide:not(.slick-cloned)',
                 thumbnail: true,
                 share: false,
                 fullScreen: false,
                 autoplay: false,
                 autoplayControls: false,
                 actualSize: false,
+                // Dánh dấu riêng khung xem của bộ ảnh phòng để CSS giữ nút đóng luôn hiện:
+                // slide VR360/video là iframe, chuột nằm trong iframe nên lightGallery
+                // không nhận được mousemove để hiện lại thanh công cụ đã tự ẩn.
+                addClass: 'lg-room-gallery',
+            });
+
+            // Khung xem to dang mo: go src cua tour nhung trong slide va khung phat video
+            // de khong co hai tour/video chay cung luc; dong lai thi nap tra ve nhu cu.
+            roomDetailsSlider.on('onAfterOpen.lg', function () {
+                stopRoomVideos();
+
+                vr360Frames.each(function () {
+                    this.removeAttribute('src');
+                });
+            });
+
+            roomDetailsSlider.on('onCloseAfter.lg', function () {
+                vr360Frames.each(function () {
+                    this.src = $(this).data('src');
+                });
+
+                playRoomVideo(roomDetailsSlider.slick('slickCurrentSlide'));
             });
 
             roomDetailsSliderNav.slick({

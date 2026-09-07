@@ -6,6 +6,12 @@
     <meta content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=1" name="viewport" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- Link hệ thống đặt phòng, nhập ở Theme Options > Booking button.
+         Bỏ trống thì mọi nút đặt phòng của theme bấm vào không làm gì cả —
+         theme không còn địa chỉ đặt phòng cứng nào nữa. --}}
+    <meta name="mlb-booking-url" content="{{ trim((string) theme_option('booking_button_url')) }}">
+    <meta name="mlb-booking-new-tab" content="{{ theme_option('booking_button_new_tab', 'yes') !== 'no' ? '1' : '0' }}">
+
     <link href="https://fonts.googleapis.com/css?family={{ urlencode(theme_option('primary_font', 'Epilogue')) }}:400,500,600,700" rel="stylesheet" type="text/css">
 
     {{-- Display serif used by the Malibu homepage headings --}}

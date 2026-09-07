@@ -159,8 +159,8 @@
                     <div class="room-details-slider">
                         {{-- VR360 embedded inline as the first slide(s). src is deferred to data-src and
                              filled by roomDetailsSlider() so slick's clones don't load the tour twice.
-                             Tour kéo xoay thẳng trong slider; xem toàn màn hình bằng nút của chính tour,
-                             nên slide này không có thẻ <a> và không nằm trong danh sách của lightGallery. --}}
+                             Tour kéo xoay thẳng trong slider, đồng thời thẻ <a> bên dưới đưa chính
+                             tour đó vào lightGallery dạng iframe để xem to cùng ảnh và video. --}}
                         @foreach ($roomVr360Items as $vr360)
                             <div class="room-media-slide room-vr360-slide">
                                 <iframe class="room-vr360-frame"
@@ -169,9 +169,20 @@
                                         frameborder="0"
                                         allow="accelerometer; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
                                         allowfullscreen></iframe>
-                                {{-- Không thêm nút mở rộng: thanh điều khiển của chính tour đã có
-                                     nút toàn màn hình, mà bốn góc slide đều là UI của tour nên nút
-                                     của theme đặt đâu cũng chồng lên. --}}
+                                {{-- Nút nhỏ ở giữa mép trên — bốn góc slide đều là nút của chính tour.
+                                     Không phủ kín slide để vẫn kéo xoay tour ngay tại chỗ được.
+                                     data-thumb: lightGallery không tìm thấy <img> trong thẻ này nên
+                                     phải chỉ rõ ảnh cho dải thumbnail của khung xem to. --}}
+                                <a class="room-vr360-expand"
+                                   href="{{ Arr::get($vr360, 'img') }}"
+                                   data-iframe="true"
+                                   data-download-url="false"
+                                   data-thumb="{{ $roomVr360Poster($vr360) }}"
+                                   data-sub-html="{{ Arr::get($vr360, 'description') ?: __('View VR360') }}"
+                                   aria-label="{{ __('View VR360') }}">
+                                    <i class="fal fa-vr-cardboard"></i>
+                                    <span>{{ __('View VR360') }}</span>
+                                </a>
                             </div>
                         @endforeach
                         {{-- Video: slide là poster + nút play, bấm vào mở lightGallery dạng iframe --}}
