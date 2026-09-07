@@ -550,6 +550,17 @@
     <div class="mlb-hero-count" data-mlb-hero-count></div>
 </section>
 
+{{-- hộp đặt phòng nhanh bật từ ô tick của shortcode, chỉ có tác dụng ở trang chủ --}}
+@if (is_plugin_active('hotel') && malibu_booking_box_enabled($shortcode->show_booking ?? null))
+    @include(Theme::getThemeNamespace('partials.shortcodes.includes.booking-box'), [
+        'variant' => 'hero',
+        'buttonLabel' => $shortcode->booking_button_label ?? null,
+        'promoEnabled' => ($shortcode->booking_promo_enabled ?? null) === '1',
+        'trustItems' => array_values(array_filter(array_map('trim', explode(';', (string) ($shortcode->booking_trust_items ?? ''))))),
+        'boxTitle' => null,
+    ])
+@endif
+
 @once
     <script>
         (function () {

@@ -558,8 +558,8 @@ body.mlb-bar-hidden .booking-bar {
     z-index: 2;
 }
 
-/* only the homepage strip lifts into the hero */
-.mlb-home .mlb-booking {
+/* only the homepage hero strip lifts into the hero */
+.mlb-home .mlb-booking--hero {
     margin-top: calc(-1 * var(--mlb-hero-strip));
     /* trả lại đúng phần đã kéo lên, để section kế tiếp bắt đầu ở đáy hero */
     margin-bottom: var(--mlb-hero-gap);
@@ -588,18 +588,25 @@ body.mlb-bar-hidden .booking-bar {
 }
 
 .mlb-booking__form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    align-items: end;
-    gap: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 18px 22px;
     margin: 0;
 }
 
 .mlb-booking__field {
     display: flex;
     flex-direction: column;
+    flex: 1 1 130px;
     gap: 6px;
     min-width: 0;
+}
+
+/* ô ngày gánh cả kỳ nghỉ nên rộng gấp đôi các ô còn lại */
+.mlb-booking__field--range {
+    position: relative;
+    flex: 2 1 250px;
 }
 
 .mlb-booking__field label {
@@ -645,6 +652,7 @@ body.mlb-bar-hidden .booking-bar {
 }
 
 .mlb-booking__submit {
+    flex: 0 0 auto;
     height: 44px;
     padding: 0 26px;
     border: 0;
@@ -700,11 +708,11 @@ body.mlb-bar-hidden .booking-bar {
 }
 
 /* trang chủ Malibu: hộp gọn hơn vì nằm trong hero */
-.mlb-home .mlb-booking__inner {
+.mlb-home .mlb-booking--hero .mlb-booking__inner {
     padding-bottom: clamp(14px, 1.4vw, 18px);
 }
 
-.mlb-home .mlb-booking__trust {
+.mlb-home .mlb-booking--hero .mlb-booking__trust {
     margin: 14px 0 0;
     padding-top: 12px;
 }
@@ -1951,5 +1959,798 @@ body.mlb-bar-hidden .booking-bar {
     .mlb-location__contact > div {
         grid-template-columns: minmax(0, 1fr);
         gap: 4px;
+    }
+}
+
+/* ------------------------------------------------------- one-row slider skin */
+
+/* Dùng chung cho highlight-columns, offers và dải giải thưởng: mọi khối chỉ còn một hàng */
+.mlb-slider {
+    display: block;
+    position: relative;
+}
+
+.mlb-slider:not(.slick-initialized) {
+    display: flex;
+    gap: var(--mlb-gap);
+    overflow: hidden;
+}
+
+.mlb-slider:not(.slick-initialized) > * {
+    flex: 0 0 calc((100% - (var(--mlb-columns, 3) - 1) * var(--mlb-gap)) / var(--mlb-columns, 3));
+}
+
+.mlb-slider .slick-list {
+    margin-inline: calc(var(--mlb-gap) / -2);
+}
+
+/* track dựng bằng flex để mọi card trong hàng cao bằng nhau */
+.mlb-slider .slick-track {
+    display: flex;
+    align-items: stretch;
+}
+
+.mlb-slider .slick-track::before,
+.mlb-slider .slick-track::after {
+    display: none;
+}
+
+.mlb-slider .slick-slide {
+    height: auto;
+    padding-inline: calc(var(--mlb-gap) / 2);
+}
+
+.mlb-slider .slick-slide > div,
+.mlb-slider .slick-slide > div > * {
+    height: 100%;
+}
+
+.mlb-slider .mlb-slider__nav.slick-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--mlb-line);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 14px 34px -22px rgba(22, 25, 44, 0.55);
+    color: var(--mlb-ink);
+    font-size: 0;
+    line-height: 0;
+    opacity: 1;
+    transform: translateY(-50%);
+    transition: background 0.25s var(--mlb-ease), border-color 0.25s var(--mlb-ease), color 0.25s var(--mlb-ease);
+}
+
+/* mũi tên vẽ bằng border, không phụ thuộc bộ icon nào */
+.mlb-slider .mlb-slider__nav.slick-arrow::before {
+    content: '';
+    width: 9px;
+    height: 9px;
+    border-top: 1.5px solid currentColor;
+    border-inline-end: 1.5px solid currentColor;
+}
+
+.mlb-slider .mlb-slider__nav--prev.slick-arrow {
+    inset-inline-start: -22px;
+}
+
+.mlb-slider .mlb-slider__nav--next.slick-arrow {
+    inset-inline-end: -22px;
+}
+
+.mlb-slider .mlb-slider__nav--prev.slick-arrow::before {
+    transform: rotate(-135deg);
+    margin-inline-start: 3px;
+}
+
+.mlb-slider .mlb-slider__nav--next.slick-arrow::before {
+    transform: rotate(45deg);
+    margin-inline-end: 3px;
+}
+
+.mlb-slider .mlb-slider__nav.slick-arrow:hover,
+.mlb-slider .mlb-slider__nav.slick-arrow:focus-visible {
+    background: var(--mlb-ink);
+    border-color: var(--mlb-ink);
+    color: #fff;
+}
+
+.mlb-slider .mlb-slider__nav.slick-disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+@media (min-width: 1400px) {
+    .mlb-slider .mlb-slider__nav--prev.slick-arrow {
+        inset-inline-start: -66px;
+    }
+
+    .mlb-slider .mlb-slider__nav--next.slick-arrow {
+        inset-inline-end: -66px;
+    }
+}
+
+/* theme.css ẩn .slick-dots và neo nó tuyệt đối, phải trả lại về dòng thường */
+.mlb-slider .slick-dots {
+    display: flex;
+    position: static;
+    justify-content: center;
+    gap: 10px;
+    margin: clamp(24px, 3vw, 36px) 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+}
+
+.mlb-slider .slick-dots li {
+    display: block;
+    width: auto;
+    height: auto;
+    margin: 0;
+}
+
+.mlb-slider .slick-dots li button {
+    width: 26px;
+    height: 2px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: var(--mlb-line);
+    text-indent: -9999px;
+    transition: background 0.25s var(--mlb-ease), width 0.25s var(--mlb-ease);
+}
+
+.mlb-slider .slick-dots li button::before {
+    display: none;
+}
+
+.mlb-slider .slick-dots li.slick-active button {
+    width: 46px;
+    background: var(--mlb-accent);
+}
+
+/* ------------------------------------------------------------ section heads */
+
+.mlb-section-head--center {
+    text-align: center;
+}
+
+.mlb-section-head--center .mlb-eyebrow {
+    justify-content: center;
+}
+
+.mlb-section-head--center .mlb-lede {
+    margin-inline: auto;
+}
+
+/* ----------------------------------------------------- awards & achievements */
+
+.mlb-awards {
+    padding-block: clamp(44px, 5vw, 78px);
+    border-block: 1px solid var(--mlb-line-soft);
+    background: #fff;
+}
+
+.mlb-awards__track {
+    /* logo nhỏ hơn card nên khe hẹp lại, dùng chung biến với phần slider */
+    --mlb-gap: clamp(14px, 1.6vw, 26px);
+}
+
+.mlb-awards__track--static {
+    display: grid;
+    grid-template-columns: repeat(var(--mlb-awards-per-view, 6), minmax(0, 1fr));
+    gap: var(--mlb-gap);
+}
+
+.mlb-awards .mlb-slider:not(.slick-initialized) > * {
+    flex: 0 0 calc((100% - (var(--mlb-awards-per-view, 6) - 1) * var(--mlb-gap)) / var(--mlb-awards-per-view, 6));
+}
+
+.mlb-award {
+    margin: 0;
+}
+
+/* khung cố định chiều cao: ảnh to nhỏ khác nhau vẫn cho ra một hàng phẳng */
+.mlb-award__frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: clamp(112px, 11vw, 168px);
+    padding: clamp(8px, 1vw, 14px);
+    border: 1px solid var(--mlb-line-soft);
+    border-radius: 3px;
+    background: #fff;
+    transition: border-color 0.3s var(--mlb-ease), transform 0.3s var(--mlb-ease), box-shadow 0.3s var(--mlb-ease);
+}
+
+.mlb-award__frame img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+a.mlb-award__frame:hover,
+a.mlb-award__frame:focus-visible {
+    border-color: var(--mlb-accent);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 36px -24px rgba(22, 25, 44, 0.6);
+}
+
+.mlb-award__name {
+    margin: 12px 0 0;
+    font-size: 11.5px;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--mlb-ink-mute);
+}
+
+@media (max-width: 575px) {
+    .mlb-awards__track--static {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ------------------------------------------------------------- video section */
+
+.mlb-video--full {
+    position: relative;
+    background: #000;
+}
+
+.mlb-video__stage {
+    position: relative;
+    height: var(--mlb-video-h, 100svh);
+    min-height: 380px;
+    overflow: hidden;
+    background: #000;
+}
+
+.mlb-video__stage .mlb-video__el {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mlb-video__frame {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+/* iframe YouTube giữ tỉ lệ 16:9, phóng to để phủ kín khung dù khung cao hay rộng */
+.mlb-video__frame iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 56.25vw;
+    min-width: 177.78vh;
+    min-height: 100%;
+    border: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.mlb-video__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: #0b0d16;
+    opacity: var(--mlb-video-scrim, 0.35);
+}
+
+.mlb-video__mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: min(42vw, 280px);
+    height: auto;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 12px 34px rgba(0, 0, 0, 0.42));
+}
+
+.mlb-video__overlay {
+    position: absolute;
+    inset-inline: 0;
+    bottom: clamp(36px, 7vh, 96px);
+    z-index: 3;
+    text-align: center;
+}
+
+.mlb-video--full .mlb-eyebrow,
+.mlb-video--full .mlb-display,
+.mlb-video--full .mlb-lede {
+    color: #fff;
+}
+
+.mlb-video--full .mlb-eyebrow {
+    justify-content: center;
+}
+
+.mlb-video--full .mlb-eyebrow::before {
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.mlb-video--full .mlb-lede {
+    margin-inline: auto;
+}
+
+.mlb-video--full .mlb-btn {
+    margin-top: clamp(20px, 2.4vw, 30px);
+    border-color: #fff;
+    background: #fff;
+    color: var(--mlb-ink);
+}
+
+.mlb-video--full .mlb-btn:hover,
+.mlb-video--full .mlb-btn:focus-visible {
+    border-color: var(--mlb-accent);
+    background: var(--mlb-accent);
+    color: #fff;
+}
+
+/* video hero nằm ngay dưới header trong suốt, kéo lên cho tràn hết màn hình */
+.mlb-home .mlb-video--full:first-child .mlb-video__stage {
+    margin-top: 0;
+}
+
+.mlb-video--split {
+    padding-block: var(--mlb-section-y);
+    background: var(--mlb-paper);
+}
+
+.mlb-video__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(28px, 4vw, 64px);
+}
+
+.mlb-video--media-right .mlb-video__media {
+    order: 2;
+}
+
+.mlb-video__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #000;
+}
+
+.mlb-video__media .mlb-video__el,
+.mlb-video__media .mlb-video__facade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mlb-video__media .mlb-video__frame iframe {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    pointer-events: auto;
+}
+
+.mlb-video__facade {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: #000;
+    cursor: pointer;
+}
+
+.mlb-video__facade img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s var(--mlb-ease), opacity 0.4s var(--mlb-ease);
+}
+
+.mlb-video__facade:hover img,
+.mlb-video__facade:focus-visible img {
+    transform: scale(1.04);
+    opacity: 0.82;
+}
+
+.mlb-video__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: clamp(58px, 6vw, 82px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--mlb-accent);
+    transform: translate(-50%, -50%);
+}
+
+.mlb-video__play::before {
+    content: '';
+    margin-inline-start: 5px;
+    border-block: 11px solid transparent;
+    border-inline-start: 18px solid #fff;
+    border-inline-end: 0;
+}
+
+/* vòng sáng lan ra để nút play không nằm chết trên ảnh tĩnh */
+.mlb-video__play::after {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+    animation: mlb-video-pulse 2.6s var(--mlb-ease) infinite;
+}
+
+@keyframes mlb-video-pulse {
+    0% { transform: scale(0.86); opacity: 0.9; }
+    70% { transform: scale(1.18); opacity: 0; }
+    100% { transform: scale(1.18); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mlb-video__play::after {
+        animation: none;
+    }
+}
+
+.mlb-video__text {
+    margin: 20px 0 26px;
+    font-size: clamp(15px, 1.05vw, 17px);
+    line-height: 1.78;
+    color: var(--mlb-ink-soft);
+}
+
+.mlb-video__text p:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 860px) {
+    .mlb-video__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mlb-video--media-right .mlb-video__media {
+        order: 0;
+    }
+}
+
+/* --------------------------------------------- booking box under a video */
+
+/* Biến thể dưới video: dải tối chạy hết bề ngang, khác hẳn thẻ trắng của hero */
+.mlb-booking--video {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.mlb-home .mlb-booking--video {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.mlb-booking--video .mlb-booking__shell {
+    width: 100%;
+}
+
+.mlb-booking--video .mlb-booking__inner {
+    padding-block: clamp(20px, 2.2vw, 28px);
+    padding-inline: max(20px, calc((100% - 1280px) / 2));
+    border: 0;
+    border-top: 2px solid var(--mlb-accent);
+    background: var(--mlb-ink);
+    box-shadow: none;
+}
+
+.mlb-booking--video .mlb-booking__eyebrow {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.mlb-booking--video .mlb-booking__field label {
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.mlb-booking--video .mlb-booking__field input,
+.mlb-booking--video .mlb-booking__field select,
+.mlb-booking--video .mlb-range__value {
+    border-bottom-color: rgba(255, 255, 255, 0.28);
+    color: #fff;
+}
+
+.mlb-booking--video .mlb-booking__field input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* theme.css ép select nền trắng bằng !important, chữ trắng sẽ mất hút nên phải đè lại */
+.mlb-booking--video .mlb-booking__field select {
+    background: transparent url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath fill='%23ffffff' d='M2 0 0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") no-repeat right 4px center/8px 10px !important;
+}
+
+.mlb-booking--video .mlb-booking__field select option {
+    color: var(--mlb-ink);
+}
+
+.mlb-booking--video .mlb-booking__field input:focus,
+.mlb-booking--video .mlb-booking__field select:focus,
+.mlb-booking--video .mlb-range__value[aria-expanded='true'] {
+    border-bottom-color: var(--mlb-accent);
+}
+
+.mlb-booking--video .mlb-range__nights {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.mlb-booking--video .mlb-booking__trust {
+    border-top-color: rgba(255, 255, 255, 0.16);
+}
+
+.mlb-booking--video .mlb-booking__trust li {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+/* ---------------------------------------------------------- date range picker */
+
+.mlb-range__value {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    height: 44px;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 1px solid var(--mlb-line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--mlb-ink);
+    font-family: var(--mlb-body-font);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 44px;
+    text-align: start;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.mlb-range__value:focus-visible,
+.mlb-range__value[aria-expanded='true'] {
+    outline: none;
+    border-bottom-color: var(--mlb-accent);
+}
+
+.mlb-range__text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.mlb-range__nights {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-range__pop {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 14px);
+    inset-inline-start: 0;
+    width: min(92vw, 620px);
+    border: 1px solid var(--mlb-line-soft);
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 34px 80px -34px rgba(22, 25, 44, 0.5);
+    color: var(--mlb-ink);
+    cursor: default;
+}
+
+.mlb-range__body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(18px, 2.4vw, 34px);
+    padding: clamp(16px, 2vw, 24px);
+}
+
+.mlb-range__cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+    min-height: 30px;
+}
+
+.mlb-range__title {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: var(--mlb-ink-soft);
+}
+
+.mlb-range__step {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--mlb-ink);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mlb-range__step:hover {
+    background: var(--mlb-paper-alt);
+}
+
+.mlb-range__step[hidden] {
+    visibility: hidden;
+    display: grid;
+}
+
+.mlb-range__grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.mlb-range__dow {
+    padding-bottom: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-range__day {
+    position: relative;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--mlb-ink);
+    font-family: var(--mlb-body-font);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 36px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.mlb-range__day:disabled {
+    color: var(--mlb-ink-mute);
+    opacity: 0.42;
+    cursor: default;
+}
+
+.mlb-range__day.is-muted {
+    color: var(--mlb-ink-mute);
+    opacity: 0.5;
+}
+
+.mlb-range__day:not(:disabled):hover {
+    background: var(--mlb-paper-alt);
+}
+
+.mlb-range__day.is-between {
+    background: color-mix(in srgb, var(--mlb-accent) 13%, #ffffff);
+}
+
+.mlb-range__day.is-start,
+.mlb-range__day.is-end {
+    background: var(--mlb-accent);
+    color: #fff;
+    font-weight: 700;
+}
+
+.mlb-range__day.is-start:hover,
+.mlb-range__day.is-end:hover {
+    background: var(--mlb-accent);
+}
+
+.mlb-range__foot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px clamp(16px, 2vw, 24px);
+    border-top: 1px solid var(--mlb-line-soft);
+}
+
+.mlb-range__summary {
+    flex: 1;
+    font-size: 12.5px;
+    font-style: italic;
+    color: var(--mlb-ink-mute);
+}
+
+.mlb-range__btn {
+    height: 40px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 2px;
+    font-family: var(--mlb-body-font);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.mlb-range__btn--clear {
+    background: var(--mlb-ink);
+    color: #fff;
+}
+
+.mlb-range__btn--clear:hover {
+    background: var(--mlb-ink-soft);
+}
+
+.mlb-range__btn--apply {
+    background: var(--mlb-accent);
+    color: #fff;
+}
+
+.mlb-range__btn--apply:hover {
+    background: var(--mlb-ink);
+}
+
+/* màn hình hẹp: lịch nổi giữa màn hình thay vì thò ra ngoài mép hộp */
+@media (max-width: 700px) {
+    .mlb-range__pop {
+        position: fixed;
+        inset: auto 50% 16px auto;
+        width: min(94vw, 420px);
+        max-height: 84vh;
+        overflow-y: auto;
+        transform: translateX(50%);
+    }
+
+    .mlb-range__body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mlb-range__foot {
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+    }
+}
+
+/* nền mờ chỉ dùng ở màn hình hẹp, bấm ra ngoài là đóng lịch */
+.mlb-range__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgba(11, 13, 22, 0.45);
+}
+
+@media (min-width: 701px) {
+    .mlb-range__backdrop {
+        display: none;
     }
 }
