@@ -217,40 +217,6 @@
     border: 0;
 }
 
-/* Nút mở tour trong khung xem to. Chỉ chiếm một góc để phần còn lại của slide
-   vẫn kéo xoay tour tại chỗ được; đặt trên iframe nên cần z-index. */
-.mlb-room-detail .mlb-rd-gallery .room-vr360-slide .room-vr360-expand {
-    position: absolute;
-    z-index: 3;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    text-decoration: none;
-    backdrop-filter: blur(2px);
-    transition: background 0.3s ease;
-}
-
-.mlb-room-detail .mlb-rd-gallery .room-vr360-slide .room-vr360-expand:hover {
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-}
-
-.mlb-rd-gallery .room-vr360-slide .room-vr360-expand i {
-    font-size: 15px;
-    color: #00d4ff;
-}
-
 /* Khung xem to của bộ ảnh phòng (lightGallery, class đặt từ main.js).
    lightGallery tự ẩn thanh công cụ sau vài giây và chỉ hiện lại khi chuột động
    trong khung — mà slide VR360/video là iframe nuốt hết chuột, nên nút đóng sẽ
@@ -273,17 +239,65 @@
 }
 
 /* Slide video: poster phủ kín khung, nút play nằm giữa */
-.mlb-room-detail .mlb-rd-gallery .room-video-slide > a {
+.mlb-room-detail .mlb-rd-gallery .room-video-slide img {
     position: absolute;
     inset: 0;
-}
-
-.mlb-room-detail .mlb-rd-gallery .room-video-slide img {
     width: 100%;
     height: 100%;
     aspect-ratio: auto;
     object-fit: cover;
     filter: brightness(0.7);
+}
+
+/* Nút mở lightbox. z-index 3 để nổi trên .room-video-frame (z-index 2) và trên
+   iframe tour, vì cả hai đều nuốt click nên không thể bấm xuyên xuống dưới.
+   a.room-media-expand để thắng rule .room-details-slider a { display: block }. */
+.mlb-room-detail .mlb-rd-gallery .room-details-slider a.room-media-expand {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 2px;
+    background: rgba(9, 11, 22, 0.72);
+    color: #fff;
+    font-size: 13px;
+    transition: background 0.3s ease, opacity 0.3s ease;
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-details-slider a.room-media-expand:hover,
+.mlb-room-detail .mlb-rd-gallery .room-details-slider a.room-media-expand:focus-visible {
+    background: var(--mlb-accent);
+    color: #fff;
+}
+
+/* Video: thanh điều khiển nằm dưới đáy nên góc trên phải trống, để hiện thường trực */
+.mlb-room-detail .mlb-rd-gallery .room-video-slide a.room-media-expand {
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
+}
+
+/* VR360: bốn góc tour đều có nút của chính nó, nên nút này nằm giữa mép trên
+   và chỉ hiện khi rê chuột vào slide, đỡ che tour lúc đang xem. */
+.mlb-room-detail .mlb-rd-gallery .room-vr360-slide a.room-media-expand {
+    inset-block-start: 8px;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-vr360-slide:hover a.room-media-expand,
+.mlb-room-detail .mlb-rd-gallery .room-vr360-slide a.room-media-expand:focus-visible {
+    opacity: 1;
+}
+
+/* Máy cảm ứng không có trạng thái rê chuột, nút phải hiện sẵn thì mới bấm được */
+@media (hover: none) {
+    .mlb-room-detail .mlb-rd-gallery .room-vr360-slide a.room-media-expand {
+        opacity: 1;
+    }
 }
 
 /* Khung phát chèn vào slide khi lướt tới, đè lên poster; lướt đi là js gỡ bỏ */

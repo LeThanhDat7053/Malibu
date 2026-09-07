@@ -14,6 +14,9 @@
         ])
         ->filter(fn ($item) => $item['title'])
         ->values();
+
+    // quá một hàng thì chuyển sang trượt ngang, không bao giờ xuống hàng thứ hai
+    $isSlider = $items->count() > $columns;
 @endphp
 
 @if ($items->isNotEmpty())
@@ -33,7 +36,17 @@
                 @endif
             </div>
 
-            <div class="mlb-columns__grid">
+            <div
+                class="mlb-columns__grid{{ $isSlider ? ' mlb-slider' : '' }}"
+                @if ($isSlider)
+                    data-mlb-slider
+                    data-per-view="{{ $columns }}"
+                    data-per-view-lg="{{ min($columns, 3) }}"
+                    data-per-view-md="{{ min($columns, 2) }}"
+                    data-per-view-sm="2"
+                    data-per-view-xs="1"
+                @endif
+            >
                 @foreach ($items as $item)
                     <article class="mlb-card">
                         @if ($item['image'])

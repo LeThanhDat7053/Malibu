@@ -169,19 +169,15 @@
                                         frameborder="0"
                                         allow="accelerometer; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
                                         allowfullscreen></iframe>
-                                {{-- Nút nhỏ ở giữa mép trên — bốn góc slide đều là nút của chính tour.
-                                     Không phủ kín slide để vẫn kéo xoay tour ngay tại chỗ được.
-                                     data-thumb: lightGallery không tìm thấy <img> trong thẻ này nên
-                                     phải chỉ rõ ảnh cho dải thumbnail của khung xem to. --}}
-                                <a class="room-vr360-expand"
+                                {{-- Bốn góc slide đều là UI của tour nên nút này nằm giữa mép trên
+                                     và chỉ hiện khi rê chuột, đỡ che tour lúc đang xem. --}}
+                                <a class="room-media-expand"
                                    href="{{ Arr::get($vr360, 'img') }}"
                                    data-iframe="true"
                                    data-download-url="false"
-                                   data-thumb="{{ $roomVr360Poster($vr360) }}"
                                    data-sub-html="{{ Arr::get($vr360, 'description') ?: __('View VR360') }}"
                                    aria-label="{{ __('View VR360') }}">
-                                    <i class="fal fa-vr-cardboard"></i>
-                                    <span>{{ __('View VR360') }}</span>
+                                    <i class="fal fa-expand-arrows"></i>
                                 </a>
                             </div>
                         @endforeach
@@ -192,15 +188,19 @@
                             <div class="room-media-slide room-video-slide"
                                  data-video-embed="{{ $video['embed'] }}"
                                  @if ($video['is_file']) data-video-file @endif>
-                                <a href="{{ $video['embed'] }}"
+                                <img src="{{ $video['poster'] }}" alt="{{ $video['description'] ?: $room->name }}">
+                                <span class="room-media-badge room-media-badge--play">
+                                    <i class="fas fa-play"></i>
+                                </span>
+                                {{-- Khung phát đè kín slide nên nút mở lightbox phải nổi lên trên nó.
+                                     Đặt góc trên phải vì thanh điều khiển của video nằm dưới đáy. --}}
+                                <a class="room-media-expand"
+                                   href="{{ $video['embed'] }}"
                                    data-iframe="true"
                                    data-download-url="false"
                                    data-sub-html="{{ $video['description'] }}"
                                    aria-label="{{ $video['description'] ?: __('Video') }}">
-                                    <img src="{{ $video['poster'] }}" alt="{{ $video['description'] ?: $room->name }}">
-                                    <span class="room-media-badge room-media-badge--play">
-                                        <i class="fas fa-play"></i>
-                                    </span>
+                                    <i class="fal fa-expand-arrows"></i>
                                 </a>
                             </div>
                         @endforeach

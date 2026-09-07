@@ -590,10 +590,10 @@ $(document).ready(function () {
 
             roomDetailsSlider.lightGallery({
                 // Ảnh nằm thẳng trong slider nên slick gắn .slick-slide lên CHÍNH thẻ <a>,
-                // còn slide video là <div> bọc <a> bên trong — phải nhận cả hai kiểu.
-                // Chỉ dùng vế sau thì lightGallery chỉ thấy đúng một item, mất nút lướt
-                // và ảnh không được bắt click nên trình duyệt nhảy thẳng sang link ảnh gốc.
-                // Bỏ qua slide nhân bản, không thì chế độ vòng lặp liệt kê mỗi ảnh hai lần.
+                // còn slide VR360/video là <div> bọc <a> bên trong — phải nhận cả hai kiểu,
+                // chỉ dùng một vế thì lightGallery bỏ sót và mất nút lướt trái phải.
+                // Bỏ qua slide nhân bản, không thì phòng chỉ có ảnh (chế độ vòng lặp còn bật)
+                // sẽ liệt kê mỗi ảnh hai lần trong khung xem to.
                 selector: '.slick-slide:not(.slick-cloned) a, a.slick-slide:not(.slick-cloned)',
                 thumbnail: true,
                 share: false,

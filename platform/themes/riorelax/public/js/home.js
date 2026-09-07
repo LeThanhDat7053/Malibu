@@ -192,25 +192,357 @@
         }
     }
 
-    // ----------------------------------------------------------- booking strip
+    // ------------------------------------------------------------ date range
 
-    function pickerDate($input) {
-        try {
-            return $input.datepicker('getDate')
-        } catch (e) {
+    var RANGE_I18N = {
+        daysMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+        months: [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December',
+        ],
+        monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        clear: 'Clear',
+        apply: 'Apply',
+        night: 'night',
+        nights: 'nights',
+        placeholder: 'Select your dates',
+        format: 'dd-mm-yyyy',
+    }
+
+    function pad(value) {
+        return value < 10 ? '0' + value : '' + value
+    }
+
+    function midnight(date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    }
+
+    function addDays(date, count) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate() + count)
+    }
+
+    function sameDay(a, b) {
+        return !!a && !!b && a.getTime() === b.getTime()
+    }
+
+    // Mọi định dạng plugin Hotel hỗ trợ đều là dd/mm/yyyy có độ dài cố định
+    function formatDate(date, format) {
+        return format
+            .replace('yyyy', date.getFullYear())
+            .replace('mm', pad(date.getMonth() + 1))
+            .replace('dd', pad(date.getDate()))
+    }
+
+    function parseDate(text, format) {
+        if (!text) {
             return null
         }
+
+        var year = parseInt(text.substr(format.indexOf('yyyy'), 4), 10)
+        var month = parseInt(text.substr(format.indexOf('mm'), 2), 10)
+        var day = parseInt(text.substr(format.indexOf('dd'), 2), 10)
+
+        if (!year || !month || !day) {
+            return null
+        }
+
+        return new Date(year, month - 1, day)
     }
 
-    function setPickerValue($input, text) {
-        $input.val(text)
+    function createDateRange(root) {
+        var trigger = root.querySelector('[data-mlb-range-trigger]')
+        var pop = root.querySelector('[data-mlb-range-pop]')
+        var body = root.querySelector('[data-mlb-range-body]')
+        var textEl = root.querySelector('[data-mlb-range-text]')
+        var nightsEl = root.querySelector('[data-mlb-range-nights]')
+        var summaryEl = root.querySelector('[data-mlb-range-summary]')
+        var clearBtn = root.querySelector('[data-mlb-range-clear]')
+        var applyBtn = root.querySelector('[data-mlb-range-apply]')
+        var startInput = root.querySelector('input[name="start_date"]')
+        var endInput = root.querySelector('input[name="end_date"]')
+
+        if (!trigger || !pop || !body || !startInput || !endInput) {
+            return null
+        }
+
+        var i18n = $.extend({}, RANGE_I18N)
 
         try {
-            $input.datepicker('update', text)
+            $.extend(i18n, JSON.parse(root.getAttribute('data-i18n')))
         } catch (e) {
-            /* datepicker not initialised — the plain value is still submitted */
+            /* thiếu chuỗi dịch thì dùng bản tiếng Anh mặc định */
+        }
+
+        var locale = document.documentElement.lang || 'en'
+        var today = midnight(new Date())
+        var format = i18n.format
+        var backdrop = null
+
+        var start = parseDate(startInput.value, format) || today
+        var end = parseDate(endInput.value, format) || addDays(today, 1)
+        var draftStart = start
+        var draftEnd = end
+        var hover = null
+        var view = new Date(start.getFullYear(), start.getMonth(), 1)
+
+        function longDate(date) {
+            try {
+                return date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
+            } catch (e) {
+                return i18n.months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear()
+            }
+        }
+
+        function monthTitle(date) {
+            try {
+                return date.toLocaleDateString(locale, { month: 'short', year: 'numeric' })
+            } catch (e) {
+                return i18n.monthsShort[date.getMonth()] + ' ' + date.getFullYear()
+            }
+        }
+
+        function nightsBetween(from, to) {
+            return Math.round((to.getTime() - from.getTime()) / 86400000)
+        }
+
+        function paintField() {
+            textEl.textContent = longDate(start) + ' — ' + longDate(end)
+            var nights = nightsBetween(start, end)
+            nightsEl.textContent = nights + ' ' + (nights === 1 ? i18n.night : i18n.nights)
+            startInput.value = formatDate(start, format)
+            endInput.value = formatDate(end, format)
+        }
+
+        function paintSummary() {
+            if (!draftStart) {
+                summaryEl.textContent = i18n.placeholder
+                return
+            }
+
+            summaryEl.textContent = draftEnd
+                ? formatDate(draftStart, format) + ' - ' + formatDate(draftEnd, format)
+                : formatDate(draftStart, format) + ' - …'
+        }
+
+        function edge() {
+            return draftEnd || (draftStart && hover && hover > draftStart ? hover : null)
+        }
+
+        function dayClass(date, inMonth) {
+            var classes = ['mlb-range__day']
+            var last = edge()
+
+            if (!inMonth) {
+                classes.push('is-muted')
+            }
+
+            if (sameDay(date, draftStart)) {
+                classes.push('is-start')
+            } else if (sameDay(date, last)) {
+                classes.push('is-end')
+            } else if (draftStart && last && date > draftStart && date < last) {
+                classes.push('is-between')
+            }
+
+            return classes.join(' ')
+        }
+
+        function buildMonth(offset) {
+            var first = new Date(view.getFullYear(), view.getMonth() + offset, 1)
+            var cal = document.createElement('div')
+            cal.className = 'mlb-range__cal'
+
+            var head = document.createElement('div')
+            head.className = 'mlb-range__cal-head'
+
+            var prev = document.createElement('button')
+            prev.type = 'button'
+            prev.className = 'mlb-range__step'
+            prev.innerHTML = '&lsaquo;'
+            prev.setAttribute('aria-label', 'Previous month')
+            prev.hidden = offset !== 0 || view <= new Date(today.getFullYear(), today.getMonth(), 1)
+            prev.addEventListener('click', function () {
+                view = new Date(view.getFullYear(), view.getMonth() - 1, 1)
+                render()
+            })
+
+            var title = document.createElement('span')
+            title.className = 'mlb-range__title'
+            title.textContent = monthTitle(first)
+
+            var next = document.createElement('button')
+            next.type = 'button'
+            next.className = 'mlb-range__step'
+            next.innerHTML = '&rsaquo;'
+            next.setAttribute('aria-label', 'Next month')
+            next.hidden = offset !== 1
+            next.addEventListener('click', function () {
+                view = new Date(view.getFullYear(), view.getMonth() + 1, 1)
+                render()
+            })
+
+            head.appendChild(prev)
+            head.appendChild(title)
+            head.appendChild(next)
+            cal.appendChild(head)
+
+            var grid = document.createElement('div')
+            grid.className = 'mlb-range__grid'
+
+            i18n.daysMin.forEach(function (name) {
+                var cell = document.createElement('span')
+                cell.className = 'mlb-range__dow'
+                cell.textContent = name
+                grid.appendChild(cell)
+            })
+
+            var lead = first.getDay()
+
+            for (var i = 0; i < 42; i++) {
+                var date = new Date(first.getFullYear(), first.getMonth(), 1 - lead + i)
+                var inMonth = date.getMonth() === first.getMonth()
+                var cell = document.createElement('button')
+
+                cell.type = 'button'
+                cell.className = dayClass(date, inMonth)
+                cell.textContent = date.getDate()
+                cell.disabled = date < today
+
+                if (!cell.disabled) {
+                    ;(function (picked) {
+                        cell.addEventListener('click', function () {
+                            pick(picked)
+                        })
+                        cell.addEventListener('mouseenter', function () {
+                            if (draftStart && !draftEnd) {
+                                hover = picked
+                                render()
+                            }
+                        })
+                    })(date)
+                }
+
+                grid.appendChild(cell)
+            }
+
+            cal.appendChild(grid)
+
+            return cal
+        }
+
+        function pick(date) {
+            if (!draftStart || draftEnd || date <= draftStart) {
+                draftStart = date
+                draftEnd = null
+            } else {
+                draftEnd = date
+            }
+
+            hover = null
+            render()
+        }
+
+        function render() {
+            body.innerHTML = ''
+            body.appendChild(buildMonth(0))
+            body.appendChild(buildMonth(1))
+            paintSummary()
+        }
+
+        function open() {
+            draftStart = start
+            draftEnd = end
+            hover = null
+            view = new Date(start.getFullYear(), start.getMonth(), 1)
+
+            if (view < new Date(today.getFullYear(), today.getMonth(), 1)) {
+                view = new Date(today.getFullYear(), today.getMonth(), 1)
+            }
+
+            render()
+            pop.hidden = false
+            trigger.setAttribute('aria-expanded', 'true')
+
+            backdrop = document.createElement('div')
+            backdrop.className = 'mlb-range__backdrop'
+            backdrop.addEventListener('click', close)
+            document.body.appendChild(backdrop)
+        }
+
+        function close() {
+            pop.hidden = true
+            trigger.setAttribute('aria-expanded', 'false')
+
+            if (backdrop) {
+                backdrop.remove()
+                backdrop = null
+            }
+        }
+
+        function commit() {
+            if (draftStart) {
+                start = draftStart
+                end = draftEnd && draftEnd > draftStart ? draftEnd : addDays(draftStart, 1)
+            }
+
+            paintField()
+            close()
+        }
+
+        trigger.addEventListener('click', function (event) {
+            event.preventDefault()
+            pop.hidden ? open() : close()
+        })
+
+        pop.addEventListener('click', function (event) {
+            event.stopPropagation()
+        })
+
+        document.addEventListener('click', function (event) {
+            if (!pop.hidden && !root.contains(event.target)) {
+                close()
+            }
+        })
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !pop.hidden) {
+                close()
+            }
+        })
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                draftStart = null
+                draftEnd = null
+                hover = null
+                render()
+            })
+        }
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', commit)
+        }
+
+        paintField()
+
+        return {
+            set: function (from, to) {
+                start = midnight(from)
+                end = to && midnight(to) > start ? midnight(to) : addDays(start, 1)
+                paintField()
+            },
+            value: function () {
+                return {
+                    start: start,
+                    end: end,
+                    startText: startInput.value,
+                    endText: endInput.value,
+                }
+            },
         }
     }
+
+    // ----------------------------------------------------------- booking strip
 
     function initBookingStrip() {
         var form = document.querySelector('[data-mlb-booking-form]')
@@ -219,44 +551,22 @@
             return
         }
 
-        var $start = $(form).find('#mlb-start-date')
-        var $end = $(form).find('#mlb-end-date')
+        var rangeRoot = form.querySelector('[data-mlb-range]')
+        var range = rangeRoot ? createDateRange(rangeRoot) : null
         var $adults = $(form).find('#mlb-adults')
         var $children = $(form).find('#mlb-children')
         var $promo = $(form).find('#mlb-promo')
 
-        // check-out always stays after check-in
-        $start.on('changeDate', function () {
-            var start = pickerDate($start)
-            var end = pickerDate($end)
-
-            if (!start) {
-                return
-            }
-
-            if (!end || end <= start) {
-                var next = new Date(start.getTime())
-                next.setDate(next.getDate() + 1)
-
-                try {
-                    $end.datepicker('setDate', next)
-                } catch (e) {}
-            }
-
-            try {
-                $end.datepicker('setStartDate', start)
-            } catch (e) {}
-        })
-
-        restoreStay($start, $end, $adults, $children)
+        restoreStay(range, $adults, $children)
 
         form.addEventListener('submit', function () {
-            var start = pickerDate($start)
+            var stay = range ? range.value() : null
 
             writeJson(STAY_KEY, {
-                startText: $start.val(),
-                endText: $end.val(),
-                startTime: start ? start.getTime() : null,
+                startText: stay ? stay.startText : '',
+                endText: stay ? stay.endText : '',
+                startTime: stay ? stay.start.getTime() : null,
+                endTime: stay ? stay.end.getTime() : null,
                 adults: $adults.val(),
                 children: $children.val(),
             })
@@ -269,23 +579,26 @@
         })
     }
 
-    function restoreStay($start, $end, $adults, $children) {
+    function restoreStay(range, $adults, $children) {
         var stay = readJson(STAY_KEY, null)
 
-        if (!stay || !stay.startText || !stay.endText) {
+        if (!stay || !stay.startTime) {
             greet(null)
             return
         }
 
         // a saved stay whose check-in has passed is worse than no suggestion at all
-        if (!stay.startTime || stay.startTime < startOfToday().getTime()) {
+        if (stay.startTime < startOfToday().getTime()) {
             removeKey(STAY_KEY)
             greet(null)
             return
         }
 
-        setPickerValue($start, stay.startText)
-        setPickerValue($end, stay.endText)
+        if (range) {
+            range.set(new Date(stay.startTime), stay.endTime ? new Date(stay.endTime) : null)
+            stay.startText = range.value().startText
+            stay.endText = range.value().endText
+        }
 
         if (stay.adults) {
             $adults.val(stay.adults)
@@ -465,6 +778,80 @@
         })
     }
 
+    // --------------------------------------------------------------- sliders
+
+    // Mọi khối một hàng (cột nổi bật, ưu đãi, giải thưởng) dùng chung một bộ tuỳ chọn slick
+    function initSliders() {
+        if (!$.fn.slick) {
+            return
+        }
+
+        var rtl = document.body.getAttribute('dir') === 'rtl'
+
+        $('[data-mlb-slider]').each(function () {
+            var $el = $(this)
+
+            if ($el.hasClass('slick-initialized')) {
+                return
+            }
+
+            var read = function (name, fallback) {
+                return parseInt($el.attr('data-per-view' + name), 10) || fallback
+            }
+
+            var per = read('', 3)
+            var lg = read('-lg', per)
+            var md = read('-md', lg)
+            var sm = read('-sm', md)
+            var xs = read('-xs', 1)
+            var total = $el.children().length
+
+            $el.slick({
+                slidesToShow: per,
+                slidesToScroll: 1,
+                infinite: total > per,
+                autoplay: $el.attr('data-autoplay') === '1',
+                autoplaySpeed: 4000,
+                pauseOnHover: true,
+                speed: 650,
+                cssEase: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+                arrows: true,
+                dots: $el.attr('data-dots') !== '0',
+                rtl: rtl,
+                prevArrow: '<button type="button" class="mlb-slider__nav mlb-slider__nav--prev" aria-label="Previous"></button>',
+                nextArrow: '<button type="button" class="mlb-slider__nav mlb-slider__nav--next" aria-label="Next"></button>',
+                responsive: [
+                    { breakpoint: 1400, settings: { slidesToShow: lg, infinite: total > lg } },
+                    { breakpoint: 1200, settings: { slidesToShow: md, infinite: total > md } },
+                    { breakpoint: 992, settings: { slidesToShow: sm, infinite: total > sm } },
+                    { breakpoint: 576, settings: { slidesToShow: xs, infinite: total > xs } },
+                ],
+            })
+        })
+    }
+
+    // ----------------------------------------------------------------- video
+
+    // Bố cục chia đôi chỉ nạp iframe YouTube khi khách bấm play
+    function initVideoEmbed() {
+        document.querySelectorAll('[data-mlb-video-embed]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var frame = document.createElement('div')
+                frame.className = 'mlb-video__frame'
+
+                var iframe = document.createElement('iframe')
+                iframe.src = button.getAttribute('data-mlb-video-embed')
+                iframe.title = button.getAttribute('aria-label') || ''
+                iframe.setAttribute('frameborder', '0')
+                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen')
+                iframe.setAttribute('allowfullscreen', '')
+
+                frame.appendChild(iframe)
+                button.parentNode.replaceChild(frame, button)
+            })
+        })
+    }
+
     // ---------------------------------------------------------------- reveal
 
     // Each entry: selector, motion, per-item stagger in ms (0 = no stagger).
@@ -472,8 +859,12 @@
     var REVEAL_GROUPS = [
         ['.mlb-section-head', 'up', 0],
         ['.mlb-rooms__grid .mlb-room', 'up', 90],
-        ['.mlb-columns__grid .mlb-card', 'up', 90],
-        ['.mlb-offers__grid .mlb-offer', 'up', 90],
+        ['.mlb-columns__grid:not([data-mlb-slider]) .mlb-card', 'up', 90],
+        ['.mlb-offers__grid:not([data-mlb-slider]) .mlb-offer', 'up', 90],
+        ['.mlb-columns__grid[data-mlb-slider]', 'up', 0],
+        ['.mlb-offers__grid[data-mlb-slider]', 'up', 0],
+        ['.mlb-awards__track', 'up', 0],
+        ['.mlb-video__grid', 'up', 0],
         ['.mlb-signature__item', 'left', 110],
         ['.mlb-recent__card', 'up', 60],
         ['.mlb-location__grid', 'up', 0],
@@ -564,7 +955,7 @@
 
     // Hộp booking đè lên hero: đo chiều cao thật để CSS chừa đúng khoảng ảnh dưới đáy hộp
     function measureBookingStrip() {
-        var inner = document.querySelector('.mlb-home .mlb-booking__inner')
+        var inner = document.querySelector('.mlb-home .mlb-booking--hero .mlb-booking__inner')
 
         if (!inner) {
             return
@@ -594,6 +985,8 @@
         applyStoredCoupon()
         initPanorama()
         initMap()
+        initSliders()
+        initVideoEmbed()
         initReveal()
         measureBookingStrip()
     })

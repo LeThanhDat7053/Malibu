@@ -1,15 +1,19 @@
 <?php
 
 use Botble\Base\Facades\Assets;
+use Botble\Base\Forms\FieldOptions\AlertFieldOption;
 use Botble\Base\Forms\FieldOptions\DescriptionFieldOption;
 use Botble\Base\Forms\FieldOptions\HtmlFieldOption;
 use Botble\Base\Forms\FieldOptions\InputFieldOption;
+use Botble\Base\Forms\FieldOptions\MediaFileFieldOption;
 use Botble\Base\Forms\FieldOptions\MediaImageFieldOption;
 use Botble\Base\Forms\FieldOptions\NumberFieldOption;
 use Botble\Base\Forms\FieldOptions\SelectFieldOption;
 use Botble\Base\Forms\FieldOptions\TextareaFieldOption;
 use Botble\Base\Forms\FieldOptions\TextFieldOption;
+use Botble\Base\Forms\Fields\AlertField;
 use Botble\Base\Forms\Fields\HtmlField;
+use Botble\Base\Forms\Fields\MediaFileField;
 use Botble\Base\Forms\Fields\MediaImageField;
 use Botble\Base\Forms\Fields\NumberField;
 use Botble\Base\Forms\Fields\SelectField;
@@ -38,6 +42,7 @@ use Botble\Shortcode\Forms\Fields\ShortcodeColorField;
 use Botble\Shortcode\Forms\Fields\ShortcodeTabsField;
 use Botble\Shortcode\Forms\ShortcodeForm;
 use Botble\Shortcode\ShortcodeField;
+use Botble\SimpleSlider\Models\SimpleSlider;
 use Botble\Team\Models\Team;
 use Botble\Testimonial\Models\Testimonial;
 use Botble\Theme\Facades\Theme;
@@ -57,6 +62,65 @@ app()->booted(function (): void {
     if (is_plugin_active('simple-slider')) {
         add_filter(SIMPLE_SLIDER_VIEW_TEMPLATE, function (): ?string {
             return Theme::getThemeNamespace('partials.shortcodes.simple-slider.index');
+        });
+
+        // Chép lại form gốc của plugin và gắn thêm phần hộp đặt phòng nhanh cho hero
+        Shortcode::setAdminConfig('simple-slider', function (array $attributes) {
+            $form = ShortcodeForm::createFromArray($attributes)
+                ->add(
+                    'key',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(trans('plugins/simple-slider::simple-slider.select_slider'))
+                        ->choices(
+                            SimpleSlider::query()
+                                ->wherePublished()
+                                ->pluck('name', 'key')
+                                ->all()
+                        )
+                        ->toArray()
+                )
+                ->withCaching(false);
+
+            if (! is_plugin_active('hotel')) {
+                return $form;
+            }
+
+            return $form
+                ->add(
+                    'booking_note',
+                    AlertField::class,
+                    AlertFieldOption::make()->content(malibu_booking_box_note())->toArray()
+                )
+                ->add(
+                    'show_booking',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Quick booking box'))
+                        ->choices(['0' => __('Hidden'), '1' => __('Show under the slider')])
+                        ->toArray()
+                )
+                ->add(
+                    'booking_button_label',
+                    TextField::class,
+                    TextFieldOption::make()->label(__('Booking button label'))->toArray()
+                )
+                ->add(
+                    'booking_promo_enabled',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Show promo code field'))
+                        ->choices(['0' => __('No'), '1' => __('Yes')])
+                        ->toArray()
+                )
+                ->add(
+                    'booking_trust_items',
+                    TextareaField::class,
+                    TextareaFieldOption::make()
+                        ->label(__('Trust items (separate with ";")'))
+                        ->rows(2)
+                        ->toArray()
+                );
         });
 
         Shortcode::register(
@@ -1561,6 +1625,7 @@ JS;
                 SelectFieldOption::make()
                     ->label(__('Columns'))
                     ->choices([2 => 2, 3 => 3, 4 => 4])
+                    ->helperText(__('Everything stays on one row - extra items turn the block into a slider.'))
                     ->toArray()
             )
             ->add(
@@ -1743,6 +1808,15 @@ JS;
                         ->toArray()
                 )
                 ->add('limit', NumberField::class, NumberFieldOption::make()->label(__('Limit'))->toArray())
+                ->add(
+                    'columns',
+                    SelectField::class,
+                    SelectFieldOption::make()
+                        ->label(__('Columns'))
+                        ->choices([2 => 2, 3 => 3, 4 => 4])
+                        ->helperText(__('Everything stays on one row - extra items turn the block into a slider.'))
+                        ->toArray()
+                )
                 ->add('item_label', TextField::class, TextFieldOption::make()->label(__('Card link label'))->toArray())
                 ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
                 ->add('button_url', TextField::class, TextFieldOption::make()->label(__('Button URL'))->toArray());
@@ -1756,6 +1830,11 @@ JS;
             __('Booking strip'),
             __('Malibu homepage - inline availability search'),
             function (ShortcodeCompiler $shortcode): ?string {
+                // khối phía trên đã bật hộp đặt phòng thì shortcode này tự tắt
+                if (! malibu_booking_slot_take()) {
+                    return null;
+                }
+
                 if (App::getLocale() !== 'en') {
                     Theme::asset()
                         ->container('footer')
@@ -1773,8 +1852,16 @@ JS;
             }
         );
 
+        Shortcode::ignoreLazyLoading(['booking-strip']);
+        Shortcode::ignoreCaches(['booking-strip']);
+
         Shortcode::setAdminConfig('booking-strip', function (array $attributes) {
             return ShortcodeForm::createFromArray($attributes)
+                ->add(
+                    'single_box_note',
+                    AlertField::class,
+                    AlertFieldOption::make()->content(malibu_booking_box_note())->toArray()
+                )
                 ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
                 ->add(
                     'promo_enabled',
@@ -1904,4 +1991,209 @@ JS;
                 );
         });
     }
+    // Dải giải thưởng / chứng nhận trượt ngang
+    Shortcode::register(
+        'awards-slider',
+        __('Awards & achievements'),
+        __('Malibu - awards, ratings and certificates in one sliding row'),
+        function (ShortcodeCompiler $shortcode): ?string {
+            $tabs = Shortcode::fields()->getTabsData(['image', 'name', 'link'], $shortcode);
+
+            return Theme::partial('shortcodes.awards-slider.index', compact('shortcode', 'tabs'));
+        }
+    );
+
+    Shortcode::setAdminConfig('awards-slider', function (array $attributes) {
+        return ShortcodeForm::createFromArray($attributes)
+            ->add(
+                'demo_note',
+                AlertField::class,
+                AlertFieldOption::make()
+                    ->content(__('Leave the list empty to preview the block with the demo award images bundled in the theme.'))
+                    ->toArray()
+            )
+            ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+            ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add(
+                'columns',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Logos per row'))
+                    ->choices([3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8])
+                    ->helperText(__('Everything stays on one row - extra items turn the block into a slider.'))
+                    ->toArray()
+            )
+            ->add(
+                'autoplay',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Auto scroll'))
+                    ->choices(['1' => __('Yes'), '0' => __('No')])
+                    ->toArray()
+            )
+            ->add(
+                'show_names',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Show award names'))
+                    ->choices(['0' => __('No'), '1' => __('Yes')])
+                    ->toArray()
+            )
+            ->add(
+                'background_color',
+                ShortcodeColorField::class,
+                InputFieldOption::make()
+                    ->label(__('Background color'))
+                    ->defaultValue('#ffffff')
+                    ->toArray()
+            )
+            ->add(
+                'tabs',
+                ShortcodeTabsField::class,
+                ShortcodeTabsFieldOption::make()
+                    ->label(__('Awards'))
+                    ->attrs($attributes)
+                    ->max(20)
+                    ->fields([
+                        'image' => ['type' => 'image', 'title' => __('Image')],
+                        'name' => ['type' => 'text', 'title' => __('Name')],
+                        'link' => ['type' => 'url', 'title' => __('Link URL')],
+                    ])
+                    ->toArray()
+            );
+    });
+
+    // Khối video: căn trái/phải kèm nội dung, hoặc phủ kín màn hình làm hero
+    Shortcode::register(
+        'video-section',
+        __('Video section'),
+        __('Malibu - video beside content, or a full-screen hero video'),
+        function (ShortcodeCompiler $shortcode): ?string {
+            $shortcode->youtube_video_id = $shortcode->youtube_url
+                ? Youtube::getYoutubeVideoID($shortcode->youtube_url)
+                : null;
+
+            return Theme::partial('shortcodes.video-section.index', compact('shortcode'));
+        }
+    );
+
+    Shortcode::ignoreLazyLoading(['video-section', 'awards-slider']);
+    Shortcode::ignoreCaches(['video-section']);
+
+    Shortcode::setAdminConfig('video-section', function (array $attributes) {
+        $form = ShortcodeForm::createFromArray($attributes)
+            ->add(
+                'layout',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Layout'))
+                    ->choices([
+                        'left' => __('Video on the left + content'),
+                        'right' => __('Video on the right + content'),
+                        'full' => __('Full screen (use as hero)'),
+                    ])
+                    ->toArray()
+            )
+            ->add(
+                'height',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Full screen height'))
+                    ->choices([
+                        'full' => __('Full viewport'),
+                        'tall' => __('80% of viewport'),
+                        'medium' => __('62% of viewport'),
+                    ])
+                    ->helperText(__('Only used by the full screen layout.'))
+                    ->toArray()
+            )
+            ->add(
+                'video_file',
+                MediaFileField::class,
+                MediaFileFieldOption::make()
+                    ->label(__('Video file (mp4)'))
+                    ->helperText(__('Takes priority over the Youtube URL below.'))
+                    ->toArray()
+            )
+            ->add('youtube_url', TextField::class, TextFieldOption::make()->label(__('Youtube URL'))->toArray())
+            ->add(
+                'poster_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()->label(__('Poster image'))->toArray()
+            )
+            ->add(
+                'watermark_enabled',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Center watermark'))
+                    ->choices(['1' => __('Show'), '0' => __('Hidden')])
+                    ->helperText(__('Only used by the full screen layout.'))
+                    ->toArray()
+            )
+            ->add(
+                'watermark_image',
+                MediaImageField::class,
+                MediaImageFieldOption::make()
+                    ->label(__('Watermark image'))
+                    ->helperText(__('Leave empty to use the demo logo bundled in the theme.'))
+                    ->toArray()
+            )
+            ->add(
+                'overlay_opacity',
+                NumberField::class,
+                NumberFieldOption::make()
+                    ->label(__('Dark overlay (%)'))
+                    ->helperText(__('0 - 90. Keeps the text readable over a bright video.'))
+                    ->toArray()
+            )
+            ->add('subtitle', TextField::class, TextFieldOption::make()->label(__('Subtitle'))->toArray())
+            ->add('title', TextField::class, TextFieldOption::make()->label(__('Title'))->toArray())
+            ->add('description', TextareaField::class, DescriptionFieldOption::make()->toArray())
+            ->add('button_label', TextField::class, TextFieldOption::make()->label(__('Button label'))->toArray())
+            ->add('button_url', TextField::class, TextFieldOption::make()->label(__('Button URL'))->toArray());
+
+        if (! is_plugin_active('hotel')) {
+            return $form;
+        }
+
+        return $form
+            ->add(
+                'booking_note',
+                AlertField::class,
+                AlertFieldOption::make()
+                    ->content(malibu_booking_box_note() . ' ' . __('The box never sits on top of the video - it is always rendered underneath it.'))
+                    ->toArray()
+            )
+            ->add(
+                'show_booking',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Quick booking box'))
+                    ->choices(['0' => __('Hidden'), '1' => __('Show under the video')])
+                    ->toArray()
+            )
+            ->add('booking_title', TextField::class, TextFieldOption::make()->label(__('Booking box heading'))->toArray())
+            ->add(
+                'booking_button_label',
+                TextField::class,
+                TextFieldOption::make()->label(__('Booking button label'))->toArray()
+            )
+            ->add(
+                'booking_promo_enabled',
+                SelectField::class,
+                SelectFieldOption::make()
+                    ->label(__('Show promo code field'))
+                    ->choices(['0' => __('No'), '1' => __('Yes')])
+                    ->toArray()
+            )
+            ->add(
+                'booking_trust_items',
+                TextareaField::class,
+                TextareaFieldOption::make()
+                    ->label(__('Trust items (separate with ";")'))
+                    ->rows(2)
+                    ->toArray()
+            );
+    });
 });

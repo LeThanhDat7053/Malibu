@@ -1,5 +1,13 @@
 {{-- Offers & stay packages, pulled from a blog category so marketing can publish them as posts --}}
-<section class="mlb-offers">
+@php
+    $columns = (int) ($shortcode->columns ?: 3);
+    $columns = in_array($columns, [2, 3, 4], true) ? $columns : 3;
+
+    // quá một hàng thì chuyển sang trượt ngang, không bao giờ xuống hàng thứ hai
+    $isSlider = $posts->count() > $columns;
+@endphp
+
+<section class="mlb-offers" style="--mlb-columns: {{ $columns }}">
     <div class="mlb-shell">
         <div class="mlb-section-head mlb-section-head--split">
             <div>
@@ -21,7 +29,17 @@
             @endif
         </div>
 
-        <div class="mlb-offers__grid">
+        <div
+            class="mlb-offers__grid{{ $isSlider ? ' mlb-slider' : '' }}"
+            @if ($isSlider)
+                data-mlb-slider
+                data-per-view="{{ $columns }}"
+                data-per-view-lg="{{ min($columns, 3) }}"
+                data-per-view-md="{{ min($columns, 2) }}"
+                data-per-view-sm="2"
+                data-per-view-xs="1"
+            @endif
+        >
             @foreach ($posts as $post)
                 <article class="mlb-offer">
                     <a class="mlb-offer__media" href="{{ $post->url }}">
