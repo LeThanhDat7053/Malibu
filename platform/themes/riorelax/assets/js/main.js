@@ -530,6 +530,64 @@ $(document).ready(function () {
                 this.src = $(this).data('src');
             });
 
+            // Video tự chạy khi lướt tới, gỡ hẳn khung phát khi lướt đi để tiếng dừng.
+            let videoSlides = roomDetailsSlider.find('.room-video-slide');
+
+            let stopRoomVideos = function () {
+                videoSlides.find('.room-video-frame').remove();
+            };
+
+            let playRoomVideo = function (index) {
+                stopRoomVideos();
+
+                let slide = videoSlides.filter(function () {
+                    return $(this).closest('.slick-slide').data('slick-index') === index;
+                });
+
+                if (!slide.length) {
+                    return;
+                }
+
+                let embed = slide.data('video-embed');
+
+                if (!embed) {
+                    return;
+                }
+
+                if (slide.is('[data-video-file]')) {
+                    slide.append(
+                        $('<video>', {
+                            class: 'room-video-frame',
+                            src: embed,
+                            controls: true,
+                            autoplay: true,
+                            playsinline: true,
+                        })
+                    );
+
+                    return;
+                }
+
+                slide.append(
+                    $('<iframe>', {
+                        class: 'room-video-frame',
+                        src: embed + (embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1&rel=0&playsinline=1',
+                        frameborder: 0,
+                        allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                        allowfullscreen: true,
+                    })
+                );
+            };
+
+            if (videoSlides.length) {
+                roomDetailsSlider.on('beforeChange', stopRoomVideos);
+                roomDetailsSlider.on('afterChange', function (event, slick, currentSlide) {
+                    playRoomVideo(currentSlide);
+                });
+
+                playRoomVideo(roomDetailsSlider.slick('slickCurrentSlide'));
+            }
+
             roomDetailsSlider.lightGallery({
                 // Cloned slides are skipped, otherwise infinite mode would list every photo twice
                 // in the lightbox. Order of the links = order of the slides: VR360, video, photos.

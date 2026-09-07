@@ -17,36 +17,231 @@
         }
 
         var image = root.querySelector('img');
+        var media = root.querySelector('[data-rst-lightbox-media]');
+        var prev = root.querySelector('[data-rst-lightbox-prev]');
+        var next = root.querySelector('[data-rst-lightbox-next]');
+        var bar = root.querySelector('[data-rst-lightbox-bar]');
+        var caption = root.querySelector('[data-rst-lightbox-caption]');
+        var counter = root.querySelector('[data-rst-lightbox-counter]');
 
-        function open(src) {
+        // Bộ đang xem và vị trí trong bộ. group rỗng nghĩa là mở lẻ một ảnh
+        // (ảnh thực đơn), lúc đó không hiện nút lướt.
+        var group = [];
+        var current = -1;
+
+        function clearMedia() {
+            if (!media) {
+                return;
+            }
+
+            // xoá hẳn iframe / video để tiếng không chạy tiếp
+            media.innerHTML = '';
+            media.hidden = true;
+            media.classList.remove('rst-lightbox__media--wide');
+        }
+
+        function showImage(src) {
+            clearMedia();
             image.src = src;
+            image.hidden = false;
+        }
+
+        // Video / VR360: nhồi iframe (YouTube, Vimeo, tour 360) hoặc thẻ <video> cho file mp4.
+        function showMedia(html, wide) {
+            if (!media) {
+                return;
+            }
+
+            image.hidden = true;
+            image.src = '';
+            media.innerHTML = html;
+            // tour 360 xem sướng hơn ở khung cao, video giữ tỉ lệ 16/9
+            media.classList.toggle('rst-lightbox__media--wide', !!wide);
+            media.hidden = false;
+        }
+
+        function render(el) {
+            var kind = el.getAttribute('data-rst-kind') || 'image';
+            var src = el.getAttribute('data-rst-src');
+
+            if (kind === 'video') {
+                if (el.hasAttribute('data-rst-file')) {
+                    showMedia('<video controls autoplay playsinline src="' + src + '"></video>', false);
+                } else {
+                    showMedia(
+                        '<iframe src="' + src + '" frameborder="0" ' +
+                        'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ' +
+                        'allowfullscreen></iframe>',
+                        false
+                    );
+                }
+            } else if (kind === 'vr360') {
+                showMedia(
+                    '<iframe src="' + src + '" frameborder="0" ' +
+                    'allow="accelerometer; gyroscope; magnetometer; xr-spatial-tracking; fullscreen" ' +
+                    'allowfullscreen></iframe>',
+                    true
+                );
+            } else {
+                showImage(src);
+            }
+
+            if (caption) {
+                caption.textContent = el.getAttribute('data-rst-caption') || '';
+            }
+        }
+
+        function updateChrome() {
+            var many = group.length > 1;
+
+            if (prev) {
+                prev.hidden = !many;
+            }
+
+            if (next) {
+                next.hidden = !many;
+            }
+
+            if (counter) {
+                counter.textContent = many ? (current + 1) + ' / ' + group.length : '';
+            }
+
+            if (bar) {
+                bar.hidden = !many && !(caption && caption.textContent);
+            }
+        }
+
+        function show() {
             root.hidden = false;
             document.body.style.overflow = 'hidden';
+        }
+
+        // Mở một ô trong bộ: từ đây bấm mũi tên là lướt tiếp, khỏi thoát ra
+        function openGroup(el) {
+            var container = el.closest('[data-rst-gallery]');
+
+            group = container
+                ? Array.prototype.slice.call(container.querySelectorAll('[data-rst-item]'))
+                : [el];
+            current = group.indexOf(el);
+
+            render(el);
+            updateChrome();
+            show();
+        }
+
+        // Ảnh lẻ (ảnh thực đơn) — vẫn giữ đường cũ data-rst-lightbox
+        function openSingle(src) {
+            group = [];
+            current = -1;
+
+            showImage(src);
+
+            if (caption) {
+                caption.textContent = '';
+            }
+
+            updateChrome();
+            show();
+        }
+
+        function go(delta) {
+            if (group.length < 2) {
+                return;
+            }
+
+            current = (current + delta + group.length) % group.length;
+            render(group[current]);
+            updateChrome();
         }
 
         function close() {
             root.hidden = true;
             image.src = '';
+            image.hidden = false;
+            clearMedia();
+            group = [];
+            current = -1;
             document.body.style.overflow = '';
         }
 
         document.addEventListener('click', function (event) {
-            var trigger = event.target.closest('[data-rst-lightbox]');
+            if (event.target.closest('[data-rst-lightbox-prev]')) {
+                go(-1);
 
-            if (trigger) {
-                open(trigger.getAttribute('data-rst-lightbox'));
+                return;
+            }
+
+            if (event.target.closest('[data-rst-lightbox-next]')) {
+                go(1);
 
                 return;
             }
 
             if (event.target.closest('[data-rst-lightbox-close]') || event.target === root) {
                 close();
+
+                return;
+            }
+
+            // Đang ở trong lightbox thì không mở thêm gì nữa
+            if (root.contains(event.target)) {
+                return;
+            }
+
+            // Ô VR360 là iframe nuốt click nên có nút mở rộng riêng; nút thoát ra
+            // tab mới thì để trình duyệt tự xử.
+            if (event.target.closest('.rst-photo__tool:not([data-rst-open])')) {
+                return;
+            }
+
+            var item = event.target.closest('[data-rst-item]');
+
+            if (item) {
+                openGroup(item);
+
+                return;
+            }
+
+            var single = event.target.closest('[data-rst-lightbox]');
+
+            if (single) {
+                openSingle(single.getAttribute('data-rst-lightbox'));
+            }
+        });
+
+        // Vuốt ngang trên điện thoại. Vuốt trên iframe tour thì tour ăn mất,
+        // lúc đó vẫn còn hai nút mũi tên.
+        var touchX = null;
+
+        root.addEventListener('touchstart', function (event) {
+            touchX = event.touches[0].clientX;
+        }, { passive: true });
+
+        root.addEventListener('touchend', function (event) {
+            if (touchX === null) {
+                return;
+            }
+
+            var diff = event.changedTouches[0].clientX - touchX;
+            touchX = null;
+
+            if (Math.abs(diff) > 50) {
+                go(diff < 0 ? 1 : -1);
             }
         });
 
         document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && !root.hidden) {
+            if (root.hidden) {
+                return;
+            }
+
+            if (event.key === 'Escape') {
                 close();
+            } else if (event.key === 'ArrowLeft') {
+                go(-1);
+            } else if (event.key === 'ArrowRight') {
+                go(1);
             }
         });
     }

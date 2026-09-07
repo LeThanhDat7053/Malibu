@@ -69,6 +69,8 @@
 
         return [
             'embed' => $embed,
+            // Không phải YouTube / Vimeo thì là file video, phải phát bằng thẻ <video>
+            'is_file' => ! ($ytMatch || $vmMatch),
             'poster' => $poster ?: $roomFallbackPoster,
             'description' => Arr::get($video, 'description'),
         ];
@@ -180,7 +182,11 @@
                         @endforeach
                         {{-- Video: slide là poster + nút play, bấm vào mở lightGallery dạng iframe --}}
                         @foreach ($roomVideoSlides as $video)
-                            <div class="room-media-slide room-video-slide">
+                            {{-- Lướt tới là js nhét khung phát vào đây cho video tự chạy,
+                                 lướt đi thì gỡ hẳn ra để tiếng dừng luôn. --}}
+                            <div class="room-media-slide room-video-slide"
+                                 data-video-embed="{{ $video['embed'] }}"
+                                 @if ($video['is_file']) data-video-file @endif>
                                 <a href="{{ $video['embed'] }}"
                                    data-iframe="true"
                                    data-download-url="false"

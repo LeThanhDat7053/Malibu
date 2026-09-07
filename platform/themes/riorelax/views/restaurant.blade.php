@@ -1,5 +1,6 @@
 @php
     use Illuminate\Support\Arr;
+    use Illuminate\Support\Str;
 
     // Layout full-width + headerClass 'mlb-header': navbar mờ đè lên banner giống trang chủ mới.
     Theme::layout('full-width');
@@ -8,16 +9,94 @@
     // Banner riêng của trang nhà hàng thay cho breadcrumb dùng chung
     Theme::set('breadcrumb', false);
 
-    $items = collect($galleryItems ?? []);
+    $metaItems = collect($galleryItems ?? [])->filter(fn ($item) => filled(Arr::get($item, 'img')));
 
-    $galleryImages = $items
-        ->filter(fn ($item) => Arr::get($item, 'type', 'image') === 'image' && Arr::get($item, 'img'))
-        ->pluck('img')
-        ->values();
+    // Cột videos của nhà hàng chứa cả video lẫn vr360 (xem RestaurantController::save),
+    // gộp chung với lưới media rồi bỏ trùng theo URL — làm y như trang phòng.
+    $mediaItems = $metaItems
+        ->reject(fn ($item) => Arr::get($item, 'type', 'image') === 'image')
+        ->merge(collect($restaurant->videos)->filter(fn ($item) => filled(Arr::get($item, 'img'))))
+        ->unique(fn ($item) => Arr::get($item, 'img'));
 
-    if ($galleryImages->isEmpty()) {
-        $galleryImages = collect($restaurant->images);
+    // Link nhập ở ô "VR360 tour URL" trong dashboard cũng là một ô của lưới và đứng đầu,
+    // giống cách trang phòng đưa vr360_url thành slide đầu tiên.
+    $vr360Items = collect([['img' => $restaurant->vr360_url, 'type' => 'vr360']])
+        ->merge($mediaItems->filter(fn ($item) => Arr::get($item, 'type') === 'vr360'))
+        ->filter(fn ($item) => filled(Arr::get($item, 'img')))
+        ->unique(fn ($item) => Arr::get($item, 'img'));
+
+    // Thiếu 'type' thì coi là video: dữ liệu cũ ở cột videos không ghi khoá này.
+    $videoItems = $mediaItems->filter(fn ($item) => Arr::get($item, 'type', 'video') === 'video');
+
+    $imageItems = $metaItems->filter(fn ($item) => Arr::get($item, 'type', 'image') === 'image');
+
+    // Chưa có gì trong lưới media thì lấy tạm cột images cũ.
+    if ($imageItems->isEmpty()) {
+        $imageItems = collect($restaurant->images)
+            ->filter()
+            ->map(fn ($image) => ['img' => $image, 'type' => 'image']);
     }
+
+    // Thứ tự ô: VR360 → video → ảnh, khớp thứ tự slide của trang phòng.
+    $items = $vr360Items->concat($videoItems)->concat($imageItems);
+
+    // Đưa URL bất kỳ về link xem được: link ngoài giữ nguyên, còn lại đi qua RvMedia.
+    $rstUrl = fn ($url) => $url
+        ? (Str::startsWith($url, ['http://', 'https://', '//']) ? $url : RvMedia::getImageUrl($url))
+        : null;
+
+    // Ô VR360 / video không có ảnh riêng thì mượn ảnh đầu tiên của nhà hàng làm nền,
+    // giống poster dự phòng của slide VR360 bên trang phòng.
+    $fallbackPoster = ($firstImage = Arr::first($imageItems->pluck('img')->all()))
+        ? RvMedia::getImageUrl($firstImage)
+        : null;
+
+    // Mỗi ô của lưới gallery: ảnh, video (YouTube / Vimeo / file mp4) hoặc VR360.
+    $galleryTiles = $items->map(function ($item) use ($rstUrl, $fallbackPoster) {
+        $type = Arr::get($item, 'type', 'image');
+        $url = Arr::get($item, 'img');
+        $thumb = Arr::get($item, 'thumb');
+        $description = Arr::get($item, 'description');
+
+        if ($type === 'video') {
+            $embed = null;
+
+            if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $match)) {
+                $embed = 'https://www.youtube.com/embed/' . $match[1] . '?autoplay=1&rel=0';
+                $thumb = $thumb ?: 'https://img.youtube.com/vi/' . $match[1] . '/hqdefault.jpg';
+            } elseif (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $match)) {
+                $embed = 'https://player.vimeo.com/video/' . $match[1] . '?autoplay=1';
+            }
+
+            return [
+                'type' => 'video',
+                'preview' => $rstUrl($thumb) ?: $fallbackPoster,
+                // không phải YouTube / Vimeo thì coi là file video phát thẳng
+                'embed' => $embed,
+                'file' => $embed ? null : $rstUrl($url),
+                'description' => $description,
+            ];
+        }
+
+        if ($type === 'vr360') {
+            // Link tour 360 không phải ảnh nên không dùng làm nền được, trừ khi
+            // chính nó là file ảnh panorama.
+            $isPanoramaFile = Str::endsWith(Str::lower(Str::before($url, '?')), ['.jpg', '.jpeg', '.png', '.webp']);
+
+            return [
+                'type' => 'vr360',
+                'preview' => $rstUrl($thumb) ?: ($isPanoramaFile ? $rstUrl($url) : $fallbackPoster),
+                'link' => $url,
+                'description' => $description,
+            ];
+        }
+
+        return [
+            'type' => 'image',
+            'preview' => RvMedia::getImageUrl($url),
+            'description' => $description,
+        ];
+    })->values();
 
     $banner = $restaurant->banner;
 
@@ -147,21 +226,73 @@
         </section>
     @endif
 
-    {{-- 7. Gallery ảnh --}}
-    @if ($galleryImages->isNotEmpty())
+    {{-- 7. Gallery: ảnh + video + VR360 trong một lưới.
+         Mỗi ô mang data-rst-item để lightbox gom thành một bộ, mở ra lướt qua lại được. --}}
+    @if ($galleryTiles->isNotEmpty())
         <section class="rst-gallery">
             <div class="rst-heading">
                 <div class="rst-heading__line"><span class="rst-diamond"></span></div>
                 <div class="rst-heading__sub">{{ $restaurant->name }}</div>
                 <h2 class="rst-heading__main">{{ trans('plugins/restaurant::restaurant.gallery_heading') }}</h2>
             </div>
-            <div class="rst-gallery__grid">
-                @foreach ($galleryImages as $image)
-                    {{-- ảnh gốc: cỡ 'medium' (440x340) bị kéo giãn ở khổ này --}}
-                    <div class="rst-photo" data-rst-lightbox="{{ RvMedia::getImageUrl($image) }}">
-                        <img src="{{ RvMedia::getImageUrl($image) }}"
-                             alt="{{ $restaurant->name }}" loading="lazy">
-                    </div>
+            <div class="rst-gallery__grid" data-rst-gallery>
+                @foreach ($galleryTiles as $tile)
+                    @if ($tile['type'] === 'vr360')
+                        {{-- VR360: nhúng thẳng tour vào lưới, kéo xoay được ngay không cần bấm.
+                             iframe nuốt hết click nên nút phóng to phải tách riêng ở góc. --}}
+                        <div class="rst-photo rst-photo--vr"
+                             data-rst-item data-rst-kind="vr360"
+                             data-rst-src="{{ $tile['link'] }}"
+                             data-rst-caption="{{ $tile['description'] }}">
+                            <iframe class="rst-photo__frame"
+                                    src="{{ $tile['link'] }}"
+                                    title="{{ $tile['description'] ?: trans('plugins/restaurant::restaurant.view_vr360') }}"
+                                    loading="lazy"
+                                    frameborder="0"
+                                    allow="accelerometer; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
+                                    allowfullscreen></iframe>
+                            <span class="rst-photo__tag">VR360</span>
+                            <div class="rst-photo__tools">
+                                <button type="button" class="rst-photo__tool" data-rst-open
+                                        aria-label="{{ __('View fullscreen') }}">
+                                    <i class="fal fa-expand-arrows"></i>
+                                </button>
+                                {{-- lối thoát khi trang tour chặn nhúng iframe --}}
+                                <a class="rst-photo__tool" href="{{ $tile['link'] }}" target="_blank"
+                                   rel="noopener noreferrer" aria-label="{{ __('Open in new tab') }}">
+                                    <i class="fal fa-external-link"></i>
+                                </a>
+                            </div>
+                            @if ($tile['description'])
+                                <span class="rst-photo__caption">{{ $tile['description'] }}</span>
+                            @endif
+                        </div>
+                    @elseif ($tile['type'] === 'video')
+                        <button type="button" class="rst-photo rst-photo--media"
+                                data-rst-item data-rst-kind="video"
+                                data-rst-src="{{ $tile['embed'] ?: $tile['file'] }}"
+                                @if (! $tile['embed']) data-rst-file @endif
+                                data-rst-caption="{{ $tile['description'] }}"
+                                aria-label="{{ $tile['description'] ?: __('Video') }}">
+                            @if ($tile['preview'])
+                                <img src="{{ $tile['preview'] }}" alt="{{ $tile['description'] }}" loading="lazy">
+                            @endif
+                            <span class="rst-photo__play"><i class="fas fa-play"></i></span>
+                            <span class="rst-photo__tag">Video</span>
+                            @if ($tile['description'])
+                                <span class="rst-photo__caption">{{ $tile['description'] }}</span>
+                            @endif
+                        </button>
+                    @else
+                        {{-- ảnh gốc: cỡ 'medium' (440x340) bị kéo giãn ở khổ này --}}
+                        <div class="rst-photo"
+                             data-rst-item data-rst-kind="image"
+                             data-rst-src="{{ $tile['preview'] }}"
+                             data-rst-caption="{{ $tile['description'] }}">
+                            <img src="{{ $tile['preview'] }}"
+                                 alt="{{ $tile['description'] ?: $restaurant->name }}" loading="lazy">
+                        </div>
+                    @endif
                 @endforeach
             </div>
         </section>
@@ -266,5 +397,19 @@
 {{-- Lightbox dùng chung cho gallery và ảnh menu --}}
 <div class="rst-lightbox" data-rst-lightbox-root hidden>
     <button type="button" class="rst-lightbox__close" data-rst-lightbox-close aria-label="Close">&times;</button>
+
+    {{-- lướt qua lại ngay trong lightbox, khỏi phải thoát ra bấm ô khác --}}
+    <button type="button" class="rst-lightbox__nav rst-lightbox__nav--prev" data-rst-lightbox-prev
+            aria-label="{{ __('Previous') }}" hidden><i class="fal fa-angle-left"></i></button>
+    <button type="button" class="rst-lightbox__nav rst-lightbox__nav--next" data-rst-lightbox-next
+            aria-label="{{ __('Next') }}" hidden><i class="fal fa-angle-right"></i></button>
+
     <img src="" alt="">
+    {{-- khung video / tour: js đổ iframe hoặc thẻ video vào đây rồi dọn sạch khi đóng --}}
+    <div class="rst-lightbox__media" data-rst-lightbox-media hidden></div>
+
+    <div class="rst-lightbox__bar" data-rst-lightbox-bar hidden>
+        <span class="rst-lightbox__caption" data-rst-lightbox-caption></span>
+        <span class="rst-lightbox__counter" data-rst-lightbox-counter></span>
+    </div>
 </div>

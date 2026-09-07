@@ -16,6 +16,7 @@ use Botble\Base\Forms\Fields\SelectField;
 use Botble\Base\Forms\Fields\TextareaField;
 use Botble\Base\Forms\Fields\TextField;
 use Botble\Base\Forms\FormAbstract;
+use Botble\Gallery\Facades\Gallery;
 use Botble\Restaurant\Http\Requests\RestaurantRequest;
 use Botble\Restaurant\Models\Restaurant;
 
@@ -23,10 +24,20 @@ class RestaurantForm extends FormAbstract
 {
     public function setup(): void
     {
+        // Plugin Gallery tự thêm một meta box ảnh ở phần "advanced" cho mọi model đã
+        // đăng ký. Trên form này đã có sẵn lưới media rồi nên phải tắt nó đi:
+        // hai ô input cùng tên "gallery" thì PHP lấy ô cuối (meta box, giá trị cũ)
+        // → ảnh / video / VR360 vừa thêm sẽ mất ngay khi bấm lưu. Room cũng tắt y hệt.
+        Gallery::disableGalleryImagesMetaBox();
+
         // Nạp asset của plugin Gallery để lưới ảnh/video/VR360 hoạt động,
         // giống cách RoomForm làm.
+        // 'sortable' là bắt buộc: gallery-admin.js gọi Sortable.create ngay khi nạp, thiếu thư
+        // viện là cả khối JS chết, ảnh / video thêm vào không được ghi vào ô ẩn nữa.
+        // Trước đây meta box của plugin Gallery nạp hộ, tắt meta box thì phải tự nạp — Room cũng vậy.
         Assets::addStylesDirectly(['vendor/core/plugins/gallery/css/admin-gallery.css'])
-            ->addScriptsDirectly(['vendor/core/plugins/gallery/js/gallery-admin.js']);
+            ->addScriptsDirectly(['vendor/core/plugins/gallery/js/gallery-admin.js'])
+            ->addScripts(['sortable']);
 
         $half = $this->formHelper->getConfig('defaults.wrapper_class') . ' col-md-6';
 

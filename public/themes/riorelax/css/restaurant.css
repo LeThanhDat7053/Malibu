@@ -476,7 +476,7 @@
 }
 
 /* ==========================================================================
-   9. Gallery — lưới vuông 3 cột
+   9. Gallery — lưới vuông 3 cột, xen tour VR360 và video
    ========================================================================== */
 
 .rst-gallery {
@@ -509,6 +509,122 @@
 
 .rst-photo:hover img {
     transform: scale(1.06);
+}
+
+/* Ô video: khung như ô ảnh, thêm lớp phủ nút play */
+.rst-photo--media {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: var(--mlb-ink, #16192c);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.rst-photo--media img {
+    opacity: 0.82;
+}
+
+.rst-photo--media:hover img {
+    opacity: 1;
+}
+
+.rst-photo__play {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(9, 11, 22, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    color: #fff;
+    font-size: 18px;
+    pointer-events: none;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.rst-photo--media:hover .rst-photo__play {
+    background: var(--mlb-accent, var(--primary-color, #e4762c));
+    transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* Ô VR360: tour nhúng thẳng, chiếm trọn một hàng để đủ chỗ kéo xoay */
+.rst-photo--vr {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
+    cursor: default;
+    background: var(--mlb-ink, #16192c);
+}
+
+.rst-photo__frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* iframe nuốt hết click nên hai nút này phải nổi riêng ở góc */
+.rst-photo__tools {
+    position: absolute;
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.rst-photo__tool {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(9, 11, 22, 0.72);
+    color: #fff;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.rst-photo__tool:hover,
+.rst-photo__tool:focus-visible {
+    background: var(--mlb-accent, var(--primary-color, #e4762c));
+    color: #fff;
+}
+
+.rst-photo__tag {
+    position: absolute;
+    inset-block-start: 10px;
+    inset-inline-start: 10px;
+    padding: 3px 8px;
+    background: rgba(9, 11, 22, 0.72);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+.rst-photo__caption {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    padding: 8px 10px;
+    background: linear-gradient(to top, rgba(9, 11, 22, 0.85), rgba(9, 11, 22, 0));
+    color: #fff;
+    font-size: 12px;
+    text-align: start;
+    pointer-events: none;
 }
 
 /* ==========================================================================
@@ -995,6 +1111,83 @@
     object-fit: contain;
 }
 
+/* Khung video trong lightbox: giữ tỉ lệ 16/9 và không tràn màn hình */
+.rst-lightbox__media {
+    width: min(92vw, 1100px);
+    aspect-ratio: 16 / 9;
+    max-height: 88vh;
+    background: #000;
+}
+
+/* Tour VR360 cần khung cao hơn video mới xoay ngắm thoải mái */
+.rst-lightbox__media--wide {
+    aspect-ratio: auto;
+    width: min(94vw, 1400px);
+    height: 86vh;
+    max-height: 86vh;
+}
+
+.rst-lightbox__media iframe,
+.rst-lightbox__media video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Lướt qua lại ngay trong lightbox */
+.rst-lightbox__nav {
+    position: absolute;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.rst-lightbox__nav:hover,
+.rst-lightbox__nav:focus-visible {
+    background: var(--mlb-accent, var(--primary-color, #e4762c));
+}
+
+.rst-lightbox__nav--prev {
+    inset-inline-start: 18px;
+}
+
+.rst-lightbox__nav--next {
+    inset-inline-end: 18px;
+}
+
+.rst-lightbox__bar {
+    position: absolute;
+    inset-block-end: 18px;
+    inset-inline: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 76px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.rst-lightbox__counter {
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
 .rst-lightbox__close {
     position: absolute;
     top: 18px;
@@ -1046,6 +1239,12 @@
     .rst-gallery__grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
+    }
+
+    .rst-lightbox__nav {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
     }
 
     .rst-divider::before,

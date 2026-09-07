@@ -151,7 +151,9 @@ $(() => {
 
     let initSortable = function () {
         let el = document.getElementById('list-photos-items')
-        if (el) {
+        // Thiếu thư viện Sortable thì bỏ qua phần kéo thả, đừng để ReferenceError
+        // giết cả khối JS phía dưới (updateItems, nút xoá, modal sửa ảnh...)
+        if (el && typeof Sortable !== 'undefined') {
             Sortable.create(el, {
                 group: 'galleries',
                 sort: true,
