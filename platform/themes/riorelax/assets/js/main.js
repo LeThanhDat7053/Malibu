@@ -510,14 +510,15 @@ $(document).ready(function () {
         if (roomDetailsSlider.length) {
             let roomDetailsSliderNav = $('.room-details-slider-nav');
             let vr360Frames = roomDetailsSlider.find('.room-vr360-frame');
+            let mediaSlides = roomDetailsSlider.find('.room-media-slide');
 
             roomDetailsSlider.slick({
                 rtl: RiorelaxTheme.isRtl(),
                 slidesToShow: 1,
                 slidesToScroll: 1,
                 // An embedded VR360 tour must not be duplicated into slick's wrap-around clones,
-                // so infinite mode is dropped only on rooms that actually have one.
-                infinite: !vr360Frames.length,
+                // so infinite mode is dropped only on rooms that actually have VR360 or video slides.
+                infinite: !mediaSlides.length,
                 autoplay: false,
                 arrows: false,
                 dots: false,
@@ -530,7 +531,9 @@ $(document).ready(function () {
             });
 
             roomDetailsSlider.lightGallery({
-                selector: 'a',
+                // Cloned slides are skipped, otherwise infinite mode would list every photo twice
+                // in the lightbox. Order of the links = order of the slides: VR360, video, photos.
+                selector: '.slick-slide:not(.slick-cloned) a',
                 thumbnail: true,
                 share: false,
                 fullScreen: false,

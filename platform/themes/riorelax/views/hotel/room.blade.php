@@ -13,7 +13,6 @@
     $nights = (int) $startDate->diffInDays($endDate);
 
     $roomGalleryItems = function_exists('gallery_meta_data') ? gallery_meta_data($room) : [];
-    $roomVideos = collect($room->videos ?? []);
     $roomGalleryVr360s = collect($roomGalleryItems)->filter(fn($item) => Arr::get($item, 'type') === 'vr360');
 
     // VR360 tours shown as the first slide(s) of the room gallery.
@@ -24,16 +23,56 @@
         ->unique(fn($item) => Arr::get($item, 'img'))
         ->values();
 
+    // Ảnh đại diện dùng chung cho slide VR360 / video khi bản thân chúng không có thumb riêng
+    $roomFallbackPoster = ($firstRoomImage = Arr::first($room->images ?? []))
+        ? RvMedia::getImageUrl($firstRoomImage, 'room-image')
+        : RvMedia::getDefaultImage();
+
     // Poster for a VR360 slide: its own thumb, else the room's first image.
-    $roomVr360Poster = function (array $item) use ($room) {
+    $roomVr360Poster = function (array $item) use ($roomFallbackPoster) {
         $thumb = Arr::get($item, 'thumb');
 
         if ($thumb) {
             return str_starts_with($thumb, 'http') ? $thumb : RvMedia::getImageUrl($thumb);
         }
 
-        return ($first = Arr::first($room->images ?? [])) ? RvMedia::getImageUrl($first, 'room-image') : RvMedia::getDefaultImage();
+        return $roomFallbackPoster;
     };
+
+    // Video của phòng: lấy cả cột videos lẫn item type=video trong gallery, bỏ trùng theo URL
+    $roomVideos = collect($room->videos ?? [])
+        ->merge(collect($roomGalleryItems)->filter(fn($item) => Arr::get($item, 'type') === 'video'))
+        ->filter(fn($item) => ! empty(Arr::get($item, 'img')))
+        ->unique(fn($item) => Arr::get($item, 'img'))
+        ->values();
+
+    // Chuẩn hoá video thành slide cho gallery: URL nhúng cho iframe của lightGallery + ảnh poster
+    $roomVideoSlides = $roomVideos->map(function ($video) use ($roomFallbackPoster) {
+        $url = (string) Arr::get($video, 'img');
+        $embed = $url;
+        $poster = null;
+
+        if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $url, $ytMatch)) {
+            $embed = 'https://www.youtube.com/embed/' . $ytMatch[1];
+            $poster = 'https://img.youtube.com/vi/' . $ytMatch[1] . '/hqdefault.jpg';
+        } elseif (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $vmMatch)) {
+            $embed = 'https://player.vimeo.com/video/' . $vmMatch[1];
+        } elseif (! str_starts_with($url, 'http')) {
+            // File mp4/webm upload trên site: nhúng thẳng file, trình duyệt tự dựng player
+            $embed = RvMedia::getImageUrl($url);
+        }
+
+        // Thumb tự đặt trong admin luôn được ưu tiên hơn poster tự suy ra
+        if ($thumb = Arr::get($video, 'thumb')) {
+            $poster = str_starts_with($thumb, 'http') ? $thumb : RvMedia::getImageUrl($thumb);
+        }
+
+        return [
+            'embed' => $embed,
+            'poster' => $poster ?: $roomFallbackPoster,
+            'description' => Arr::get($video, 'description'),
+        ];
+    })->values();
 
     // Ảnh nền dải tiêu đề: ưu tiên ảnh cấu hình ở Theme Options, không có thì lấy ảnh đầu của phòng
     $heroImageOption = theme_option('breadcrumb_background_image_room') ?: theme_option('breadcrumb_background_image');
@@ -118,15 +157,40 @@
                     <div class="room-details-slider">
                         {{-- VR360 embedded inline as the first slide(s). src is deferred to data-src and
                              filled by roomDetailsSlider() so slick's clones don't load the tour twice.
-                             Not an <a>, so lightGallery (selector: 'a') skips it and only indexes photos. --}}
+                             The tour is draggable right in the slider, and the corner button is a real <a>
+                             so lightGallery indexes the tour too (data-iframe -> href rendered as an iframe). --}}
                         @foreach ($roomVr360Items as $vr360)
-                            <div class="room-vr360-slide">
+                            <div class="room-media-slide room-vr360-slide">
                                 <iframe class="room-vr360-frame"
                                         data-src="{{ Arr::get($vr360, 'img') }}"
                                         title="{{ Arr::get($vr360, 'description') ?: __('View VR360') }}"
                                         frameborder="0"
                                         allow="accelerometer; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
                                         allowfullscreen></iframe>
+                                {{-- Nút riêng vì iframe nuốt hết click, không bấm xuyên xuống thẻ bọc được --}}
+                                <a class="room-media-expand"
+                                   href="{{ Arr::get($vr360, 'img') }}"
+                                   data-iframe="true"
+                                   data-download-url="false"
+                                   data-sub-html="{{ Arr::get($vr360, 'description') ?: __('View VR360') }}"
+                                   aria-label="{{ __('View VR360') }}">
+                                    <i class="fal fa-expand-arrows"></i>
+                                </a>
+                            </div>
+                        @endforeach
+                        {{-- Video: slide là poster + nút play, bấm vào mở lightGallery dạng iframe --}}
+                        @foreach ($roomVideoSlides as $video)
+                            <div class="room-media-slide room-video-slide">
+                                <a href="{{ $video['embed'] }}"
+                                   data-iframe="true"
+                                   data-download-url="false"
+                                   data-sub-html="{{ $video['description'] }}"
+                                   aria-label="{{ $video['description'] ?: __('Video') }}">
+                                    <img src="{{ $video['poster'] }}" alt="{{ $video['description'] ?: $room->name }}">
+                                    <span class="room-media-badge room-media-badge--play">
+                                        <i class="fas fa-play"></i>
+                                    </span>
+                                </a>
                             </div>
                         @endforeach
                         @foreach ($room->images as $img)
@@ -137,10 +201,18 @@
                     </div>
                     <div class="room-details-slider-nav">
                         @foreach ($roomVr360Items as $vr360)
-                            <div class="room-vr360-nav-thumb">
+                            <div class="room-media-nav-thumb">
                                 <img src="{{ $roomVr360Poster($vr360) }}" alt="{{ Arr::get($vr360, 'description') ?: $room->name }}">
-                                <span class="room-vr360-badge">
+                                <span class="room-media-badge room-media-badge--vr">
                                     <i class="fal fa-vr-cardboard"></i>
+                                </span>
+                            </div>
+                        @endforeach
+                        @foreach ($roomVideoSlides as $video)
+                            <div class="room-media-nav-thumb">
+                                <img src="{{ $video['poster'] }}" alt="{{ $video['description'] ?: $room->name }}">
+                                <span class="room-media-badge room-media-badge--play">
+                                    <i class="fas fa-play"></i>
                                 </span>
                             </div>
                         @endforeach
@@ -163,16 +235,6 @@
 
                 {{-- $room->content đã được controller bọc sẵn trong .ck-content --}}
                 <div class="mlb-rd-prose mlb-rd-prose--lead">{!! BaseHelper::clean($room->content) !!}</div>
-
-                @if ($roomVideos->isNotEmpty())
-                    <section class="mlb-rd-section">
-                        <div class="mlb-rd-head">
-                            <h2 class="mlb-rd-head__title">{{ __('Video') }}</h2>
-                            <p class="mlb-rd-head__sub">{{ __('A closer look at the room') }}</p>
-                        </div>
-                        {!! Theme::partial('media-gallery', ['items' => $roomVideos->values()->toArray(), 'id' => 'room-gallery']) !!}
-                    </section>
-                @endif
 
                 @if ($room->amenities->isNotEmpty())
                     <section class="mlb-rd-section">

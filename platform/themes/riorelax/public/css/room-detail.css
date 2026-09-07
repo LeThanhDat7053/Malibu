@@ -200,8 +200,8 @@
     border-radius: 0;
 }
 
-/* VR360 nhúng thẳng vào slider, cùng tỷ lệ với ảnh nên đổi slide không giật */
-.mlb-rd-gallery .room-vr360-slide {
+/* VR360 và video nhúng thẳng vào slider, cùng tỷ lệ với ảnh nên đổi slide không giật */
+.mlb-rd-gallery .room-media-slide {
     position: relative;
     aspect-ratio: 850 / 460;
     background: #000;
@@ -215,6 +215,43 @@
     width: 100%;
     height: 100%;
     border: 0;
+}
+
+/* iframe VR360 nuốt click nên phải có nút riêng để mở tour trong lightbox */
+.mlb-room-detail .mlb-rd-gallery .room-media-expand {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 14px;
+    transition: background 0.25s ease;
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-media-expand:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+/* Slide video: poster phủ kín khung, nút play nằm giữa */
+.mlb-room-detail .mlb-rd-gallery .room-video-slide > a {
+    position: absolute;
+    inset: 0;
+}
+
+.mlb-room-detail .mlb-rd-gallery .room-video-slide img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: cover;
+    filter: brightness(0.7);
 }
 
 /* dải thumbnail nằm dưới ảnh lớn, không đè lên ảnh */
@@ -242,16 +279,17 @@
     border-radius: 0;
 }
 
-.mlb-rd-gallery .room-details-slider-nav .room-vr360-nav-thumb {
+.mlb-rd-gallery .room-details-slider-nav .room-media-nav-thumb {
     position: relative;
 }
 
-.mlb-rd-gallery .room-details-slider-nav .room-vr360-nav-thumb img {
+.mlb-rd-gallery .room-details-slider-nav .room-media-nav-thumb img {
     width: 100%;
     filter: brightness(0.6);
 }
 
-.mlb-rd-gallery .room-vr360-badge {
+/* Huy hiệu giữa thumbnail / poster, phân biệt slide VR360 và slide video */
+.mlb-rd-gallery .room-media-badge {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -266,10 +304,28 @@
     pointer-events: none;
 }
 
-.mlb-rd-gallery .room-vr360-badge i {
+.mlb-rd-gallery .room-media-badge i {
     font-size: 20px;
     line-height: 1;
+}
+
+.mlb-rd-gallery .room-media-badge--vr i {
     color: #00d4ff;
+}
+
+/* Nút play trên slide lớn to hơn nút trên dải thumbnail */
+.mlb-rd-gallery .room-video-slide .room-media-badge {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.mlb-rd-gallery .room-video-slide .room-media-badge i {
+    font-size: 22px;
+    margin-left: 4px;
 }
 
 
