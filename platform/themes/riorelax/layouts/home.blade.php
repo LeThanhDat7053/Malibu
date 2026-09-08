@@ -2,6 +2,8 @@
 
 {{-- Homepage layout: content scoped under .mlb-home so the editorial restyle stays on this page --}}
 @section('main')
+    {{-- nền trang đè lên footer, cuộn tới cuối mới nhả footer lộ ra --}}
+    <div class="mlb-page">
     <header class="header-area header-three mlb-header">
         @if (theme_option('header_top_enabled', true))
             {!! Theme::partial('header-top') !!}
@@ -17,6 +19,8 @@
     <main class="mlb-home">
         {!! Theme::content() !!}
     </main>
+
+    </div>
 
     {!! Theme::partial('footer') !!}
 @endsection

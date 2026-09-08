@@ -1,4 +1,7 @@
-<footer class="footer-bg footer-p">
+{{-- chỗ trống bằng đúng chiều cao footer, để cuộn tới cuối là footer cố định lộ dần ra --}}
+<div class="mlb-footer-spacer" aria-hidden="true"></div>
+
+<footer class="footer-bg footer-p mlb-footer" data-mlb-footer>
     <div class="footer-top  pt-90 pb-40"
          @if ($background = theme_option('background_footer'))
              style="background-image: url('{{ RvMedia::getImageUrl($background) }}');"

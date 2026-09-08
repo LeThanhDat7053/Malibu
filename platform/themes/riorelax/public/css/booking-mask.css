@@ -415,11 +415,6 @@ body.lg-on .booking-bar {
     left: 20px !important;
 }
 
-/* ---- Move scrollUp button a bit left to avoid Chat Bot overlap ---- */
-#scrollUp {
-    inset-inline-end: 100px !important;
-}
-
 /* ---- Keep cookie consent actions tappable on mobile ---- */
 @media (max-width: 767px) {
     .site-notice.site-notice--visible ~ #scrollUp {

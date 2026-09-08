@@ -1,17 +1,2 @@
-#scrollUp {
-    background: var(--primary-color);
-    height: 45px;
-    width: 45px;
-    inset-inline-end: 50px;
-    bottom: 77px;
-    color: #fff;
-    text-align: center;
-    border-radius: 50%;
-    font-size: 22px;
-    line-height: 45px;
-    transition: 0.3s;
-}
-
-#scrollUp:hover {
-    background: var(--primary-color);
-}
+/* Nút cuộn lên đầu trang nằm trọn trong public/css/scroll-top.css để gom cả vòng tiến trình
+   vào một chỗ. File này giữ lại cho đúng danh sách import của theme.scss. */

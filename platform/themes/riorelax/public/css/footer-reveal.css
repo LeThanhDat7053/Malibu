@@ -1,0 +1,151 @@
+/* Footer nằm sẵn dưới đáy khung nhìn, nội dung trang phủ lên trên. Cuộn tới cuối thì nền trang
+   trượt lên và nhả footer lộ dần ra. Mép dưới trang có nẹm chữ V chĩa xuống, mũi tên cuộn lên
+   nằm trong nẹm, và có shadow đổ xuống footer cho thấy rõ hai lớp.
+
+   footer-reveal.js đo và đặt: --mlb-footer-h (chiều cao chỗ trống), --mlb-footer-reveal
+   (số px footer đã lộ), --mlb-wedge-bg và --mlb-wedge-ink (màu nẹm và màu mũi tên). */
+
+:root {
+    --mlb-footer-h: 0px;
+    --mlb-footer-reveal: 0px;
+    --mlb-wedge-w: 84px;
+    --mlb-wedge-h: 42px;
+    /* tâm nẹm và tâm nút cuộn lên phải trùng nhau, cùng đo từ mép phải */
+    --mlb-dock-center: 117px;
+    --mlb-wedge-bg: #fff;
+    --mlb-wedge-ink: #16192c;
+    /* đường trắng chạy dọc chỗ trang tiếp giáp footer, vòng luôn theo hai cạnh nẹm */
+    --mlb-edge-line: 2px;
+    --mlb-edge-color: #fff;
+}
+
+.mlb-page {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    /* rèm phải kéo dài tới đúng mép trên footer, nếu không trang ngắn sẽ hụt một khoảng */
+    min-height: calc(100vh - var(--mlb-footer-h));
+    box-shadow: 0 22px 38px -16px rgba(10, 10, 14, 0.55);
+}
+
+/* vạch trắng ngay mép dưới trang, nối liền với viền hai cạnh nẹm thành một đường duy nhất */
+.mlb-page::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    /* nằm ngay dưới mép trang, cùng dải với viền cạnh nẹm nên hai đoạn nối khít nhau;
+       z-index cao hơn nẹm để hai đầu vạch phủ lên góc nẹm, khỏi hở khấc ở chỗ nối */
+    top: 100%;
+    z-index: 3;
+    height: var(--mlb-edge-line);
+    /* chừa một quãng đúng bề ngang nẹm, để đường trắng vòng theo hai cạnh xiên
+       thay vì cắt ngang qua đáy tam giác */
+    background: linear-gradient(
+        to right,
+        var(--mlb-edge-color) 0,
+        var(--mlb-edge-color) calc(100% - var(--mlb-dock-center) - var(--mlb-wedge-w) / 2),
+        transparent calc(100% - var(--mlb-dock-center) - var(--mlb-wedge-w) / 2),
+        transparent calc(100% - var(--mlb-dock-center) + var(--mlb-wedge-w) / 2),
+        var(--mlb-edge-color) calc(100% - var(--mlb-dock-center) + var(--mlb-wedge-w) / 2),
+        var(--mlb-edge-color) 100%
+    );
+    pointer-events: none;
+}
+
+.mlb-reveal-off .mlb-page::after {
+    display: none;
+}
+
+/* Nẹm chữ V thò xuống dưới mép trang, mũi tên cuộn lên nằm trong đó.
+   Nằm trong .mlb-page nên trôi cùng rèm, lướt nhanh cỡ nào cũng không lệch khung hình nào. */
+.mlb-page__wedge {
+    position: absolute;
+    top: 100%;
+    inset-inline-end: calc(var(--mlb-dock-center) - var(--mlb-wedge-w) / 2);
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: var(--mlb-wedge-w);
+    height: var(--mlb-wedge-h);
+    padding-top: 7px;
+    color: var(--mlb-wedge-ink);
+    font-size: 15px;
+    line-height: 1;
+    text-decoration: none;
+    /* Viền vẽ bằng bốn drop-shadow lệch bốn phía để bám đúng hình tam giác, kể cả chỗ đỉnh nhọn.
+       Filter chạy trước clip-path nên phải để clip ở thẻ con, nếu không viền bị cắt mất. */
+    filter:
+        drop-shadow(var(--mlb-edge-line) 0 0 var(--mlb-edge-color))
+        drop-shadow(calc(var(--mlb-edge-line) * -1) 0 0 var(--mlb-edge-color))
+        drop-shadow(0 var(--mlb-edge-line) 0 var(--mlb-edge-color))
+        /* blur phải nhỏ hơn độ dời, không thì bóng loang ngược lên làm sậm nền trang phía trên */
+        drop-shadow(0 12px 7px rgba(10, 10, 14, 0.42));
+}
+
+.mlb-page__wedge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--mlb-wedge-bg);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.mlb-page__wedge i {
+    position: relative;
+}
+
+.mlb-page__wedge:hover {
+    color: var(--mlb-wedge-ink);
+}
+
+.mlb-page__wedge i {
+    transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.mlb-page__wedge:hover i {
+    transform: translateY(-3px);
+}
+
+.mlb-footer-spacer {
+    height: var(--mlb-footer-h);
+}
+
+.mlb-footer {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 0;
+}
+
+/* footer cao hơn khung nhìn thì phần đầu bị cắt mất, JS gắn cờ này để trả về cuộn thường */
+.mlb-reveal-off .mlb-page {
+    min-height: 0;
+    box-shadow: none;
+}
+
+.mlb-reveal-off .mlb-footer {
+    position: static;
+}
+
+.mlb-reveal-off .mlb-footer-spacer,
+.mlb-reveal-off .mlb-page__wedge {
+    display: none;
+}
+
+/* màn hình hẹp: thanh địa chỉ trình duyệt co giãn liên tục, giữ footer trong luồng cho chắc */
+@media (max-width: 991px) {
+    .mlb-page {
+        min-height: 0;
+        box-shadow: none;
+    }
+
+    .mlb-footer {
+        position: static;
+    }
+
+    .mlb-footer-spacer,
+    .mlb-page__wedge {
+        display: none;
+    }
+}

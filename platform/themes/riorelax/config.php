@@ -68,6 +68,8 @@ return [
             $theme->asset()->usePath()->add('mlb-home-css', 'css/home.css', ['style-css']);
             $theme->asset()->usePath()->add('mlb-room-detail-css', 'css/room-detail.css', ['style-css']);
             $theme->asset()->usePath()->add('mlb-contact-css', 'css/contact.css', ['style-css']);
+            $theme->asset()->usePath()->add('mlb-footer-reveal-css', 'css/footer-reveal.css', ['style-css']);
+            $theme->asset()->usePath()->add('mlb-scroll-top-css', 'css/scroll-top.css', ['style-css', 'responsive-css']);
 
             $theme->asset()->container('header')->usePath()->add('jquery', 'plugins/jquery.min.js');
             $theme->asset()->container('footer')->usePath()->add('imagesloaded', 'plugins/imagesloaded.min.js');
@@ -89,6 +91,8 @@ return [
             $theme->asset()->container('footer')->usePath()->add('external-booking', 'js/external-booking.js', ['main']);
             $theme->asset()->container('footer')->usePath()->add('booking-mask-js', 'js/booking-mask.js', ['datepicker-js']);
             $theme->asset()->container('footer')->usePath()->add('mlb-home-js', 'js/home.js', ['datepicker-js']);
+            $theme->asset()->container('footer')->usePath()->add('mlb-footer-reveal-js', 'js/footer-reveal.js');
+            $theme->asset()->container('footer')->usePath()->add('mlb-scroll-top-js', 'js/scroll-top.js', ['main', 'scrollUp']);
 
             if (function_exists('shortcode')) {
                 $theme->composer(['page', 'post', 'teams.team', 'hotel.room', 'hotel.service'], function (View $view): void {
