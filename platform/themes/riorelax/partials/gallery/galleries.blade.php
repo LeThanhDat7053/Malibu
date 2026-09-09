@@ -158,6 +158,17 @@
                                     <i class="fas fa-video"></i> VIDEO
                                 </span>
                             @elseif ($item['kind'] === 'vr360')
+                                {{-- Tour VR360 chạy thẳng trong ô; src chỉ gán khi ô lọt vào màn hình --}}
+                                <iframe class="gallery-tile-frame"
+                                        data-src="{{ $item['lbSrc'] }}"
+                                        title="{{ $item['desc'] ?: 'VR360' }}"
+                                        loading="lazy"
+                                        scrolling="no"
+                                        tabindex="-1"
+                                        aria-hidden="true"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
+                                        allowfullscreen></iframe>
                                 <span class="gallery-tile-icon gallery-tile-icon--vr"><i class="fas fa-vr-cardboard"></i></span>
                                 <span class="gallery-tile-badge gallery-tile-badge--vr">
                                     <i class="fas fa-street-view"></i> VR360
@@ -382,6 +393,30 @@
 }
 .gallery-tile-badge--video { background: rgba(13, 110, 253, .9); }
 .gallery-tile-badge--vr { background: rgba(0, 150, 180, .92); }
+/* Iframe VR360 nằm đè lên ảnh poster. pointer-events:none để cú click rơi
+   xuống ô, mở lightbox — trong lightbox mới xoay/kéo được tour. */
+.gallery-tile-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .4s ease;
+}
+.gallery-tile-frame.is-loaded {
+    opacity: 1;
+}
+/* Tour đã hiện thì mờ icon giữa đi cho đỡ che, rê chuột mới hiện lại */
+.gallery-tile--vr360.is-live .gallery-tile-icon {
+    opacity: 0;
+    transition: opacity .25s ease, transform .25s ease, background .25s ease;
+}
+.colItem:hover .gallery-tile--vr360.is-live .gallery-tile-icon {
+    opacity: 1;
+}
 </style>
 
 <script>
@@ -494,10 +529,49 @@
         if (e.key === 'ArrowRight')  { glbNav(1); }
     });
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', attachItems);
-    } else {
+    // Chỉ nạp tour VR360 khi ô lọt vào màn hình. Tab đang ẩn có display:none nên
+    // không bao giờ "intersect" — mở tab nào mới tải tour của tab đó.
+    function lazyLoadFrames() {
+        var frames = document.querySelectorAll('.gallery-tile-frame[data-src]');
+        if (!frames.length) return;
+
+        function load(frame) {
+            if (frame.dataset.loaded) return;
+            frame.dataset.loaded = '1';
+            frame.addEventListener('load', function () {
+                frame.classList.add('is-loaded');
+                var tile = frame.closest('.gallery-tile');
+                if (tile) tile.classList.add('is-live');
+            });
+            frame.src = frame.getAttribute('data-src');
+        }
+
+        if (!('IntersectionObserver' in window)) {
+            frames.forEach(load);
+            return;
+        }
+
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    load(entry.target);
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { rootMargin: '200px' });
+
+        frames.forEach(function (frame) { io.observe(frame); });
+    }
+
+    function init() {
         attachItems();
+        lazyLoadFrames();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
 })();
 </script>
