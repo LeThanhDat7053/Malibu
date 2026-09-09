@@ -9,21 +9,11 @@
         <div class="row mt-50">
             <article class="post post--single">
                 <div class="post__content">
-                    <div class="row" id="list-photo">
-                        @foreach (gallery_meta_data($gallery) as $image)
-                            @if ($image)
-                                <div class="col-12 col-md-4 mt-20" data-src="{{ RvMedia::getImageUrl(Arr::get($image, 'img'), 'galleries') }}" data-sub-html="{{ BaseHelper::clean(Arr::get($image, 'description')) }}">
-                                    <div class="photo-item">
-                                        <div class="thumb">
-                                            <a href="{{ BaseHelper::clean(Arr::get($image, 'description')) }}">
-                                                <img src="{{ RvMedia::getImageUrl(Arr::get($image, 'img'), 'galleries') }}" alt="{{ BaseHelper::clean(Arr::get($image, 'description')) }}">
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
+                    {{-- Ảnh + video + VR360 dùng chung partial media-gallery --}}
+                    {!! Theme::partial('media-gallery', [
+                        'items' => gallery_meta_data($gallery),
+                        'id' => 'list-photo',
+                    ]) !!}
                 </div>
             </article>
         </div>

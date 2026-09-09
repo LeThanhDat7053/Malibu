@@ -82,7 +82,7 @@
 
                         <div class="modal fade" id="{{ $videoUniqueId }}Modal" tabindex="-1"
                              aria-labelledby="{{ $videoUniqueId }}Label" aria-hidden="true"
-                             data-video-src="{{ $embedUrl }}">
+                             data-frame-src="{{ $embedUrl }}">
                             <div class="modal-dialog modal-lg modal-dialog-centered">
                                 <div class="modal-content" style="background:#000;">
                                     <div class="modal-header border-0 p-2">
@@ -165,9 +165,10 @@
                     } else {
                         $vrPreviewUrl = str_starts_with($vrLink, 'http') ? $vrLink : RvMedia::getImageUrl($vrLink);
                     }
+                    $vrUniqueId = 'vr_' . md5($vrLink);
                 @endphp
                 <div class="col-12 col-md-4 mt-20">
-                    <a href="{{ $vrLink }}" target="_blank" rel="noopener noreferrer"
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#{{ $vrUniqueId }}Modal"
                        class="position-relative d-block overflow-hidden rounded"
                        style="aspect-ratio:16/9;background:#1a1a2e;">
                         {{-- Show preview image; onerror hides it if the URL is not a loadable image --}}
@@ -188,18 +189,43 @@
                             </span>
                         @endif
                     </a>
+
+                    <div class="modal fade" id="{{ $vrUniqueId }}Modal" tabindex="-1"
+                         aria-hidden="true" data-frame-src="{{ $vrLink }}">
+                        <div class="modal-dialog modal-xl modal-dialog-centered">
+                            <div class="modal-content" style="background:#000;">
+                                <div class="modal-header border-0 p-2">
+                                    <a href="{{ $vrLink }}" target="_blank" rel="noopener noreferrer"
+                                       class="text-white text-decoration-none me-auto" style="font-size:13px;">
+                                        <i class="fas fa-external-link-alt me-1"></i> {{ __('Open in new tab') }}
+                                    </a>
+                                    <button type="button" class="btn-close btn-close-white"
+                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-0">
+                                    <div style="position:relative;padding-bottom:60%;height:0;">
+                                        {{-- src set by JS on open, cleared on close --}}
+                                        <iframe src="" frameborder="0"
+                                                allow="accelerometer; autoplay; gyroscope; magnetometer; xr-spatial-tracking; fullscreen"
+                                                allowfullscreen
+                                                style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         @endforeach
     </div>
 </div>
 
-@if ($galleryVideos->isNotEmpty())
+@if ($galleryVideos->isNotEmpty() || $galleryVr360s->isNotEmpty())
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Set iframe src only when modal opens, clear it on close so audio stops
-    document.querySelectorAll('.modal[data-video-src]').forEach(function (modal) {
-        var src = modal.getAttribute('data-video-src');
+    document.querySelectorAll('.modal[data-frame-src]').forEach(function (modal) {
+        var src = modal.getAttribute('data-frame-src');
         var iframe = modal.querySelector('iframe');
         if (!iframe) return;
         modal.addEventListener('show.bs.modal', function () {
