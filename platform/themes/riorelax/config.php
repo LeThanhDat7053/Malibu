@@ -53,6 +53,8 @@ return [
 
             $theme->asset()->usePath()->add('animate-css', 'plugins/animate.min.css');
             $theme->asset()->usePath()->add('fontawesome-css', 'plugins/fontawesome-all.min.css');
+            // icon tự thêm (Zalo) cho Social Links, xem functions/theme-icons-field.php
+            $theme->asset()->usePath()->add('custom-icons-css', 'css/custom-icons.css', ['fontawesome-css']);
             $theme->asset()->usePath()->add('slick-css', 'plugins/slick/slick.css');
             $theme->asset()->usePath()->add('magnific-popup-css', 'plugins/magnific-popup/magnific-popup.css');
             $theme->asset()->usePath()->add('toastr-css', 'plugins/toastr/toastr.min.css');

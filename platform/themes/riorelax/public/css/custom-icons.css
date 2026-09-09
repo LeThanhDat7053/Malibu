@@ -1,0 +1,22 @@
+/* ==========================================================================
+   Icon tự thêm cho Theme Options > Social Links
+   Font Awesome 5.15.4 của theme không có Zalo, nên dựng icon bằng mask lấy
+   đúng hình plugin chat của site đang dùng (botble-popup-chat-icon/zalo.png).
+   Dùng mask thay vì <img> để icon ăn theo màu chữ giống mọi icon FA khác.
+   ========================================================================== */
+
+.mlb-icon-zalo {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    background-color: currentColor;
+    -webkit-mask-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABfCAQAAAC0VqqxAAAB5ElEQVR42u2bybaDIBBELQ7//8v1du+YBAdGq9t2kYUR4VrQAwO4+bjSFiBaVy7ere9v0ANpGTTQU4QWIb5BzEI4Hey0q8ZeEeMYrV0Lm6hDpHWMFkWwuQhRRDHcx1rG1HhpGI/IR6RAEBmiFAgiZ5cCgQ8QxHRQgMyItdZ0LPbXpqUI10S/tZUixshwEDzVUbQUgWqGeN1MPudI87baHmF3B1WdE6tAjvTg4VM8aRyLdzB/jNzD6DUUnA2yBuPkvzQVo82OsaVUXhZy4P+X1bbxs1RxZKWFetQbZtwvlRZhQN2zUyWXTHaiqXkgVMrt06IAkVN9y8DEikU0FIwmK+u4WSpfvAjNo+M3MuJtdXn5iYxkiNBLdTH8fRgLct+D/1Z92Jjd/fIzJ7WCV70XQyMvNBoVqGSI7Z8EMR2kG4aEIpY0edn6CEMRORCGInIg9KMI/XQt+hkj9DPY6cdqaaGwx/xSb2U+mZ5jpA+HSB+enWNydqjtWUn2tehRBHr7h5IPjBZFoLmXKxvA4PpjF6NXFDljUw0qK2UnDOfsDkLXdgvMD35ywz5QDvi6GB2z5YeCRcYsyjtAYJgAn4ogupbIQnaydk7kyLsle0deyu1NFk/vlNoKWlzWwdGGgXCIATL8+gOh4WXp7gaawgAAAABJRU5ErkJggg==");
+    mask-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABfCAQAAAC0VqqxAAAB5ElEQVR42u2bybaDIBBELQ7//8v1du+YBAdGq9t2kYUR4VrQAwO4+bjSFiBaVy7ere9v0ANpGTTQU4QWIb5BzEI4Hey0q8ZeEeMYrV0Lm6hDpHWMFkWwuQhRRDHcx1rG1HhpGI/IR6RAEBmiFAgiZ5cCgQ8QxHRQgMyItdZ0LPbXpqUI10S/tZUixshwEDzVUbQUgWqGeN1MPudI87baHmF3B1WdE6tAjvTg4VM8aRyLdzB/jNzD6DUUnA2yBuPkvzQVo82OsaVUXhZy4P+X1bbxs1RxZKWFetQbZtwvlRZhQN2zUyWXTHaiqXkgVMrt06IAkVN9y8DEikU0FIwmK+u4WSpfvAjNo+M3MuJtdXn5iYxkiNBLdTH8fRgLct+D/1Z92Jjd/fIzJ7WCV70XQyMvNBoVqGSI7Z8EMR2kG4aEIpY0edn6CEMRORCGInIg9KMI/XQt+hkj9DPY6cdqaaGwx/xSb2U+mZ5jpA+HSB+enWNydqjtWUn2tehRBHr7h5IPjBZFoLmXKxvA4PpjF6NXFDljUw0qK2UnDOfsDkLXdgvMD35ywz5QDvi6GB2z5YeCRcYsyjtAYJgAn4ogupbIQnaydk7kyLsle0deyu1NFk/vlNoKWlzWwdGGgXCIATL8+gOh4WXp7gaawgAAAABJRU5ErkJggg==");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}

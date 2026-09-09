@@ -1438,9 +1438,20 @@ app()->booted(function (): void {
         'fab fa-superpowers',
         'fab fa-wpexplorer',
         'fab fa-spotify',
+
+        // Bổ sung cho Social Links.
+        // Theme dùng Font Awesome Pro 5.15.4 nên cú pháp là 'fab fa-...',
+        // KHÔNG phải 'fa-brands fa-...' của Font Awesome 6 (lớp đó không tồn tại ở đây).
+        'fab fa-tiktok',
+        // Font Awesome không có Zalo — icon tự dựng, xem css/custom-icons.css
+        'mlb-icon-zalo',
     ];
 
-    $css = [Theme::asset()->url('plugins/fontawesome-all.min.css')];
+    $css = [
+        Theme::asset()->url('plugins/fontawesome-all.min.css'),
+        // nạp trong trang quản trị để trình chọn icon vẽ được Zalo
+        Theme::asset()->url('css/custom-icons.css'),
+    ];
 
     Theme::registerThemeIconFields($icons, $css);
 });
